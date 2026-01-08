@@ -1,0 +1,419 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-01-03T00:18:56.000Z",
+    "createdAt": "2026-01-03T00:18:30.704Z",
+    "versionId": "33ea9a67-7d9d-4836-9d21-1a1cb58cc69e",
+    "workflowId": "gYqZrdR2Aishyl4z",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "## TODO\n**This node is a work in progress**.\nAfter the user submits an exam the system must evaluate in which topics the user needs more training.\n**For the moment:**\nThe node will only save the record of completion to avoid showing the same exam twice.",
+          "height": 256
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -640,
+          80
+        ],
+        "typeVersion": 1,
+        "id": "a818b4f0-f019-40bb-82a2-24924ce55c4b",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "19f37475-cf81-4d24-84b3-c931d075753c",
+          "authentication": "jwtAuth",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          64
+        ],
+        "id": "511118f9-ee40-41ab-b327-bdd755bcdc47",
+        "name": "Webhook",
+        "webhookId": "19f37475-cf81-4d24-84b3-c931d075753c",
+        "credentials": {
+          "jwtAuth": {
+            "id": "UZqDYFn9lmzwtyfS",
+            "name": "Mimir User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "tableId": "user_exams_registry",
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "user_id",
+                "fieldValue": "={{ $json.jwtPayload.sub }}"
+              },
+              {
+                "fieldId": "exam_id",
+                "fieldValue": "={{ $json.body.exam_id }}"
+              },
+              {
+                "fieldId": "completed_at",
+                "fieldValue": "={{$now}}"
+              },
+              {
+                "fieldId": "score",
+                "fieldValue": "={{ $json.body.score }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          224,
+          64
+        ],
+        "id": "4cd564ee-2ffc-4c7d-9071-6ea65572c42e",
+        "name": "Create a row",
+        "alwaysOutputData": true,
+        "credentials": {
+          "supabaseApi": {
+            "id": "UjpfwLCOwOKmxVQn",
+            "name": "Supabase account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "8c1912bf-24f1-4f13-a871-7bcd681e05e9",
+                "leftValue": "={{ $json.id }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          64
+        ],
+        "id": "84e3a03d-39b9-4060-9560-b3db10cf3f9f",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "=[ERR] There was an error when saving the exam result into the database.\nThe error is: '{{ $json.error }}'",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          672,
+          160
+        ],
+        "id": "5fda531c-e4f9-4509-9d1f-66e76feeef94",
+        "name": "Error when saving"
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "=Exam saved under ID:  {{ $json.id }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          672,
+          -32
+        ],
+        "id": "e36234ab-3b14-4395-965a-797e251daf10",
+        "name": "DB Record successful"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Create a row",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create a row": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "DB Record successful",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Error when saving",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": "Version 33ea9a67",
+    "description": "1rst commit",
+    "autosaved": false
+  },
+  "activeVersionId": "33ea9a67-7d9d-4836-9d21-1a1cb58cc69e",
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "DB Record successful",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error when saving",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-01-02T23:53:46.829Z",
+  "id": "gYqZrdR2Aishyl4z",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "[Mimir] Test Results",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## TODO\n**This node is a work in progress**.\nAfter the user submits an exam the system must evaluate in which topics the user needs more training.\n**For the moment:**\nThe node will only save the record of completion to avoid showing the same exam twice.",
+        "height": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -640,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "a818b4f0-f019-40bb-82a2-24924ce55c4b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "19f37475-cf81-4d24-84b3-c931d075753c",
+        "authentication": "jwtAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        64
+      ],
+      "id": "511118f9-ee40-41ab-b327-bdd755bcdc47",
+      "name": "Webhook",
+      "webhookId": "19f37475-cf81-4d24-84b3-c931d075753c",
+      "credentials": {
+        "jwtAuth": {
+          "id": "UZqDYFn9lmzwtyfS",
+          "name": "Mimir User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "user_exams_registry",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $json.jwtPayload.sub }}"
+            },
+            {
+              "fieldId": "exam_id",
+              "fieldValue": "={{ $json.body.exam_id }}"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{$now}}"
+            },
+            {
+              "fieldId": "score",
+              "fieldValue": "={{ $json.body.score }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        224,
+        64
+      ],
+      "id": "4cd564ee-2ffc-4c7d-9071-6ea65572c42e",
+      "name": "Create a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "UjpfwLCOwOKmxVQn",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8c1912bf-24f1-4f13-a871-7bcd681e05e9",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        64
+      ],
+      "id": "84e3a03d-39b9-4060-9560-b3db10cf3f9f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=[ERR] There was an error when saving the exam result into the database.\nThe error is: '{{ $json.error }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        160
+      ],
+      "id": "5fda531c-e4f9-4509-9d1f-66e76feeef94",
+      "name": "Error when saving"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Exam saved under ID:  {{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        -32
+      ],
+      "id": "e36234ab-3b14-4395-965a-797e251daf10",
+      "name": "DB Record successful"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-01-02T23:53:46.836Z",
+      "createdAt": "2026-01-02T23:53:46.836Z",
+      "role": "workflow:owner",
+      "workflowId": "gYqZrdR2Aishyl4z",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-03T00:18:30.703Z",
+  "versionId": "33ea9a67-7d9d-4836-9d21-1a1cb58cc69e"
+}
