@@ -1,0 +1,115 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Daily Backup Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "Push to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-01-05T00:32:38.531Z",
+  "id": "r8iEu2PrOtHb2Fg6",
+  "isArchived": false,
+  "meta": null,
+  "name": "Backup to Github",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "4e176c92-c0d4-4add-92f8-ac49830b9d89",
+      "name": "Daily Backup Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "id": "66f7d750-b01e-464e-8343-826e7154e04e",
+      "name": "Get All Workflows",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": "YOUR_GITHUB_USERNAME",
+        "repository": "YOUR_REPO_NAME",
+        "labels": [],
+        "assignees": []
+      },
+      "id": "e66eb597-d2bb-4cdb-bc2c-381669e2155b",
+      "name": "Push to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "webhookId": "6e5f385f-c13f-47b5-a229-a003b38d6532",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "CTxFioj4lZsYyPJm",
+          "name": "GitHub account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-01-05T00:32:38.536Z",
+      "createdAt": "2026-01-05T00:32:38.536Z",
+      "role": "workflow:owner",
+      "workflowId": "r8iEu2PrOtHb2Fg6",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-08T02:42:12.074Z",
+  "versionId": "1b15051d-3e8a-4ffb-94da-ee9de7a148a2"
+}
