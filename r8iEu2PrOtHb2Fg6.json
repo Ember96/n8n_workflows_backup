@@ -3,22 +3,22 @@
   "activeVersion": null,
   "activeVersionId": null,
   "connections": {
-    "Daily Backup Trigger": {
-      "main": [
+    "Groq Chat Model": {
+      "ai_languageModel": [
         [
           {
-            "node": "Get All Workflows",
-            "type": "main",
+            "node": "AI Agent",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Get All Workflows": {
+    "Webhook": {
       "main": [
         [
           {
-            "node": "Push to GitHub",
+            "node": "AI Agent",
             "type": "main",
             "index": 0
           }
@@ -29,63 +29,74 @@
   "createdAt": "2026-01-05T00:32:38.531Z",
   "id": "r8iEu2PrOtHb2Fg6",
   "isArchived": false,
-  "meta": null,
-  "name": "Backup to Github",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "[Mimir] Podcast generator",
   "nodes": [
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {}
-          ]
-        }
+        "promptType": "define",
+        "text": "=# ROLE\nYou are a world-class educational scriptwriter specialized in Applied Behavior Analysis (ABA). Your goal is to produce a natural, conversational classroom-style podcast script for RBT exam preparation.\n\n# THE CAST\n1. Professor Sarah: Expert, authoritative but warm. She leads the lesson.\n2. Tim (The Newbie): A student who asks \"obvious\" but essential questions to clarify core definitions (e.g., \"Wait, what's the difference between negative reinforcement and punishment again?\").\n3. Maya (The Smart Student): A high-performer who connects concepts to real-world clinical scenarios and asks \"How do I apply this to a child with autism who is non-verbal?\"\n\n# INPUT DATA\n- User Name: {{ $json.user_name }}\n- User Question: {{ $json.user_question }}\n- Core Knowledge Area: {{ $json.retrieved_context }}\n\n# INSTRUCTIONS & CONSTRAINTS\n1. OPENING: Professor Sarah must start by acknowledging the student: \"Alright class, today we have a great question from {{ $json.user_name }}.\"\n2. FIXATION TECHNIQUE: Professor Sarah MUST repeat the user's question verbatim: \"{{ $json.user_name }} asked: '{{ $json.user_question }}'. Let's dive into that.\"\n3. STRUCTURE:\n   - Professor Sarah explains the core concept based on the input data.\n   - Tim interrupts to ask for a \"plain English\" definition of a specific term mentioned.\n   - Maya follows up by describing a real-life situation (e.g., a clinic or home session) to bridge theory and practice.\n4. TONE: Professional, encouraging, and highly educational. Avoid \"radio host\" clichés; make it sound like a recorded university seminar.\n5. OUTPUT: Format the output as a clear dialogue script:\n   Professor Sarah: [Text]\n   Tim: [Text]\n   Maya: [Text]",
+        "options": {}
       },
-      "id": "4e176c92-c0d4-4add-92f8-ac49830b9d89",
-      "name": "Daily Backup Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "aE8pOIvvVZLZ2wyl",
+          "name": "Groq Mimir RBT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "ee5e671d-3de6-4048-b99c-71b39a3f5de4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
       "position": [
         0,
         0
-      ]
-    },
-    {
-      "parameters": {
-        "filters": {},
-        "requestOptions": {}
-      },
-      "id": "66f7d750-b01e-464e-8343-826e7154e04e",
-      "name": "Get All Workflows",
-      "type": "n8n-nodes-base.n8n",
-      "typeVersion": 1,
-      "position": [
-        224,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "authentication": "oAuth2",
-        "owner": "YOUR_GITHUB_USERNAME",
-        "repository": "YOUR_REPO_NAME",
-        "labels": [],
-        "assignees": []
-      },
-      "id": "e66eb597-d2bb-4cdb-bc2c-381669e2155b",
-      "name": "Push to GitHub",
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1,
-      "position": [
-        448,
-        0
       ],
-      "webhookId": "6e5f385f-c13f-47b5-a229-a003b38d6532",
-      "credentials": {
-        "githubOAuth2Api": {
-          "id": "CTxFioj4lZsYyPJm",
-          "name": "GitHub account"
-        }
-      }
+      "id": "6ce81990-b311-40e8-84d0-a07b2c0c1b54",
+      "name": "Webhook",
+      "webhookId": "ee5e671d-3de6-4048-b99c-71b39a3f5de4"
+    },
+    {
+      "parameters": {
+        "content": "## Pending \nI need to extract the knowledge source from from the RAG or find a way to consume it so I don't have to create another RAG for the podcast. Somehow I also need to keep track of the conversation and feed it to the agent. The text to speech conversion should be made in the client side with kokoro-tts-flutter.",
+        "height": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        544,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "07925eee-f849-4ee1-af69-114f15d737c7",
+      "name": "Sticky Note"
     }
   ],
   "origin": "n8n",
@@ -110,6 +121,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-01-08T02:42:12.074Z",
-  "versionId": "1b15051d-3e8a-4ffb-94da-ee9de7a148a2"
+  "updatedAt": "2026-01-08T04:07:00.043Z",
+  "versionId": "915735b1-7a8b-4da6-9451-5e93246dc328"
 }
