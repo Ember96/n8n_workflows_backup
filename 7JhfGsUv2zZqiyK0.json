@@ -1,0 +1,314 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2025-12-06T22:49:54.398Z",
+    "createdAt": "2025-12-06T22:49:54.398Z",
+    "versionId": "eb591349-ba89-4ab1-8dda-c91f1802ae2a",
+    "workflowId": "7JhfGsUv2zZqiyK0",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "a186d32f-d8cb-40f1-b4fd-de00a49e16b8",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "a4ec2c61-f03c-426b-8194-45f1ddd2d64c",
+        "name": "Webhook",
+        "webhookId": "a186d32f-d8cb-40f1-b4fd-de00a49e16b8"
+      },
+      {
+        "parameters": {
+          "operation": "text",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1,
+        "position": [
+          208,
+          0
+        ],
+        "id": "1dd92025-e91f-4ffb-b5b5-f56db57504c5",
+        "name": "Extract from File"
+      },
+      {
+        "parameters": {
+          "operation": "extractHtmlContent",
+          "extractionValues": {
+            "values": [
+              {
+                "key": "patient_name",
+                "cssSelector": "td[data-aqa=\"clientName\"] a, td[data-aqa=\"clientName\"]:not(:has(a))",
+                "returnArray": true
+              },
+              {
+                "key": "appointment",
+                "cssSelector": " td[data-aqa=\"dateField\"] a, td[data-aqa=\"dateField\"]:not(:has(a))",
+                "returnArray": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.html",
+        "typeVersion": 1.2,
+        "position": [
+          416,
+          0
+        ],
+        "id": "103179e8-d3be-407b-8388-3fcc768279cc",
+        "name": "HTML"
+      },
+      {
+        "parameters": {
+          "jsCode": "const inputData = $input.first().json\nconst appointments = inputData.appointment;\nconst patientNames = inputData.patient_name;\nconst processedAppointments = [];\nconst regex = /^(\\d{2}\\/\\d{2}\\/\\d{4})\\s+(\\d{1,2}:\\d{2}\\s(?:AM|PM))\\s+-\\s+(\\d{1,2}:\\d{2}\\s(?:AM|PM))/;\n\nfor (let i = 0; i < appointments.length; i++) {\n   const appointmentStr = appointments[i];\n   const match = appointmentStr.match(regex);\n   if (match) {\n     processedAppointments.push({\n     patient_name: patientNames[i],\n          date: match[1],         // The first captured group (date)\n          start_time: match[2],   // The second captured group (start time)\n          end_time: match[3]      // The third captured group (end time)\n        });\n      }\n    } \n// Return the newly structured array for the next n8n node\n    return processedAppointments;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          624,
+          0
+        ],
+        "id": "44874f33-fe16-4a2b-929e-353a0704b15a",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
+          "options": {
+            "responseCode": 200
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          832,
+          0
+        ],
+        "id": "91c99283-b82f-43dc-b35f-fd033066b0cc",
+        "name": "Respond to Webhook"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Extract from File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract from File": {
+        "main": [
+          [
+            {
+              "node": "HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTML": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "activeVersionId": "eb591349-ba89-4ab1-8dda-c91f1802ae2a",
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-10-03T03:34:23.085Z",
+  "id": "7JhfGsUv2zZqiyK0",
+  "isArchived": false,
+  "meta": null,
+  "name": "Worksheet Automation - Schedule Extraction",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a186d32f-d8cb-40f1-b4fd-de00a49e16b8",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a4ec2c61-f03c-426b-8194-45f1ddd2d64c",
+      "name": "Webhook",
+      "webhookId": "a186d32f-d8cb-40f1-b4fd-de00a49e16b8"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1dd92025-e91f-4ffb-b5b5-f56db57504c5",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "patient_name",
+              "cssSelector": "td[data-aqa=\"clientName\"] a, td[data-aqa=\"clientName\"]:not(:has(a))",
+              "returnArray": true
+            },
+            {
+              "key": "appointment",
+              "cssSelector": " td[data-aqa=\"dateField\"] a, td[data-aqa=\"dateField\"]:not(:has(a))",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "103179e8-d3be-407b-8388-3fcc768279cc",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.first().json\nconst appointments = inputData.appointment;\nconst patientNames = inputData.patient_name;\nconst processedAppointments = [];\nconst regex = /^(\\d{2}\\/\\d{2}\\/\\d{4})\\s+(\\d{1,2}:\\d{2}\\s(?:AM|PM))\\s+-\\s+(\\d{1,2}:\\d{2}\\s(?:AM|PM))/;\n\nfor (let i = 0; i < appointments.length; i++) {\n   const appointmentStr = appointments[i];\n   const match = appointmentStr.match(regex);\n   if (match) {\n     processedAppointments.push({\n     patient_name: patientNames[i],\n          date: match[1],         // The first captured group (date)\n          start_time: match[2],   // The second captured group (start time)\n          end_time: match[3]      // The third captured group (end time)\n        });\n      }\n    } \n// Return the newly structured array for the next n8n node\n    return processedAppointments;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "44874f33-fe16-4a2b-929e-353a0704b15a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "91c99283-b82f-43dc-b35f-fd033066b0cc",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "updatedAt": "2025-10-03T03:34:23.090Z",
+      "createdAt": "2025-10-03T03:34:23.090Z",
+      "role": "workflow:owner",
+      "workflowId": "7JhfGsUv2zZqiyK0",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-10-04T06:36:47.000Z",
+  "versionId": "eb591349-ba89-4ab1-8dda-c91f1802ae2a"
+}
