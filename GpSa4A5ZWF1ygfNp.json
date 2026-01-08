@@ -1,0 +1,35 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {},
+  "createdAt": "2025-10-21T23:14:32.361Z",
+  "id": "GpSa4A5ZWF1ygfNp",
+  "isArchived": true,
+  "meta": null,
+  "name": "Mimir",
+  "nodes": [],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T23:14:32.364Z",
+      "createdAt": "2025-10-21T23:14:32.364Z",
+      "role": "workflow:owner",
+      "workflowId": "GpSa4A5ZWF1ygfNp",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-12-10T00:24:26.000Z",
+  "versionId": "175603b4-6f36-443d-9c22-2b5279187cfe"
+}
