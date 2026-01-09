@@ -1,7 +1,241 @@
 {
-  "active": false,
-  "activeVersion": null,
-  "activeVersionId": null,
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-01-08T17:07:37.000Z",
+    "createdAt": "2026-01-08T17:06:17.637Z",
+    "versionId": "8ccb0755-1539-4438-9112-a6faa87247f0",
+    "workflowId": "r8iEu2PrOtHb2Fg6",
+    "nodes": [
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=# ROLE\nYou are a specialized scriptwriter for a \"Classroom-Style\" RBT Podcast. \n\n# CLASSROOM PERSONAS\n- Professor Sarah: Expert instructor. \n- Tim: The newbie student (asks for basic definitions).\n- Maya: The smart student (applies concepts to real-life ABA scenarios).\n\n# CONTEXT & USER INPUT\n- User Name: {{ $json.jwtPayload.name }}\n- User Question: {{ $json.body.message }}\n\n# KNOWLEDGE SOURCE (MANDATORY)\n1. You have access to a tool called 'Supabase Vector Store'. \n2. Before answering any question about ABA or RBT concepts, you MUST search this tool for relevant context.\n3. If the tool returns information, prioritize it over your own internal training data.\n4. If the tool returns no information, state: \"I couldn't find that specific detail in our RBT textbook, but based on general ABA principles...\"\n\n# SCRIPT RULES\n1. Sarah must open by saying: \"Hello everyone, {{ $json.jwtPayload.name }} has a great question today.\"\n2. Sarah must then repeat the user's question verbatim for reinforcement.\n3. Tim must interrupt to clarify the most \"obvious\" part of the concept.\n4. Maya must provide a practical example of how to use the concept with a client.\n\n# OUTPUT FORMAT (STRICT)\nYou must output the script exactly in this format so it can be saved to the database:\n[Professor Sarah]: [Message content]\n[Tim]: [Message content]\n[Maya]: [Message content]\n[Professor Sarah]: [Closing thought]\n\n\"Respond using this exact format for every turn. Do not use bolding or other markdown inside the messages:\n\n[SARAH]: Hello {{ $json.jwtPayload.name }}, let's look at your question... [TIM]: Wait, can you explain that more simply? [MAYA]: Here is how I saw this happen in the clinic...\n\nWhen the user speaks, refer to them as [{{$json.jwtPayload.name}}].\"",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          280,
+          0
+        ],
+        "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
+        "name": "AI Agent"
+      },
+      {
+        "parameters": {
+          "model": "llama-3.3-70b-versatile",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+        "typeVersion": 1,
+        "position": [
+          224,
+          224
+        ],
+        "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
+        "name": "Groq Chat Model",
+        "credentials": {
+          "groqApi": {
+            "id": "aE8pOIvvVZLZ2wyl",
+            "name": "Groq Mimir RBT"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "## Pending \nI need to extract the knowledge source from from the RAG or find a way to consume it so I don't have to create another RAG for the podcast. Somehow I also need to keep track of the conversation and feed it to the agent. The text to speech conversion should be made in the client side with kokoro-tts-flutter.",
+          "height": 288
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1376,
+          32
+        ],
+        "typeVersion": 1,
+        "id": "07925eee-f849-4ee1-af69-114f15d737c7",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "mode": "retrieve-as-tool",
+          "toolDescription": "Call this tool to look into the RBT documentation stored in Supabase to answer user questions and generate mock exams or study plans.",
+          "tableName": {
+            "__rl": true,
+            "value": "mimir_docs_rbt",
+            "mode": "list",
+            "cachedResultName": "mimir_docs_rbt"
+          },
+          "options": {
+            "queryName": "match_mimir_docs_rbt"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+        "typeVersion": 1.3,
+        "position": [
+          480,
+          224
+        ],
+        "id": "ab406520-8f28-4a99-a3b8-144a08ddc08e",
+        "name": "Vector Store Retriever",
+        "credentials": {
+          "supabaseApi": {
+            "id": "UjpfwLCOwOKmxVQn",
+            "name": "Supabase account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "modelName": "embed-multilingual-v3.0"
+        },
+        "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+        "typeVersion": 1,
+        "position": [
+          560,
+          432
+        ],
+        "id": "1014562a-8158-4d88-8ff6-bb08311d16b0",
+        "name": "Embeddings Cohere",
+        "credentials": {
+          "cohereApi": {
+            "id": "Fnlj29qnLp78m5T5",
+            "name": "CohereApi account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "sessionIdType": "customKey",
+          "sessionKey": "={{ $('Webhook').item.json.jwtPayload.sub }}",
+          "tableName": "podcast_chat_history"
+        },
+        "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+        "typeVersion": 1.3,
+        "position": [
+          352,
+          224
+        ],
+        "id": "35f0bc0e-9fa1-4986-9393-b7621094ccf9",
+        "name": "Chat history",
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "a39a7207-e29a-4080-b0a8-d853ea96a12f",
+          "authentication": "jwtAuth",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "9d177811-ca48-4aa7-b71f-fa21f88f516e",
+        "name": "Webhook",
+        "webhookId": "a39a7207-e29a-4080-b0a8-d853ea96a12f",
+        "credentials": {
+          "jwtAuth": {
+            "id": "UZqDYFn9lmzwtyfS",
+            "name": "Mimir User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          848,
+          0
+        ],
+        "id": "f0518308-ff92-4df5-b849-e8d4ede258f2",
+        "name": "Respond to Webhook"
+      }
+    ],
+    "connections": {
+      "Groq Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embeddings Cohere": {
+        "ai_embedding": [
+          [
+            {
+              "node": "Vector Store Retriever",
+              "type": "ai_embedding",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vector Store Retriever": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Chat history": {
+        "ai_memory": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_memory",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": "Version 8ccb0755",
+    "description": "First commit",
+    "autosaved": false
+  },
+  "activeVersionId": "8ccb0755-1539-4438-9112-a6faa87247f0",
   "connections": {
     "Groq Chat Model": {
       "ai_languageModel": [
@@ -14,11 +248,55 @@
         ]
       ]
     },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat history": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Webhook": {
       "main": [
         [
           {
             "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
@@ -37,13 +315,13 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# ROLE\nYou are a world-class educational scriptwriter specialized in Applied Behavior Analysis (ABA). Your goal is to produce a natural, conversational classroom-style podcast script for RBT exam preparation.\n\n# THE CAST\n1. Professor Sarah: Expert, authoritative but warm. She leads the lesson.\n2. Tim (The Newbie): A student who asks \"obvious\" but essential questions to clarify core definitions (e.g., \"Wait, what's the difference between negative reinforcement and punishment again?\").\n3. Maya (The Smart Student): A high-performer who connects concepts to real-world clinical scenarios and asks \"How do I apply this to a child with autism who is non-verbal?\"\n\n# INPUT DATA\n- User Name: {{ $json.user_name }}\n- User Question: {{ $json.user_question }}\n- Core Knowledge Area: {{ $json.retrieved_context }}\n\n# INSTRUCTIONS & CONSTRAINTS\n1. OPENING: Professor Sarah must start by acknowledging the student: \"Alright class, today we have a great question from {{ $json.user_name }}.\"\n2. FIXATION TECHNIQUE: Professor Sarah MUST repeat the user's question verbatim: \"{{ $json.user_name }} asked: '{{ $json.user_question }}'. Let's dive into that.\"\n3. STRUCTURE:\n   - Professor Sarah explains the core concept based on the input data.\n   - Tim interrupts to ask for a \"plain English\" definition of a specific term mentioned.\n   - Maya follows up by describing a real-life situation (e.g., a clinic or home session) to bridge theory and practice.\n4. TONE: Professional, encouraging, and highly educational. Avoid \"radio host\" clichés; make it sound like a recorded university seminar.\n5. OUTPUT: Format the output as a clear dialogue script:\n   Professor Sarah: [Text]\n   Tim: [Text]\n   Maya: [Text]",
+        "text": "=# ROLE\nYou are a specialized scriptwriter for a \"Classroom-Style\" RBT Podcast. \n\n# CLASSROOM PERSONAS\n- Professor Sarah: Expert instructor. \n- Tim: The newbie student (asks for basic definitions).\n- Maya: The smart student (applies concepts to real-life ABA scenarios).\n\n# CONTEXT & USER INPUT\n- User Name: {{ $json.jwtPayload.name }}\n- User Question: {{ $json.body.message }}\n\n# KNOWLEDGE SOURCE (MANDATORY)\n1. You have access to a tool called 'Supabase Vector Store'. \n2. Before answering any question about ABA or RBT concepts, you MUST search this tool for relevant context.\n3. If the tool returns information, prioritize it over your own internal training data.\n4. If the tool returns no information, state: \"I couldn't find that specific detail in our RBT textbook, but based on general ABA principles...\"\n\n# SCRIPT RULES\n1. Sarah must open by saying: \"Hello everyone, {{ $json.jwtPayload.name }} has a great question today.\"\n2. Sarah must then repeat the user's question verbatim for reinforcement.\n3. Tim must interrupt to clarify the most \"obvious\" part of the concept.\n4. Maya must provide a practical example of how to use the concept with a client.\n\n# OUTPUT FORMAT (STRICT)\nYou must output the script exactly in this format so it can be saved to the database:\n[Professor Sarah]: [Message content]\n[Tim]: [Message content]\n[Maya]: [Message content]\n[Professor Sarah]: [Closing thought]\n\n\"Respond using this exact format for every turn. Do not use bolding or other markdown inside the messages:\n\n[SARAH]: Hello {{ $json.jwtPayload.name }}, let's look at your question... [TIM]: Wait, can you explain that more simply? [MAYA]: Here is how I saw this happen in the clinic...\n\nWhen the user speaks, refer to them as [{{$json.jwtPayload.name}}].\"",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        208,
+        280,
         0
       ],
       "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
@@ -57,8 +335,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        80,
-        208
+        224,
+        224
       ],
       "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
       "name": "Groq Chat Model",
@@ -71,7 +349,93 @@
     },
     {
       "parameters": {
-        "path": "ee5e671d-3de6-4048-b99c-71b39a3f5de4",
+        "content": "## Pending \nI need to extract the knowledge source from from the RAG or find a way to consume it so I don't have to create another RAG for the podcast. Somehow I also need to keep track of the conversation and feed it to the agent. The text to speech conversion should be made in the client side with kokoro-tts-flutter.",
+        "height": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1376,
+        32
+      ],
+      "typeVersion": 1,
+      "id": "07925eee-f849-4ee1-af69-114f15d737c7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Call this tool to look into the RBT documentation stored in Supabase to answer user questions and generate mock exams or study plans.",
+        "tableName": {
+          "__rl": true,
+          "value": "mimir_docs_rbt",
+          "mode": "list",
+          "cachedResultName": "mimir_docs_rbt"
+        },
+        "options": {
+          "queryName": "match_mimir_docs_rbt"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        224
+      ],
+      "id": "ab406520-8f28-4a99-a3b8-144a08ddc08e",
+      "name": "Vector Store Retriever",
+      "credentials": {
+        "supabaseApi": {
+          "id": "UjpfwLCOwOKmxVQn",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        560,
+        432
+      ],
+      "id": "1014562a-8158-4d88-8ff6-bb08311d16b0",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "Fnlj29qnLp78m5T5",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.jwtPayload.sub }}",
+        "tableName": "podcast_chat_history"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        224
+      ],
+      "id": "35f0bc0e-9fa1-4986-9393-b7621094ccf9",
+      "name": "Chat history",
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a39a7207-e29a-4080-b0a8-d853ea96a12f",
+        "authentication": "jwtAuth",
+        "responseMode": "responseNode",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
@@ -80,23 +444,28 @@
         0,
         0
       ],
-      "id": "6ce81990-b311-40e8-84d0-a07b2c0c1b54",
+      "id": "9d177811-ca48-4aa7-b71f-fa21f88f516e",
       "name": "Webhook",
-      "webhookId": "ee5e671d-3de6-4048-b99c-71b39a3f5de4"
+      "webhookId": "a39a7207-e29a-4080-b0a8-d853ea96a12f",
+      "credentials": {
+        "jwtAuth": {
+          "id": "UZqDYFn9lmzwtyfS",
+          "name": "Mimir User"
+        }
+      }
     },
     {
       "parameters": {
-        "content": "## Pending \nI need to extract the knowledge source from from the RAG or find a way to consume it so I don't have to create another RAG for the podcast. Somehow I also need to keep track of the conversation and feed it to the agent. The text to speech conversion should be made in the client side with kokoro-tts-flutter.",
-        "height": 288
+        "options": {}
       },
-      "type": "n8n-nodes-base.stickyNote",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
       "position": [
-        544,
-        16
+        848,
+        0
       ],
-      "typeVersion": 1,
-      "id": "07925eee-f849-4ee1-af69-114f15d737c7",
-      "name": "Sticky Note"
+      "id": "f0518308-ff92-4df5-b849-e8d4ede258f2",
+      "name": "Respond to Webhook"
     }
   ],
   "origin": "n8n",
@@ -120,7 +489,7 @@
   ],
   "staticData": null,
   "tags": [],
-  "triggerCount": 0,
-  "updatedAt": "2026-01-08T04:07:00.043Z",
-  "versionId": "915735b1-7a8b-4da6-9451-5e93246dc328"
+  "triggerCount": 1,
+  "updatedAt": "2026-01-08T17:06:17.636Z",
+  "versionId": "8ccb0755-1539-4438-9112-a6faa87247f0"
 }
