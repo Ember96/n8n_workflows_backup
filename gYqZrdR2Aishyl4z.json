@@ -1,25 +1,11 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-03T00:18:56.000Z",
-    "createdAt": "2026-01-03T00:18:30.704Z",
-    "versionId": "33ea9a67-7d9d-4836-9d21-1a1cb58cc69e",
+    "updatedAt": "2026-01-13T02:39:09.000Z",
+    "createdAt": "2026-01-13T02:38:56.227Z",
+    "versionId": "5848a20a-0d79-4d36-8fcf-61543d462861",
     "workflowId": "gYqZrdR2Aishyl4z",
     "nodes": [
-      {
-        "parameters": {
-          "content": "## TODO\n**This node is a work in progress**.\nAfter the user submits an exam the system must evaluate in which topics the user needs more training.\n**For the moment:**\nThe node will only save the record of completion to avoid showing the same exam twice.",
-          "height": 256
-        },
-        "type": "n8n-nodes-base.stickyNote",
-        "position": [
-          -640,
-          80
-        ],
-        "typeVersion": 1,
-        "id": "a818b4f0-f019-40bb-82a2-24924ce55c4b",
-        "name": "Sticky Note"
-      },
       {
         "parameters": {
           "httpMethod": "POST",
@@ -193,11 +179,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version 33ea9a67",
-    "description": "1rst commit",
+    "name": "Version 5848a20a",
+    "description": "Removing unnecessary note",
     "autosaved": false
   },
-  "activeVersionId": "33ea9a67-7d9d-4836-9d21-1a1cb58cc69e",
+  "activeVersionId": "5848a20a-0d79-4d36-8fcf-61543d462861",
   "connections": {
     "Webhook": {
       "main": [
@@ -246,22 +232,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "name": "[Mimir] Test Results",
+  "name": "[Mimir-RBT] Test Results",
   "nodes": [
-    {
-      "parameters": {
-        "content": "## TODO\n**This node is a work in progress**.\nAfter the user submits an exam the system must evaluate in which topics the user needs more training.\n**For the moment:**\nThe node will only save the record of completion to avoid showing the same exam twice.",
-        "height": 256
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -640,
-        80
-      ],
-      "typeVersion": 1,
-      "id": "a818b4f0-f019-40bb-82a2-24924ce55c4b",
-      "name": "Sticky Note"
-    },
     {
       "parameters": {
         "httpMethod": "POST",
@@ -414,6 +386,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-01-03T00:18:30.703Z",
-  "versionId": "33ea9a67-7d9d-4836-9d21-1a1cb58cc69e"
+  "updatedAt": "2026-01-13T02:39:15.941Z",
+  "versionId": "5848a20a-0d79-4d36-8fcf-61543d462861"
 }
