@@ -1,0 +1,165 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-01-13T03:57:26.000Z",
+    "createdAt": "2026-01-13T03:39:10.082Z",
+    "versionId": "7501024c-5fc7-450c-a4f4-ba5719a2c17e",
+    "workflowId": "9z4u8CpMeP6aQsAD",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "message"
+              },
+              {
+                "name": "fileName"
+              },
+              {
+                "name": "bucketName"
+              },
+              {
+                "name": "voice"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "8bde4821-5672-47a4-8064-a2d67bfda941",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.67:8880/v1/audio/speech",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\", \n  \"response_format\": \"mp3\",\n  \"speed\": 1.0\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          208,
+          0
+        ],
+        "id": "a444c1e2-ddda-4fff-a19e-b60174758e21",
+        "name": "HTTP Request"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": "Version 7501024c",
+    "description": "First commit",
+    "autosaved": false
+  },
+  "activeVersionId": "7501024c-5fc7-450c-a4f4-ba5719a2c17e",
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-01-13T03:23:45.243Z",
+  "id": "9z4u8CpMeP6aQsAD",
+  "isArchived": false,
+  "meta": null,
+  "name": "FastKokoro",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "message"
+            },
+            {
+              "name": "fileName"
+            },
+            {
+              "name": "bucketName"
+            },
+            {
+              "name": "voice"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8bde4821-5672-47a4-8064-a2d67bfda941",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.67:8880/v1/audio/speech",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\", \n  \"response_format\": \"mp3\",\n  \"speed\": 1.0\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a444c1e2-ddda-4fff-a19e-b60174758e21",
+      "name": "HTTP Request"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-01-13T03:23:45.251Z",
+      "createdAt": "2026-01-13T03:23:45.251Z",
+      "role": "workflow:owner",
+      "workflowId": "9z4u8CpMeP6aQsAD",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-13T03:39:10.081Z",
+  "versionId": "7501024c-5fc7-450c-a4f4-ba5719a2c17e"
+}
