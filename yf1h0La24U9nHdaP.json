@@ -434,7 +434,7 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "name": "[Mimir] Mock Exam - User Requested",
+  "name": "[Mimir-RBT] Mock Exam - User Requested",
   "nodes": [
     {
       "parameters": {
@@ -699,6 +699,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-01-03T01:14:17.212Z",
+  "updatedAt": "2026-01-13T02:38:20.576Z",
   "versionId": "c4f1d0a0-f5f6-4fcf-8423-c48c2dd1857b"
 }
