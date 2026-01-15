@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-13T03:57:26.000Z",
-    "createdAt": "2026-01-13T03:39:10.082Z",
-    "versionId": "7501024c-5fc7-450c-a4f4-ba5719a2c17e",
+    "updatedAt": "2026-01-15T04:17:43.000Z",
+    "createdAt": "2026-01-15T04:17:13.456Z",
+    "versionId": "be6896fd-d7e9-4bdb-a2da-72ecaa5eb65e",
     "workflowId": "9z4u8CpMeP6aQsAD",
     "nodes": [
       {
@@ -12,12 +12,6 @@
             "values": [
               {
                 "name": "message"
-              },
-              {
-                "name": "fileName"
-              },
-              {
-                "name": "bucketName"
               },
               {
                 "name": "voice"
@@ -40,7 +34,7 @@
           "url": "http://192.168.1.67:8880/v1/audio/speech",
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\", \n  \"response_format\": \"mp3\",\n  \"speed\": 1.0\n}",
+          "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\",\n  \"response_format\": \"mp3\",\n  \"download_format\": \"mp3\",\n  \"speed\": 1,\n  \"return_download_link\": false,\n  \"volume_multiplier\": 1,\n  \"normalization_options\": {\n    \"normalize\": true,\n    \"unit_normalization\": false,\n    \"url_normalization\": true,\n    \"email_normalization\": true,\n    \"optional_pluralization_normalization\": true,\n    \"phone_normalization\": true,\n    \"replace_remaining_symbols\": true\n  }\n}",
           "options": {}
         },
         "type": "n8n-nodes-base.httpRequest",
@@ -64,14 +58,19 @@
             }
           ]
         ]
+      },
+      "HTTP Request": {
+        "main": [
+          []
+        ]
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version 7501024c",
-    "description": "First commit",
+    "name": "Version be6896fd",
+    "description": "Removing non-compatible options",
     "autosaved": false
   },
-  "activeVersionId": "7501024c-5fc7-450c-a4f4-ba5719a2c17e",
+  "activeVersionId": "be6896fd-d7e9-4bdb-a2da-72ecaa5eb65e",
   "connections": {
     "When Executed by Another Workflow": {
       "main": [
@@ -82,6 +81,11 @@
             "index": 0
           }
         ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
       ]
     }
   },
@@ -97,12 +101,6 @@
           "values": [
             {
               "name": "message"
-            },
-            {
-              "name": "fileName"
-            },
-            {
-              "name": "bucketName"
             },
             {
               "name": "voice"
@@ -125,7 +123,7 @@
         "url": "http://192.168.1.67:8880/v1/audio/speech",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\", \n  \"response_format\": \"mp3\",\n  \"speed\": 1.0\n}",
+        "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\",\n  \"response_format\": \"mp3\",\n  \"download_format\": \"mp3\",\n  \"speed\": 1,\n  \"return_download_link\": false,\n  \"volume_multiplier\": 1,\n  \"normalization_options\": {\n    \"normalize\": true,\n    \"unit_normalization\": false,\n    \"url_normalization\": true,\n    \"email_normalization\": true,\n    \"optional_pluralization_normalization\": true,\n    \"phone_normalization\": true,\n    \"replace_remaining_symbols\": true\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -139,7 +137,22 @@
     }
   ],
   "origin": "n8n",
-  "pinData": {},
+  "pinData": {
+    "HTTP Request": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
   "repo": {
     "owner": "Ember96",
     "name": "n8n_workflows_backup"
@@ -160,6 +173,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-01-13T03:39:10.081Z",
-  "versionId": "7501024c-5fc7-450c-a4f4-ba5719a2c17e"
+  "updatedAt": "2026-01-15T04:17:13.455Z",
+  "versionId": "be6896fd-d7e9-4bdb-a2da-72ecaa5eb65e"
 }
