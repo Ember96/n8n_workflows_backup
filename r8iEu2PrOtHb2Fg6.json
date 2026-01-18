@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-15T04:24:33.000Z",
-    "createdAt": "2026-01-15T04:20:31.182Z",
-    "versionId": "c0406660-f5c1-48cb-8aeb-43d6d9d1bce9",
+    "updatedAt": "2026-01-17T03:46:50.000Z",
+    "createdAt": "2026-01-17T03:33:41.215Z",
+    "versionId": "db651c7d-bb10-499d-8680-8d21b2849590",
     "workflowId": "r8iEu2PrOtHb2Fg6",
     "nodes": [
       {
@@ -16,7 +16,7 @@
         "typeVersion": 3.1,
         "position": [
           280,
-          192
+          240
         ],
         "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
         "name": "AI Agent"
@@ -29,8 +29,8 @@
         "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
         "typeVersion": 1,
         "position": [
-          224,
-          416
+          0,
+          672
         ],
         "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
         "name": "Groq Chat Model",
@@ -59,7 +59,7 @@
         "typeVersion": 1.3,
         "position": [
           480,
-          416
+          464
         ],
         "id": "ab406520-8f28-4a99-a3b8-144a08ddc08e",
         "name": "Vector Store Retriever",
@@ -78,7 +78,7 @@
         "typeVersion": 1,
         "position": [
           560,
-          624
+          672
         ],
         "id": "1014562a-8158-4d88-8ff6-bb08311d16b0",
         "name": "Embeddings Cohere",
@@ -99,7 +99,7 @@
         "typeVersion": 1.3,
         "position": [
           352,
-          416
+          464
         ],
         "id": "35f0bc0e-9fa1-4986-9393-b7621094ccf9",
         "name": "Chat history",
@@ -122,7 +122,7 @@
         "typeVersion": 2.1,
         "position": [
           0,
-          192
+          240
         ],
         "id": "9d177811-ca48-4aa7-b71f-fa21f88f516e",
         "name": "Webhook",
@@ -136,6 +136,123 @@
       },
       {
         "parameters": {
+          "jsCode": "const rawOutput = $input.first().json.output;\n\ntry {\n  const jsonMatch = rawOutput.match(/\\[\\s*{[\\s\\S]*}\\s*\\]/);\n  if (!jsonMatch) throw new Error(\"No JSON array found\");\n\n  const dialogueArray = JSON.parse(jsonMatch[0]);\n\n  return dialogueArray.map(item => {\n    // 1. Clean the name: remove [], trim spaces, and make lowercase\n    const cleanName = item.speaker.replace(/[\\[\\]]/g, \"\").trim().toLowerCase();\n    \n    // 2. Assign voice based on keywords\n    let voice = \"af_heart\"; // Default (Maya)\n    \n    if (cleanName.includes(\"sarah\")) {\n      voice = \"af_sky\";\n    } else if (cleanName.includes(\"tim\")) {\n      voice = \"am_echo\";\n    }\n\n    return {\n      json: {\n        speaker: item.speaker.replace(/[\\[\\]]/g, \"\").trim(), // Pretty name for Supabase folders\n        message: item.message,\n        voice: voice\n      }\n    };\n  });\n} catch (error) {\n  return [{ json: { error: error.message, rawOutput: rawOutput } }];\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          848,
+          240
+        ],
+        "id": "12309064-190a-4927-a8c3-2dc6312bd7f0",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "options": {
+            "reset": false
+          }
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          1296,
+          144
+        ],
+        "id": "5c2395b0-9e72-4e84-a03d-ec9deadfeec7",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "operation": "upload",
+          "bucketName": "mimir_rbt_classroom",
+          "fileName": "={{ $('Edit Fields').item.json.fileName }}",
+          "additionalFields": {
+            "acl": "publicRead",
+            "storageClass": "standard"
+          },
+          "tagsUi": {
+            "tagsValues": [
+              {
+                "key": "Content-Type",
+                "value": "audio/mpeg"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.s3",
+        "typeVersion": 1,
+        "position": [
+          1968,
+          144
+        ],
+        "id": "0203bf52-8a8a-4def-9d58-bd7dec2c3b8f",
+        "name": "Upload a file",
+        "credentials": {
+          "s3": {
+            "id": "VtB0BxymxRZHvleK",
+            "name": "S3 account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "efa36b06-7e41-4e5d-a52f-96eedcb9efae",
+                "leftValue": "={{ $json.success }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2192,
+          144
+        ],
+        "id": "6629a4b6-01e3-4bb9-b28c-7dba4b85a628",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c424fb11-0f20-4990-904f-2f94bc04b9d6",
+                "name": "fileName",
+                "value": "={{$('Webhook').first().json.jwtPayload.sub + '_' + $('Loop Over Items').first().json.speaker + '_' + $now}}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1520,
+          144
+        ],
+        "id": "f26561e8-2c3b-4d75-a9eb-4607ad8edafa",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
           "workflowId": {
             "__rl": true,
             "value": "9z4u8CpMeP6aQsAD",
@@ -146,8 +263,8 @@
           "workflowInputs": {
             "mappingMode": "defineBelow",
             "value": {
-              "voice": "={{ $json.voice }}",
-              "message": "={{ $json.message }}"
+              "voice": "={{ $('Loop Over Items').item.json.voice }}",
+              "message": "={{ $('Loop Over Items').item.json.message }}"
             },
             "matchingColumns": [],
             "schema": [
@@ -202,109 +319,122 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          1296,
-          192
+          1744,
+          144
         ],
         "id": "96072cd8-4251-494f-8700-fae5e465c998",
         "name": "Call 'FastKokoro'"
       },
       {
         "parameters": {
+          "model": "meta-llama/llama-3.3-70b-instruct:free",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          224,
+          464
+        ],
+        "id": "82f234a5-c839-4a96-be1f-95f09da6f734",
+        "name": "OpenRouter Chat Model",
+        "credentials": {
+          "openRouterApi": {
+            "id": "ujyYSOjWajsHaucP",
+            "name": "OpenRouter account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ca9527e3-8111-4f83-b29c-689436074c02",
+                "name": "fileName",
+                "value": "=https://oyhgtwhtovqlwfrjemdx.supabase.co/storage/v1/object/public/mimir_rbt_classroom/{{ $('Edit Fields').item.json.fileName }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2416,
+          144
+        ],
+        "id": "7049d332-80f8-455f-a1de-a3cb67e63359",
+        "name": "Successful"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "5382f3e5-3608-42d7-a96d-75ae8c8f78cd",
+                "leftValue": "={{ $('Webhook').item.json.body.local }}",
+                "rightValue": "false",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1072,
+          240
+        ],
+        "id": "146af020-1cd5-4c17-b55f-950d47f2c341",
+        "name": "If1"
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          1520,
+          -48
+        ],
+        "id": "f444dcf3-ad97-4a5c-8bf5-a64c9a8fc18c",
+        "name": "Audio Files"
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
           "options": {}
         },
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1.5,
         "position": [
           1296,
-          0
+          336
         ],
-        "id": "6e972544-96aa-49c6-999a-5b0ecf246dc7",
-        "name": "Respond to Webhook"
-      },
-      {
-        "parameters": {
-          "jsCode": "const rawOutput = $input.first().json.output;\n\ntry {\n  const jsonMatch = rawOutput.match(/\\[\\s*{[\\s\\S]*}\\s*\\]/);\n  if (!jsonMatch) throw new Error(\"No JSON array found\");\n\n  const dialogueArray = JSON.parse(jsonMatch[0]);\n\n  return dialogueArray.map(item => {\n    // 1. Clean the name: remove [], trim spaces, and make lowercase\n    const cleanName = item.speaker.replace(/[\\[\\]]/g, \"\").trim().toLowerCase();\n    \n    // 2. Assign voice based on keywords\n    let voice = \"af_heart\"; // Default (Maya)\n    \n    if (cleanName.includes(\"sarah\")) {\n      voice = \"af_sky\";\n    } else if (cleanName.includes(\"tim\")) {\n      voice = \"am_echo\";\n    }\n\n    return {\n      json: {\n        speaker: item.speaker.replace(/[\\[\\]]/g, \"\").trim(), // Pretty name for Supabase folders\n        message: item.message,\n        voice: voice\n      }\n    };\n  });\n} catch (error) {\n  return [{ json: { error: error.message, rawOutput: rawOutput } }];\n}"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          848,
-          192
-        ],
-        "id": "12309064-190a-4927-a8c3-2dc6312bd7f0",
-        "name": "Code in JavaScript"
-      },
-      {
-        "parameters": {
-          "options": {
-            "reset": false
-          }
-        },
-        "type": "n8n-nodes-base.splitInBatches",
-        "typeVersion": 3,
-        "position": [
-          1072,
-          192
-        ],
-        "id": "5c2395b0-9e72-4e84-a03d-ec9deadfeec7",
-        "name": "Loop Over Items"
-      },
-      {
-        "parameters": {
-          "operation": "upload",
-          "bucketName": "mimir_rbt_classroom",
-          "fileName": "=",
-          "additionalFields": {
-            "storageClass": "standard"
-          },
-          "tagsUi": {
-            "tagsValues": [
-              {
-                "key": "Content-Type",
-                "value": "audio/mpeg"
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.s3",
-        "typeVersion": 1,
-        "position": [
-          1744,
-          264
-        ],
-        "id": "0203bf52-8a8a-4def-9d58-bd7dec2c3b8f",
-        "name": "Upload a file",
-        "credentials": {
-          "s3": {
-            "id": "VtB0BxymxRZHvleK",
-            "name": "S3 account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "jsCode": "// This changes the filename property of the binary data\nconst newName = $('Webhook').first().json.jwtPayload.sub + '_' + $('Loop Over Items').first().json.speaker + '_' +$now; // Or use a variable from your script\n\n$input.first().binary.data.fileName = newName;\n\nreturn $input.first();"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          1520,
-          192
-        ],
-        "id": "d3495f07-48bd-4edf-aa1d-34cfbb78aa41",
-        "name": "Code in JavaScript1"
+        "id": "54f80015-fd76-4fb6-977b-16a9270fe48a",
+        "name": "Script"
       }
     ],
     "connections": {
       "Groq Chat Model": {
         "ai_languageModel": [
-          [
-            {
-              "node": "AI Agent",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
+          []
         ]
       },
       "Embeddings Cohere": {
@@ -362,22 +492,11 @@
           ]
         ]
       },
-      "Call 'FastKokoro'": {
-        "main": [
-          [
-            {
-              "node": "Code in JavaScript1",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Code in JavaScript": {
         "main": [
           [
             {
-              "node": "Loop Over Items",
+              "node": "If1",
               "type": "main",
               "index": 0
             }
@@ -388,14 +507,14 @@
         "main": [
           [
             {
-              "node": "Respond to Webhook",
+              "node": "Audio Files",
               "type": "main",
               "index": 0
             }
           ],
           [
             {
-              "node": "Call 'FastKokoro'",
+              "node": "Edit Fields",
               "type": "main",
               "index": 0
             }
@@ -406,14 +525,37 @@
         "main": [
           [
             {
-              "node": "Loop Over Items",
+              "node": "If",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Code in JavaScript1": {
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Successful",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Call 'FastKokoro'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'FastKokoro'": {
         "main": [
           [
             {
@@ -423,24 +565,58 @@
             }
           ]
         ]
+      },
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Successful": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If1": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Script",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version c0406660",
-    "description": "File upload working, now I need to properly format the list of audios and send it to the client.",
+    "name": "Version db651c7d",
+    "description": "feat: The flow changes now depending if the client app request for the whole audio files or just the script",
     "autosaved": false
   },
-  "activeVersionId": "c0406660-f5c1-48cb-8aeb-43d6d9d1bce9",
+  "activeVersionId": "db651c7d-bb10-499d-8680-8d21b2849590",
   "connections": {
     "Groq Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Embeddings Cohere": {
@@ -498,22 +674,11 @@
         ]
       ]
     },
-    "Call 'FastKokoro'": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Code in JavaScript": {
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "If1",
             "type": "main",
             "index": 0
           }
@@ -524,14 +689,14 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Audio Files",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Call 'FastKokoro'",
+            "node": "Edit Fields",
             "type": "main",
             "index": 0
           }
@@ -542,6 +707,62 @@
       "main": [
         [
           {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Successful",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Call 'FastKokoro'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'FastKokoro'": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Successful": {
+      "main": [
+        [
+          {
             "node": "Loop Over Items",
             "type": "main",
             "index": 0
@@ -549,11 +770,18 @@
         ]
       ]
     },
-    "Code in JavaScript1": {
+    "If1": {
       "main": [
         [
           {
-            "node": "Upload a file",
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Script",
             "type": "main",
             "index": 0
           }
@@ -579,7 +807,7 @@
       "typeVersion": 3.1,
       "position": [
         280,
-        192
+        240
       ],
       "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
       "name": "AI Agent"
@@ -592,8 +820,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        224,
-        416
+        0,
+        672
       ],
       "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
       "name": "Groq Chat Model",
@@ -622,7 +850,7 @@
       "typeVersion": 1.3,
       "position": [
         480,
-        416
+        464
       ],
       "id": "ab406520-8f28-4a99-a3b8-144a08ddc08e",
       "name": "Vector Store Retriever",
@@ -641,7 +869,7 @@
       "typeVersion": 1,
       "position": [
         560,
-        624
+        672
       ],
       "id": "1014562a-8158-4d88-8ff6-bb08311d16b0",
       "name": "Embeddings Cohere",
@@ -662,7 +890,7 @@
       "typeVersion": 1.3,
       "position": [
         352,
-        416
+        464
       ],
       "id": "35f0bc0e-9fa1-4986-9393-b7621094ccf9",
       "name": "Chat history",
@@ -685,7 +913,7 @@
       "typeVersion": 2.1,
       "position": [
         0,
-        192
+        240
       ],
       "id": "9d177811-ca48-4aa7-b71f-fa21f88f516e",
       "name": "Webhook",
@@ -699,6 +927,123 @@
     },
     {
       "parameters": {
+        "jsCode": "const rawOutput = $input.first().json.output;\n\ntry {\n  const jsonMatch = rawOutput.match(/\\[\\s*{[\\s\\S]*}\\s*\\]/);\n  if (!jsonMatch) throw new Error(\"No JSON array found\");\n\n  const dialogueArray = JSON.parse(jsonMatch[0]);\n\n  return dialogueArray.map(item => {\n    // 1. Clean the name: remove [], trim spaces, and make lowercase\n    const cleanName = item.speaker.replace(/[\\[\\]]/g, \"\").trim().toLowerCase();\n    \n    // 2. Assign voice based on keywords\n    let voice = \"af_heart\"; // Default (Maya)\n    \n    if (cleanName.includes(\"sarah\")) {\n      voice = \"af_sky\";\n    } else if (cleanName.includes(\"tim\")) {\n      voice = \"am_echo\";\n    }\n\n    return {\n      json: {\n        speaker: item.speaker.replace(/[\\[\\]]/g, \"\").trim(), // Pretty name for Supabase folders\n        message: item.message,\n        voice: voice\n      }\n    };\n  });\n} catch (error) {\n  return [{ json: { error: error.message, rawOutput: rawOutput } }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        240
+      ],
+      "id": "12309064-190a-4927-a8c3-2dc6312bd7f0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1296,
+        144
+      ],
+      "id": "5c2395b0-9e72-4e84-a03d-ec9deadfeec7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "mimir_rbt_classroom",
+        "fileName": "={{ $('Edit Fields').item.json.fileName }}",
+        "additionalFields": {
+          "acl": "publicRead",
+          "storageClass": "standard"
+        },
+        "tagsUi": {
+          "tagsValues": [
+            {
+              "key": "Content-Type",
+              "value": "audio/mpeg"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        1968,
+        144
+      ],
+      "id": "0203bf52-8a8a-4def-9d58-bd7dec2c3b8f",
+      "name": "Upload a file",
+      "credentials": {
+        "s3": {
+          "id": "VtB0BxymxRZHvleK",
+          "name": "S3 account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "efa36b06-7e41-4e5d-a52f-96eedcb9efae",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2192,
+        144
+      ],
+      "id": "6629a4b6-01e3-4bb9-b28c-7dba4b85a628",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c424fb11-0f20-4990-904f-2f94bc04b9d6",
+              "name": "fileName",
+              "value": "={{$('Webhook').first().json.jwtPayload.sub + '_' + $('Loop Over Items').first().json.speaker + '_' + $now}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1520,
+        144
+      ],
+      "id": "f26561e8-2c3b-4d75-a9eb-4607ad8edafa",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
         "workflowId": {
           "__rl": true,
           "value": "9z4u8CpMeP6aQsAD",
@@ -709,8 +1054,8 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "voice": "={{ $json.voice }}",
-            "message": "={{ $json.message }}"
+            "voice": "={{ $('Loop Over Items').item.json.voice }}",
+            "message": "={{ $('Loop Over Items').item.json.message }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -765,108 +1110,183 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1296,
-        208
+        1744,
+        144
       ],
       "id": "96072cd8-4251-494f-8700-fae5e465c998",
       "name": "Call 'FastKokoro'"
     },
     {
       "parameters": {
+        "model": "meta-llama/llama-3.3-70b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        224,
+        464
+      ],
+      "id": "82f234a5-c839-4a96-be1f-95f09da6f734",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ujyYSOjWajsHaucP",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ca9527e3-8111-4f83-b29c-689436074c02",
+              "name": "fileName",
+              "value": "=https://oyhgtwhtovqlwfrjemdx.supabase.co/storage/v1/object/public/mimir_rbt_classroom/{{ $('Edit Fields').item.json.fileName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2416,
+        144
+      ],
+      "id": "7049d332-80f8-455f-a1de-a3cb67e63359",
+      "name": "Successful"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5382f3e5-3608-42d7-a96d-75ae8c8f78cd",
+              "leftValue": "={{ $('Webhook').item.json.body.local }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        240
+      ],
+      "id": "146af020-1cd5-4c17-b55f-950d47f2c341",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        -48
+      ],
+      "id": "f444dcf3-ad97-4a5c-8bf5-a64c9a8fc18c",
+      "name": "Audio Files"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
         1296,
-        0
+        336
       ],
-      "id": "6e972544-96aa-49c6-999a-5b0ecf246dc7",
-      "name": "Respond to Webhook"
-    },
-    {
-      "parameters": {
-        "jsCode": "const rawOutput = $input.first().json.output;\n\ntry {\n  const jsonMatch = rawOutput.match(/\\[\\s*{[\\s\\S]*}\\s*\\]/);\n  if (!jsonMatch) throw new Error(\"No JSON array found\");\n\n  const dialogueArray = JSON.parse(jsonMatch[0]);\n\n  return dialogueArray.map(item => {\n    // 1. Clean the name: remove [], trim spaces, and make lowercase\n    const cleanName = item.speaker.replace(/[\\[\\]]/g, \"\").trim().toLowerCase();\n    \n    // 2. Assign voice based on keywords\n    let voice = \"af_heart\"; // Default (Maya)\n    \n    if (cleanName.includes(\"sarah\")) {\n      voice = \"af_sky\";\n    } else if (cleanName.includes(\"tim\")) {\n      voice = \"am_echo\";\n    }\n\n    return {\n      json: {\n        speaker: item.speaker.replace(/[\\[\\]]/g, \"\").trim(), // Pretty name for Supabase folders\n        message: item.message,\n        voice: voice\n      }\n    };\n  });\n} catch (error) {\n  return [{ json: { error: error.message, rawOutput: rawOutput } }];\n}"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        848,
-        192
-      ],
-      "id": "12309064-190a-4927-a8c3-2dc6312bd7f0",
-      "name": "Code in JavaScript"
-    },
-    {
-      "parameters": {
-        "options": {
-          "reset": false
-        }
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        1072,
-        192
-      ],
-      "id": "5c2395b0-9e72-4e84-a03d-ec9deadfeec7",
-      "name": "Loop Over Items"
-    },
-    {
-      "parameters": {
-        "operation": "upload",
-        "bucketName": "mimir_rbt_classroom",
-        "fileName": "=",
-        "additionalFields": {
-          "storageClass": "standard"
-        },
-        "tagsUi": {
-          "tagsValues": [
-            {
-              "key": "Content-Type",
-              "value": "audio/mpeg"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.s3",
-      "typeVersion": 1,
-      "position": [
-        1744,
-        208
-      ],
-      "id": "0203bf52-8a8a-4def-9d58-bd7dec2c3b8f",
-      "name": "Upload a file",
-      "credentials": {
-        "s3": {
-          "id": "VtB0BxymxRZHvleK",
-          "name": "S3 account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// This changes the filename property of the binary data\nconst newName = $('Webhook').first().json.jwtPayload.sub + '_' + $('Loop Over Items').first().json.speaker + '_' +$now; // Or use a variable from your script\n\n$input.first().binary.data.fileName = newName;\n\nreturn $input.first();"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1520,
-        208
-      ],
-      "id": "d3495f07-48bd-4edf-aa1d-34cfbb78aa41",
-      "name": "Code in JavaScript1"
+      "id": "54f80015-fd76-4fb6-977b-16a9270fe48a",
+      "name": "Script"
     }
   ],
   "origin": "n8n",
-  "pinData": {},
+  "pinData": {
+    "Code in JavaScript": [
+      {
+        "json": {
+          "speaker": "Professor Sarah",
+          "message": "Hello everyone, John Doe has a great question today.",
+          "voice": "af_sky"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "speaker": "Professor Sarah",
+          "message": "The question is, what observation methods exist?",
+          "voice": "af_sky"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "speaker": "Tim",
+          "message": "So, observation methods are used to collect data on behavior, right?",
+          "voice": "am_echo"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "speaker": "Maya",
+          "message": "That's right, Tim. For example, we can use methods like partial interval recording, whole interval recording, or momentary time sampling to observe and record client behavior.",
+          "voice": "af_heart"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "speaker": "Professor Sarah",
+          "message": "That's a great example, Maya. And according to our research, some common observation methods include latency, rate, and inter-response time, as well as permanent product recording procedures.",
+          "voice": "af_sky"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "repo": {
     "owner": "Ember96",
     "name": "n8n_workflows_backup"
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "qRHduwvYzVPT4ave"
   },
   "shared": [
     {
@@ -880,6 +1300,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-01-15T04:25:47.925Z",
-  "versionId": "cae0a7de-e2db-47f5-8b29-fe66cc2a6f83"
+  "updatedAt": "2026-01-17T03:33:41.214Z",
+  "versionId": "db651c7d-bb10-499d-8680-8d21b2849590"
 }
