@@ -1,0 +1,275 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "Aggregate RSS Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate RSS Items": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Fetch RSS Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Content Creator": {
+      "main": [
+        []
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Trigger Content Creator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-01-27T02:38:40.123Z",
+  "id": "OyjGGPiWPzQc572L",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Content Fetcher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "4bc279c7-38a1-445a-ba55-7152bec50997",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        320,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Get row(s)').item.json.rss_url }}",
+        "options": {}
+      },
+      "id": "bcfc7797-af73-41bb-92ae-e2b356c1650b",
+      "name": "Fetch RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        720,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "title"
+            },
+            {
+              "fieldToAggregate": "content"
+            },
+            {
+              "fieldToAggregate": "link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a26190d0-0a2b-4ece-b936-c285c901a6ca",
+      "name": "Aggregate RSS Items",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        928,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $env.CONTENT_CREATOR_WORKFLOW_ID }}",
+        "options": {}
+      },
+      "id": "a67f3e8d-705b-4ce5-bf8d-4586449a1e30",
+      "name": "Trigger Content Creator",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "GLO5Uq3U4FtlyfvY",
+          "mode": "list",
+          "cachedResultName": "RSS Feed for ABA",
+          "cachedResultUrl": "/projects/qxeR1gIEc01jkoF9/datatables/GLO5Uq3U4FtlyfvY"
+        },
+        "limit": 10
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        80
+      ],
+      "id": "c6216f14-b8e3-489e-88e4-4d34dffaa3b9",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        256
+      ],
+      "id": "5d84f05c-3e2a-48f7-8018-a5ddb73c0810",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "Fnlj29qnLp78m5T5",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "rss_feed_aba",
+          "mode": "list",
+          "cachedResultName": "rss_feed_aba"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        1136,
+        80
+      ],
+      "id": "e9d4c646-a2cc-49a0-b76d-68627d0f4d1d",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "UjpfwLCOwOKmxVQn",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1232,
+        256
+      ],
+      "id": "7827f464-2728-4cea-9ddb-ab12ca26bb17",
+      "name": "Default Data Loader"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-01-27T02:38:40.131Z",
+      "createdAt": "2026-01-27T02:38:40.131Z",
+      "role": "workflow:owner",
+      "workflowId": "OyjGGPiWPzQc572L",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-27T03:23:48.587Z",
+  "versionId": "0e6d2522-56a6-4c2d-840f-7fe6b2642899"
+}
