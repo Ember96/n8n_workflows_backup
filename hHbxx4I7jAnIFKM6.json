@@ -1,0 +1,176 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Store Created Posts": {
+      "main": [
+        [
+          {
+            "node": "Trigger Content Publisher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-01-27T02:38:23.652Z",
+  "id": "hHbxx4I7jAnIFKM6",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Content Creator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d1ba5f65-7572-461b-8563-d643c76fee5f",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create"
+      },
+      "id": "73f4cb98-a689-4f12-9ca3-8fb25037e849",
+      "name": "Store Created Posts",
+      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+      "typeVersion": 1,
+      "position": [
+        800,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update"
+      },
+      "id": "8885c12e-8e5d-4844-ab36-a79acb82b26f",
+      "name": "Update Content Status",
+      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+      "typeVersion": 1,
+      "position": [
+        800,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "={{ $env.CONTENT_PUBLISHER_WORKFLOW_ID }}",
+        "options": {}
+      },
+      "id": "8656dd48-afb7-4fa1-90dd-f86e0d6ec777",
+      "name": "Trigger Content Publisher",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        208,
+        16
+      ],
+      "id": "e86520df-772f-4e97-8db5-82f9305ae759",
+      "name": "When chat message received",
+      "webhookId": "1192e635-3269-4153-a50d-2c527e2e91c5"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        416,
+        16
+      ],
+      "id": "f3f44ac1-fd59-47ac-ac46-3dd96021be81",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        368,
+        208
+      ],
+      "id": "9858d7f7-aa12-4aec-b804-8f689608c580",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ujyYSOjWajsHaucP",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-01-27T02:38:23.656Z",
+      "createdAt": "2026-01-27T02:38:23.656Z",
+      "role": "workflow:owner",
+      "workflowId": "hHbxx4I7jAnIFKM6",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-01-27T03:26:14.717Z",
+  "versionId": "a368e501-c8ff-42df-978a-25b757418a71"
+}
