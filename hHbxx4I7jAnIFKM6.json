@@ -5,14 +5,9 @@
   "connections": {
     "Execute Workflow Trigger": {
       "main": [
-        []
-      ]
-    },
-    "Store Created Posts": {
-      "main": [
         [
           {
-            "node": "Trigger Content Publisher",
+            "node": "Basic LLM Chain",
             "type": "main",
             "index": 0
           }
@@ -30,13 +25,13 @@
         ]
       ]
     },
-    "When chat message received": {
-      "main": [
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
         [
           {
             "node": "Basic LLM Chain",
-            "type": "main",
-            "index": 0
+            "type": "ai_languageModel",
+            "index": 1
           }
         ]
       ]
@@ -63,83 +58,32 @@
     },
     {
       "parameters": {
-        "operation": "create"
-      },
-      "id": "73f4cb98-a689-4f12-9ca3-8fb25037e849",
-      "name": "Store Created Posts",
-      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
-      "typeVersion": 1,
-      "position": [
-        800,
-        16
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "update"
-      },
-      "id": "8885c12e-8e5d-4844-ab36-a79acb82b26f",
-      "name": "Update Content Status",
-      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
-      "typeVersion": 1,
-      "position": [
-        800,
-        176
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": "={{ $env.CONTENT_PUBLISHER_WORKFLOW_ID }}",
-        "options": {}
-      },
-      "id": "8656dd48-afb7-4fa1-90dd-f86e0d6ec777",
-      "name": "Trigger Content Publisher",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1,
-      "position": [
-        1008,
-        16
-      ]
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.4,
-      "position": [
-        208,
-        16
-      ],
-      "id": "e86520df-772f-4e97-8db5-82f9305ae759",
-      "name": "When chat message received",
-      "webhookId": "1192e635-3269-4153-a50d-2c527e2e91c5"
-    },
-    {
-      "parameters": {
+        "promptType": "define",
+        "text": "=Role: You are an expert Content Curator and BCBA (Board Certified Behavior Analyst).\n\nObjective: From the provided list of 60 RSS feed entries (titles, descriptions, and URLs), select exactly TWO distinct items:\n\nField News: A significant update, research finding, or legislative change in Applied Behavior Analysis.\n\nParenting Practice: A science-backed tip or testimonial-based activity that parents can do with kids at home today.\n\nInstructions:\n\nSelection: Choose the most high-impact and relevant stories. Avoid duplicates.\n\nInstagram Post: Create a short, engaging article for Buffer. Start with a \"hook,\" provide the value, and end with a call-to-action (CTA). Use 3-5 relevant hashtags (e.g., #ABA #ParentingHacks).\n\nAudio Script: Write a professional, friendly script for a CGI character. It MUST be under 50 words to ensure it stays under 20 seconds. Focus on one core insight from each story.\n\nConstraint: No preamble. Your entire response must be a single, valid JSON object.\n\nClarification: Two separate posts. One for Field New and other for Parenting Practice.\n\nInput Data: {{ $json.rss_items_stringified }}\n\nRequired JSON Schema: { \"title\": \"A catchy headline for the post\", \"post_content\": \"The full text for the Instagram caption\", \"audio_script\": \"The 20-second script for the voiceover\", \"source_url\": \"The URL of the primary news story selected\", \"metadata\": { \"topic_news\": \"Title of the news item selected\", \"topic_practice\": \"Title of the parenting tip selected\" } }",
+        "needsFallback": true,
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
-      "typeVersion": 1.8,
+      "typeVersion": 1.9,
       "position": [
-        416,
+        224,
         16
       ],
-      "id": "f3f44ac1-fd59-47ac-ac46-3dd96021be81",
+      "id": "cdd8ea8c-8afc-4c96-ac9b-bfc4494ed003",
       "name": "Basic LLM Chain"
     },
     {
       "parameters": {
-        "model": "openai/gpt-oss-20b:free",
+        "model": "google/gemini-2.0-flash-exp:free",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        368,
-        208
+        232,
+        240
       ],
-      "id": "9858d7f7-aa12-4aec-b804-8f689608c580",
+      "id": "65b67f91-ac27-4ab8-b1d4-43695c8cb1df",
       "name": "OpenRouter Chat Model",
       "credentials": {
         "openRouterApi": {
@@ -147,6 +91,40 @@
           "name": "OpenRouter account"
         }
       }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen-2.5-vl-7b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        360,
+        240
+      ],
+      "id": "43022481-c654-4211-b712-7cde4fa3e75b",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ujyYSOjWajsHaucP",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Pending\nInstead of praying for the model to put the RSS url where it goes, just ask it to specify the index from the post so I can fetch it myself. Look for a better FallBack model since the main model is leaving march 6\n",
+        "height": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -32
+      ],
+      "typeVersion": 1,
+      "id": "6f1496bc-b640-4702-9df1-ec4dd2c76478",
+      "name": "Sticky Note"
     }
   ],
   "origin": "n8n",
@@ -171,6 +149,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-01-27T03:26:14.717Z",
-  "versionId": "a368e501-c8ff-42df-978a-25b757418a71"
+  "updatedAt": "2026-01-29T03:53:32.759Z",
+  "versionId": "909cf474-154b-4ca0-b524-7ecb9158707c"
 }
