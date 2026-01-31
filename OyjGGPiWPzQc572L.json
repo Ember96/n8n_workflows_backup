@@ -104,8 +104,20 @@
     },
     "Switch": {
       "main": [
-        [],
-        []
+        [
+          {
+            "node": "AWS Lambda",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AWS Lambda",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -372,6 +384,26 @@
       "id": "26a9be2b-1da3-4f1c-a558-229eb47ff9be",
       "name": "Bedtime",
       "webhookId": "5658c922-b475-4904-9a02-33c1f9d6bc6d"
+    },
+    {
+      "parameters": {
+        "function": "arn:aws:lambda:us-east-1:327327821452:function:remotion-render-4-0-414-mem2048mb-disk2048mb-120sec",
+        "payload": "={\n  \"region\": \"us-east-1\",\n  \"functionName\": \"remotion-render-4-0-414-mem2048mb-disk2048mb-120sec\",\n  \"serveUrl\": \"https://remotionlambda-useast1-owllpep8ag.s3.us-east-1.amazonaws.com/sites/output/index.html\",\n  \"composition\": \"HelloWorld\",\n  \"inputProps\": {\n    \"titleText\": \"My Concept\",\n    \"descriptionText\": \"A detailed explanation...\",\n    \"audioUrl\": \"\"\n  }\n}"
+      },
+      "type": "n8n-nodes-base.awsLambda",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        48
+      ],
+      "id": "41c84e78-ba6b-4fe2-8408-e8ff49c4f68c",
+      "name": "AWS Lambda",
+      "credentials": {
+        "aws": {
+          "id": "nFpWyaEZlwKm6I2M",
+          "name": "AWS (IAM) account"
+        }
+      }
     }
   ],
   "origin": "n8n",
@@ -2259,6 +2291,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-01-30T00:33:29.571Z",
-  "versionId": "c0d713e7-d959-4305-b477-734004b59b2d"
+  "updatedAt": "2026-01-31T07:01:04.383Z",
+  "versionId": "aef635f1-09a0-4864-9059-a641f5f9b5c0"
 }
