@@ -119,6 +119,28 @@
           }
         ]
       ]
+    },
+    "AWS Lambda": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "createdAt": "2026-01-27T02:38:40.123Z",
@@ -387,8 +409,8 @@
     },
     {
       "parameters": {
-        "function": "arn:aws:lambda:us-east-1:327327821452:function:remotion-render-4-0-414-mem2048mb-disk2048mb-120sec",
-        "payload": "={\n  \"region\": \"us-east-1\",\n  \"functionName\": \"remotion-render-4-0-414-mem2048mb-disk2048mb-120sec\",\n  \"serveUrl\": \"https://remotionlambda-useast1-owllpep8ag.s3.us-east-1.amazonaws.com/sites/output/index.html\",\n  \"composition\": \"HelloWorld\",\n  \"inputProps\": {\n    \"titleText\": \"My Concept\",\n    \"descriptionText\": \"A detailed explanation...\",\n    \"audioUrl\": \"\"\n  }\n}"
+        "function": "arn:aws:lambda:us-east-1:327327821452:function:remotion-render-controller",
+        "payload": "={\n  \"region\": \"us-east-1\",\n  \"framesPerLambda\": 20,\n  \"concurrency\": 1,\n  \"functionName\": \"remotion-render-4-0-414-mem2048mb-disk2048mb-120sec\",\n  \"serveUrl\": \"https://remotionlambda-useast1-owllpep8ag.s3.us-east-1.amazonaws.com/sites/remotion-lambda-site/index.html\",\n  \"composition\": \"HelloWorld\",\n  \"inputProps\": {\n    \"message\": \"{{ $json.post_content }}\",\n    \"title\": \"{{ $json.title }}\",\n    \"backgroundColor\": \"#000000\"\n  }\n}"
       },
       "type": "n8n-nodes-base.awsLambda",
       "typeVersion": 1,
@@ -404,6 +426,33 @@
           "name": "AWS (IAM) account"
         }
       }
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $json.bucketName }}.s3.us-east-1.amazonaws.com/{{ $json.renderId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2656,
+        192
+      ],
+      "id": "720208e4-6a77-4348-8cc2-a5aa4996d24c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw body string from the input\nconst rawBody = $input.first().json.result.body;\n\n// 2. Parse that string into a real JavaScript object\nconst bodyObject = JSON.parse(rawBody);\n\n// 3. Return the specific fields you need\nreturn {\n  renderId: bodyObject.renderId,\n  bucketName: bodyObject.bucketName,\n  message: bodyObject.message\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        48
+      ],
+      "id": "4dbaf983-5d75-4ae3-9646-9d739c35eaa8",
+      "name": "Code in JavaScript1"
     }
   ],
   "origin": "n8n",
@@ -2291,6 +2340,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-01-31T07:01:04.383Z",
-  "versionId": "aef635f1-09a0-4864-9059-a641f5f9b5c0"
+  "updatedAt": "2026-02-02T03:01:38.935Z",
+  "versionId": "661bf7b6-a1f0-4960-9ae0-656d155ca6bb"
 }
