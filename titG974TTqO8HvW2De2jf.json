@@ -1,0 +1,392 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Prompt": {
+      "main": [
+        [
+          {
+            "node": "Select Templates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Templates": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Validate Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Code": {
+      "main": [
+        [
+          {
+            "node": "Is Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid?": {
+      "main": [
+        [
+          {
+            "node": "Deploy Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deploy Code": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success Response": {
+      "main": [
+        [
+          {
+            "node": "Return Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Response": {
+      "main": [
+        [
+          {
+            "node": "Return Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-02-07T05:01:59.471Z",
+  "id": "titG974TTqO8HvW2De2jf",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "AI Video Generator - Enhanced with Templates",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-video-generator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "63cba8d9-4e58-463e-b1b9-a7b029c3d614",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        96
+      ],
+      "webhookId": "ai-video-generator"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract data from webhook body\nconst body = $input.first().json.body;\n\nreturn {\n  json: {\n    userPrompt: body.prompt || '',\n    titleText: body.titleText || 'Generated Video',\n    descriptionText: body.descriptionText || '',\n    shouldRender: body.renderVideo !== false,\n    audioUrl: body.audioUrl || ''\n  }\n};"
+      },
+      "id": "e63dd89f-17fc-46e7-8542-113eba599387",
+      "name": "Extract Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1072,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/templates/select",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "29f30968-557c-46e7-b467-a46efcedcc01",
+      "name": "Select Templates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -848,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "a13ef449-ae50-4546-846f-d78cccefe28f",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/validate",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "c405f4ac-b27d-486d-8045-ff230885f048",
+      "name": "Validate Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -272,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e817e29f-f61b-495e-b390-3c4fbe9c1753",
+      "name": "Is Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/deploy",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "id": "01d64f1d-730c-4ffa-8c0b-b3c422daf89e",
+      "name": "Deploy Code",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        176,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return success response with video URL\nconst deployResult = $input.first().json;\nconst templateResult = $('Select Templates').first().json;\n\nreturn {\n  json: {\n    success: true,\n    message: deployResult.renderResult ? 'Video template deployed and rendering initiated' : 'Video template deployed successfully',\n    templatesUsed: templateResult.templates?.map(t => t.name) || [],\n    validation: deployResult.validation,\n    functionName: deployResult.deployOutput?.functionName,\n    serveUrl: deployResult.deployOutput?.serveUrl,\n    renderId: deployResult.renderResult?.renderId,\n    bucketName: deployResult.renderResult?.bucketName,\n    videoUrl: deployResult.renderResult?.renderId ? `https://s3.amazonaws.com/${deployResult.renderResult.bucketName}/renders/${deployResult.renderResult.renderId}/out.mp4` : null,\n    estimatedTime: '1-2 minutes for rendering'\n  }\n};"
+      },
+      "id": "82515d8e-1f38-418a-8d90-47f63440cdea",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return error response with validation details\nconst validationResult = $input.first().json;\n\nreturn {\n  json: {\n    success: false,\n    error: 'Code validation failed',\n    message: validationResult.message,\n    validationErrors: validationResult.validation?.errors || [],\n    validationWarnings: validationResult.validation?.warnings || [],\n    suggestion: 'Please review your prompt and try again with more specific requirements.'\n  }\n};"
+      },
+      "id": "a1c72214-5c8f-4f56-93bb-426053dc5ed5",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "459e74f6-d3d9-47c9-b766-4362cbef3b10",
+      "name": "Return Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "e8cdaf78-dbec-4796-9f9a-e46212df7539",
+      "name": "Return Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        400,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-coder:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        304
+      ],
+      "id": "88b07662-d3f4-4e7f-8180-76261f5997fd",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ujyYSOjWajsHaucP",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        304
+      ],
+      "id": "146937f9-5128-4e57-8a67-d4d8847bd2af",
+      "name": "Simple Memory"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-02-07T05:01:59.474Z",
+      "createdAt": "2026-02-07T05:01:59.474Z",
+      "role": "workflow:owner",
+      "workflowId": "titG974TTqO8HvW2De2jf",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-02-07T06:05:45.402Z",
+  "versionId": "47b0b956-07c5-422d-a823-1a8fb700de8e"
+}
