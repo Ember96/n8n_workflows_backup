@@ -379,7 +379,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -393,6 +394,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-03-18T03:08:19.750Z",
-  "versionId": "fd6f3550-a32c-4bcb-a5e2-445749cd47bf"
+  "updatedAt": "2026-03-19T03:15:59.470Z",
+  "versionId": "3f12d0d0-0d68-40b9-99bb-a91395df43bb"
 }
