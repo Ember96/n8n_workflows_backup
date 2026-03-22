@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2025-12-20T05:57:33.316Z",
-    "createdAt": "2025-12-20T05:57:33.316Z",
-    "versionId": "e8ffa681-a2ab-4d4f-9712-23cd65c39264",
+    "updatedAt": "2026-03-22T04:25:25.000Z",
+    "createdAt": "2026-03-22T04:21:02.284Z",
+    "versionId": "b0270f53-3dba-42a5-85ba-b532d30d3c62",
     "workflowId": "ytSlvzb0VKP5kZDK",
     "nodes": [
       {
@@ -219,7 +219,7 @@
       },
       {
         "parameters": {
-          "model": "mistralai/devstral-2512:free",
+          "model": "arcee-ai/trinity-large-preview:free",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -365,11 +365,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": null,
-    "description": null,
-    "autosaved": false
+    "name": "Version b0270f53",
+    "description": "",
+    "autosaved": true
   },
-  "activeVersionId": "e8ffa681-a2ab-4d4f-9712-23cd65c39264",
+  "activeVersionId": "b0270f53-3dba-42a5-85ba-b532d30d3c62",
   "connections": {
     "Upload your file here": {
       "main": [
@@ -687,7 +687,7 @@
     },
     {
       "parameters": {
-        "model": "mistralai/devstral-2512:free",
+        "model": "arcee-ai/trinity-large-preview:free",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -747,7 +747,8 @@
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,
-    "errorWorkflow": "qRHduwvYzVPT4ave"
+    "errorWorkflow": "qRHduwvYzVPT4ave",
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -786,6 +787,6 @@
     }
   ],
   "triggerCount": 2,
-  "updatedAt": "2025-12-20T05:57:33.000Z",
-  "versionId": "e8ffa681-a2ab-4d4f-9712-23cd65c39264"
+  "updatedAt": "2026-03-22T04:21:02.281Z",
+  "versionId": "b0270f53-3dba-42a5-85ba-b532d30d3c62"
 }
