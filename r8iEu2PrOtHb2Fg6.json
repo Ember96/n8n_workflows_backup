@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-17T03:46:50.000Z",
-    "createdAt": "2026-01-17T03:33:41.215Z",
-    "versionId": "db651c7d-bb10-499d-8680-8d21b2849590",
+    "updatedAt": "2026-03-22T04:35:15.000Z",
+    "createdAt": "2026-03-22T04:35:12.797Z",
+    "versionId": "72c5a783-7567-4f97-8d6e-7131c90d60e6",
     "workflowId": "r8iEu2PrOtHb2Fg6",
     "nodes": [
       {
@@ -15,7 +15,7 @@
         "type": "@n8n/n8n-nodes-langchain.agent",
         "typeVersion": 3.1,
         "position": [
-          280,
+          288,
           240
         ],
         "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
@@ -29,8 +29,8 @@
         "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
         "typeVersion": 1,
         "position": [
-          0,
-          672
+          192,
+          448
         ],
         "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
         "name": "Groq Chat Model",
@@ -201,7 +201,7 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict",
+              "typeValidation": "loose",
               "version": 3
             },
             "conditions": [
@@ -217,6 +217,7 @@
             ],
             "combinator": "and"
           },
+          "looseTypeValidation": true,
           "options": {}
         },
         "type": "n8n-nodes-base.if",
@@ -327,14 +328,14 @@
       },
       {
         "parameters": {
-          "model": "meta-llama/llama-3.3-70b-instruct:free",
+          "model": "openrouter/free",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
         "typeVersion": 1,
         "position": [
           224,
-          464
+          688
         ],
         "id": "82f234a5-c839-4a96-be1f-95f09da6f734",
         "name": "OpenRouter Chat Model",
@@ -374,7 +375,7 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict",
+              "typeValidation": "loose",
               "version": 3
             },
             "conditions": [
@@ -384,13 +385,13 @@
                 "rightValue": "false",
                 "operator": {
                   "type": "string",
-                  "operation": "equals",
-                  "name": "filter.operator.equals"
+                  "operation": "equals"
                 }
               }
             ],
             "combinator": "and"
           },
+          "looseTypeValidation": true,
           "options": {}
         },
         "type": "n8n-nodes-base.if",
@@ -434,7 +435,13 @@
     "connections": {
       "Groq Chat Model": {
         "ai_languageModel": [
-          []
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
         ]
       },
       "Embeddings Cohere": {
@@ -568,13 +575,7 @@
       },
       "OpenRouter Chat Model": {
         "ai_languageModel": [
-          [
-            {
-              "node": "AI Agent",
-              "type": "ai_languageModel",
-              "index": 0
-            }
-          ]
+          []
         ]
       },
       "Successful": {
@@ -608,15 +609,21 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version db651c7d",
-    "description": "feat: The flow changes now depending if the client app request for the whole audio files or just the script",
-    "autosaved": false
+    "name": "Version 72c5a783",
+    "description": "",
+    "autosaved": true
   },
-  "activeVersionId": "db651c7d-bb10-499d-8680-8d21b2849590",
+  "activeVersionId": "72c5a783-7567-4f97-8d6e-7131c90d60e6",
   "connections": {
     "Groq Chat Model": {
       "ai_languageModel": [
-        []
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     },
     "Embeddings Cohere": {
@@ -750,13 +757,7 @@
     },
     "OpenRouter Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Successful": {
@@ -806,7 +807,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        280,
+        288,
         240
       ],
       "id": "c3c1a120-88e9-4489-bf27-1617ff352a1b",
@@ -820,8 +821,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        0,
-        672
+        192,
+        448
       ],
       "id": "78c31698-b95b-40f7-9c6b-c589f97030a2",
       "name": "Groq Chat Model",
@@ -992,7 +993,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 3
           },
           "conditions": [
@@ -1008,6 +1009,7 @@
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.if",
@@ -1118,14 +1120,14 @@
     },
     {
       "parameters": {
-        "model": "meta-llama/llama-3.3-70b-instruct:free",
+        "model": "openrouter/free",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
         224,
-        464
+        688
       ],
       "id": "82f234a5-c839-4a96-be1f-95f09da6f734",
       "name": "OpenRouter Chat Model",
@@ -1165,7 +1167,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 3
           },
           "conditions": [
@@ -1175,13 +1177,13 @@
               "rightValue": "false",
               "operator": {
                 "type": "string",
-                "operation": "equals",
-                "name": "filter.operator.equals"
+                "operation": "equals"
               }
             }
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.if",
@@ -1286,7 +1288,8 @@
     "availableInMCP": false,
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": "qRHduwvYzVPT4ave"
+    "errorWorkflow": "qRHduwvYzVPT4ave",
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -1300,6 +1303,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-01-17T03:33:41.214Z",
-  "versionId": "db651c7d-bb10-499d-8680-8d21b2849590"
+  "updatedAt": "2026-03-22T04:35:12.797Z",
+  "versionId": "72c5a783-7567-4f97-8d6e-7131c90d60e6"
 }
