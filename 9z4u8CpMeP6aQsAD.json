@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-15T04:17:43.000Z",
-    "createdAt": "2026-01-15T04:17:13.456Z",
-    "versionId": "be6896fd-d7e9-4bdb-a2da-72ecaa5eb65e",
+    "updatedAt": "2026-03-22T04:39:40.000Z",
+    "createdAt": "2026-03-22T04:39:36.172Z",
+    "versionId": "2387a46e-6571-40ed-813a-68dc34ad42ae",
     "workflowId": "9z4u8CpMeP6aQsAD",
     "nodes": [
       {
@@ -31,7 +31,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "http://192.168.1.67:8880/v1/audio/speech",
+          "url": "http://192.168.20.218:8880/v1/audio/speech",
           "sendBody": true,
           "specifyBody": "json",
           "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\",\n  \"response_format\": \"mp3\",\n  \"download_format\": \"mp3\",\n  \"speed\": 1,\n  \"return_download_link\": false,\n  \"volume_multiplier\": 1,\n  \"normalization_options\": {\n    \"normalize\": true,\n    \"unit_normalization\": false,\n    \"url_normalization\": true,\n    \"email_normalization\": true,\n    \"optional_pluralization_normalization\": true,\n    \"phone_normalization\": true,\n    \"replace_remaining_symbols\": true\n  }\n}",
@@ -66,11 +66,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version be6896fd",
-    "description": "Removing non-compatible options",
-    "autosaved": false
+    "name": "Version 2387a46e",
+    "description": "",
+    "autosaved": true
   },
-  "activeVersionId": "be6896fd-d7e9-4bdb-a2da-72ecaa5eb65e",
+  "activeVersionId": "2387a46e-6571-40ed-813a-68dc34ad42ae",
   "connections": {
     "When Executed by Another Workflow": {
       "main": [
@@ -120,7 +120,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://192.168.1.67:8880/v1/audio/speech",
+        "url": "http://192.168.20.218:8880/v1/audio/speech",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={\n  \"model\": \"kokoro\",\n  \"input\": \"{{ $json.message }}\",\n  \"voice\": \"{{ $json.voice }}\",\n  \"response_format\": \"mp3\",\n  \"download_format\": \"mp3\",\n  \"speed\": 1,\n  \"return_download_link\": false,\n  \"volume_multiplier\": 1,\n  \"normalization_options\": {\n    \"normalize\": true,\n    \"unit_normalization\": false,\n    \"url_normalization\": true,\n    \"email_normalization\": true,\n    \"optional_pluralization_normalization\": true,\n    \"phone_normalization\": true,\n    \"replace_remaining_symbols\": true\n  }\n}",
@@ -159,7 +159,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -173,6 +174,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-01-15T04:17:13.455Z",
-  "versionId": "be6896fd-d7e9-4bdb-a2da-72ecaa5eb65e"
+  "updatedAt": "2026-03-22T04:39:36.171Z",
+  "versionId": "2387a46e-6571-40ed-813a-68dc34ad42ae"
 }
