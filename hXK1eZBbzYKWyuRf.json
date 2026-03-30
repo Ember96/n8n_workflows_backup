@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2025-12-21T20:18:08.031Z",
-    "createdAt": "2025-12-21T20:18:08.031Z",
-    "versionId": "9d8c25cc-9532-4149-b213-8a0009ecadce",
+    "updatedAt": "2026-03-30T02:26:11.000Z",
+    "createdAt": "2026-03-30T02:26:06.683Z",
+    "versionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309",
     "workflowId": "hXK1eZBbzYKWyuRf",
     "nodes": [
       {
@@ -191,7 +191,7 @@
       },
       {
         "parameters": {
-          "model": "mistralai/devstral-2512:free",
+          "model": "openrouter/free",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -353,11 +353,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": null,
-    "description": null,
-    "autosaved": false
+    "name": "Version c562a0c5",
+    "description": "",
+    "autosaved": true
   },
-  "activeVersionId": "9d8c25cc-9532-4149-b213-8a0009ecadce",
+  "activeVersionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309",
   "connections": {
     "Upload your file here": {
       "main": [
@@ -641,7 +641,7 @@
     },
     {
       "parameters": {
-        "model": "mistralai/devstral-2512:free",
+        "model": "openrouter/free",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -723,7 +723,8 @@
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false,
-    "errorWorkflow": "qRHduwvYzVPT4ave"
+    "errorWorkflow": "qRHduwvYzVPT4ave",
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -762,6 +763,6 @@
     }
   ],
   "triggerCount": 1,
-  "updatedAt": "2025-12-21T20:18:08.000Z",
-  "versionId": "9d8c25cc-9532-4149-b213-8a0009ecadce"
+  "updatedAt": "2026-03-30T02:26:06.682Z",
+  "versionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309"
 }
