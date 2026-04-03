@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-05T00:27:18.000Z",
-    "createdAt": "2026-01-05T00:27:10.046Z",
-    "versionId": "58f093b8-aae4-4f94-8626-7c5ab1b2d21a",
+    "updatedAt": "2026-04-03T04:03:17.000Z",
+    "createdAt": "2026-04-03T04:03:13.267Z",
+    "versionId": "90bd215c-a8f2-44c9-ac22-bf4bd67a9456",
     "workflowId": "AcUaeaaUlp9KpOAB",
     "nodes": [
       {
@@ -251,6 +251,7 @@
         ],
         "id": "d6e9ade7-d8a9-4404-b682-a75c2c14be10",
         "name": "Get today's trivia",
+        "alwaysOutputData": true,
         "credentials": {
           "supabaseApi": {
             "id": "UjpfwLCOwOKmxVQn",
@@ -275,7 +276,7 @@
         "typeVersion": 1,
         "position": [
           672,
-          296
+          304
         ],
         "id": "2d3d7f20-f88e-40ab-ba15-5ce1b49a0980",
         "name": "Get fallback trivia",
@@ -385,11 +386,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version 58f093b8",
-    "description": "Added fallback trivia",
-    "autosaved": false
+    "name": "Version 90bd215c",
+    "description": "",
+    "autosaved": true
   },
-  "activeVersionId": "58f093b8-aae4-4f94-8626-7c5ab1b2d21a",
+  "activeVersionId": "90bd215c-a8f2-44c9-ac22-bf4bd67a9456",
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -740,6 +741,7 @@
       ],
       "id": "d6e9ade7-d8a9-4404-b682-a75c2c14be10",
       "name": "Get today's trivia",
+      "alwaysOutputData": true,
       "credentials": {
         "supabaseApi": {
           "id": "UjpfwLCOwOKmxVQn",
@@ -764,7 +766,7 @@
       "typeVersion": 1,
       "position": [
         672,
-        296
+        304
       ],
       "id": "2d3d7f20-f88e-40ab-ba15-5ce1b49a0980",
       "name": "Get fallback trivia",
@@ -783,7 +785,8 @@
     "name": "n8n_workflows_backup"
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -801,6 +804,6 @@
   },
   "tags": [],
   "triggerCount": 2,
-  "updatedAt": "2026-01-05T00:27:10.045Z",
-  "versionId": "58f093b8-aae4-4f94-8626-7c5ab1b2d21a"
+  "updatedAt": "2026-04-03T04:03:13.265Z",
+  "versionId": "90bd215c-a8f2-44c9-ac22-bf4bd67a9456"
 }
