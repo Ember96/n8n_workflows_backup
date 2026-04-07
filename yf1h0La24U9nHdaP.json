@@ -685,7 +685,8 @@
     "name": "n8n_workflows_backup"
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -699,6 +700,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-01-13T02:38:20.576Z",
-  "versionId": "c4f1d0a0-f5f6-4fcf-8423-c48c2dd1857b"
+  "updatedAt": "2026-04-07T00:25:05.080Z",
+  "versionId": "3c245a70-2cb3-4e73-ba14-a8c43b437d7d"
 }
