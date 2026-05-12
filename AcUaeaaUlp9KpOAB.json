@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-04-03T04:03:17.000Z",
-    "createdAt": "2026-04-03T04:03:13.267Z",
-    "versionId": "90bd215c-a8f2-44c9-ac22-bf4bd67a9456",
+    "updatedAt": "2026-05-12T05:11:37.000Z",
+    "createdAt": "2026-05-12T05:11:14.469Z",
+    "versionId": "21d363c1-00d8-4fbb-88e2-ef0e159bb942",
     "workflowId": "AcUaeaaUlp9KpOAB",
     "nodes": [
       {
@@ -30,7 +30,7 @@
               {
                 "id": "be87146b-413e-4d55-b36b-d952a52a1f0f",
                 "name": "chatInput",
-                "value": "Generate a scenario where critical decision taking is expected from the RBT to solve a crisis situation using the most accurate behavior intervention plan. The situation must be in a grace zone and propose ethical limitations of the ABA procedures. Something that can generate a debate on the limitations of ABA techniques, restrictions of the ethical legislation and humanization of personalized care for kids with autism. The structure should be: 1. Situation 2. Three questions about this situation with 2 options each (both correct but one of them more accurate) and then explanation of why choosing one over the other  3. Proposal for debate. Please provide it in a JSON structure where all of the response must go in a content field, a topic field that captures the topic of the situation and finally a field for the external sources used if it was the case. Just send the raw JSON, no fenced code blocks or anything else.",
+                "value": "Generate a scenario where critical decision taking is expected from the RBT to solve a crisis situation using the most accurate behavior intervention plan. The situation must be in a grace zone and propose ethical limitations of the ABA procedures. Something that can generate a debate on the limitations of ABA techniques, restrictions of the ethical legislation and humanization of personalized care for kids with autism. The response must be raw JSON only, no markdown, no code fences, no explanations outside the JSON. Use this exact structure: {   \"id\": \"<generate a UUID v4>\",   \"trivia_date\": \"<today's date in YYYY-MM-DD format>\",   \"topic\": \"<short title capturing the situation>\",   \"created_at\": \"<current ISO 8601 timestamp>\",   \"external_sources\": [     { \"title\": \"<source title>\", \"url\": \"<source url>\" }   ],   \"content\": {     \"1. Situation\": {       \"description\": \"<full situation paragraph describing the scenario>\"     },     \"2. Questions and Options\": [       {         \"question\": \"<question 1 text>\",         \"options\": [           {             \"option\": \"A\",             \"description\": \"<option A intervention description>\",             \"explanation\": \"<explanation of why A is correct but less accurate>\"           },           {             \"option\": \"B\",             \"description\": \"<option B intervention description>\",             \"explanation\": \"<explanation of why B is the more accurate choice>\"           }         ]       },       {         \"question\": \"<question 2 text>\",         \"options\": [           { \"option\": \"A\", \"description\": \"...\", \"explanation\": \"...\" },           { \"option\": \"B\", \"description\": \"...\", \"explanation\": \"...\" }         ]       },       {         \"question\": \"<question 3 text>\",         \"options\": [           { \"option\": \"A\", \"description\": \"...\", \"explanation\": \"...\" },           { \"option\": \"B\", \"description\": \"...\", \"explanation\": \"...\" }         ]       }     ],     \"3. Proposal for Debate\": {       \"points\": [         \"**<point 1 title>**: <point 1 content>\",         \"**<point 2 title>**: <point 2 content>\",         \"**<point 3 title>**: <point 3 content>\"       ]     }   } } Rules: - Option B must always be the more accurate answer. - Each option description must be a full paragraph explaining the intervention. - Each explanation must compare both options and justify why one is more accurate using BACB code references. - The debate section must cover: limitations of traditional ABA techniques, ethical legislation gaps, and humanization of personalized care. - The description and explanations must be substantive paragraphs, not single sentences. - external_sources must include at least 3 real, verifiable academic or professional sources.",
                 "type": "string"
               },
               {
@@ -97,7 +97,7 @@
       },
       {
         "parameters": {
-          "jsCode": "for (const item of items) {\n  // Access the output field where the LLM put the JSON-in-Markdown\n  const content = item.json.output; \n  \n  if (typeof content === 'string') {\n     // Remove markdown code block markers\n     const cleanContent = content.replace(/^```json\\s*/, '').replace(/\\s*```$/, '');\n     \n     try {\n       // Parse the clean string back into an object\n       // and replace the item.json with it (or put it in a specific field)\n       item.json = JSON.parse(cleanContent);\n     } catch(e) {\n       item.json.error = \"Failed to parse JSON: \" + e.message;\n     }\n  }\n}\n\nreturn items;"
+          "jsCode": "for (const item of items) {\n  const content = item.json.output;\n  if (typeof content === 'string') {\n    const cleanContent = content.replace(/^```json\\s*/, '').replace(/\\s*```$/, '');\n    try {\n      const parsed = JSON.parse(cleanContent);\n      // Stringify the nested content with full Unicode/control char escaping\n      if (parsed.content && typeof parsed.content === 'object') {\n        parsed.content = JSON.stringify(parsed.content, null, 0)\n          .replace(/\\n/g, '\\\\n')\n          .replace(/\\r/g, '\\\\r')\n          .replace(/\\t/g, '\\\\t');\n      }\n      item.json = parsed;\n    } catch(e) {\n      item.json.error = \"Failed to parse JSON: \" + e.message;\n    }\n  }\n}\nreturn items;"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -386,11 +386,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version 90bd215c",
-    "description": "",
+    "name": "Version 21d363c1",
+    "description": "Getting tired of some much complexity and just returning the whole thing",
     "autosaved": true
   },
-  "activeVersionId": "90bd215c-a8f2-44c9-ac22-bf4bd67a9456",
+  "activeVersionId": "21d363c1-00d8-4fbb-88e2-ef0e159bb942",
   "connections": {
     "Schedule Trigger": {
       "main": [
@@ -520,7 +520,7 @@
             {
               "id": "be87146b-413e-4d55-b36b-d952a52a1f0f",
               "name": "chatInput",
-              "value": "Generate a scenario where critical decision taking is expected from the RBT to solve a crisis situation using the most accurate behavior intervention plan. The situation must be in a grace zone and propose ethical limitations of the ABA procedures. Something that can generate a debate on the limitations of ABA techniques, restrictions of the ethical legislation and humanization of personalized care for kids with autism. The structure should be: 1. Situation 2. Three questions about this situation with 2 options each (both correct but one of them more accurate) and then explanation of why choosing one over the other  3. Proposal for debate. Please provide it in a JSON structure where all of the response must go in a content field, a topic field that captures the topic of the situation and finally a field for the external sources used if it was the case. Just send the raw JSON, no fenced code blocks or anything else.",
+              "value": "Generate a scenario where critical decision taking is expected from the RBT to solve a crisis situation using the most accurate behavior intervention plan. The situation must be in a grace zone and propose ethical limitations of the ABA procedures. Something that can generate a debate on the limitations of ABA techniques, restrictions of the ethical legislation and humanization of personalized care for kids with autism. The response must be raw JSON only, no markdown, no code fences, no explanations outside the JSON. Use this exact structure: {   \"id\": \"<generate a UUID v4>\",   \"trivia_date\": \"<today's date in YYYY-MM-DD format>\",   \"topic\": \"<short title capturing the situation>\",   \"created_at\": \"<current ISO 8601 timestamp>\",   \"external_sources\": [     { \"title\": \"<source title>\", \"url\": \"<source url>\" }   ],   \"content\": {     \"1. Situation\": {       \"description\": \"<full situation paragraph describing the scenario>\"     },     \"2. Questions and Options\": [       {         \"question\": \"<question 1 text>\",         \"options\": [           {             \"option\": \"A\",             \"description\": \"<option A intervention description>\",             \"explanation\": \"<explanation of why A is correct but less accurate>\"           },           {             \"option\": \"B\",             \"description\": \"<option B intervention description>\",             \"explanation\": \"<explanation of why B is the more accurate choice>\"           }         ]       },       {         \"question\": \"<question 2 text>\",         \"options\": [           { \"option\": \"A\", \"description\": \"...\", \"explanation\": \"...\" },           { \"option\": \"B\", \"description\": \"...\", \"explanation\": \"...\" }         ]       },       {         \"question\": \"<question 3 text>\",         \"options\": [           { \"option\": \"A\", \"description\": \"...\", \"explanation\": \"...\" },           { \"option\": \"B\", \"description\": \"...\", \"explanation\": \"...\" }         ]       }     ],     \"3. Proposal for Debate\": {       \"points\": [         \"**<point 1 title>**: <point 1 content>\",         \"**<point 2 title>**: <point 2 content>\",         \"**<point 3 title>**: <point 3 content>\"       ]     }   } } Rules: - Option B must always be the more accurate answer. - Each option description must be a full paragraph explaining the intervention. - Each explanation must compare both options and justify why one is more accurate using BACB code references. - The debate section must cover: limitations of traditional ABA techniques, ethical legislation gaps, and humanization of personalized care. - The description and explanations must be substantive paragraphs, not single sentences. - external_sources must include at least 3 real, verifiable academic or professional sources.",
               "type": "string"
             },
             {
@@ -587,7 +587,7 @@
     },
     {
       "parameters": {
-        "jsCode": "for (const item of items) {\n  // Access the output field where the LLM put the JSON-in-Markdown\n  const content = item.json.output; \n  \n  if (typeof content === 'string') {\n     // Remove markdown code block markers\n     const cleanContent = content.replace(/^```json\\s*/, '').replace(/\\s*```$/, '');\n     \n     try {\n       // Parse the clean string back into an object\n       // and replace the item.json with it (or put it in a specific field)\n       item.json = JSON.parse(cleanContent);\n     } catch(e) {\n       item.json.error = \"Failed to parse JSON: \" + e.message;\n     }\n  }\n}\n\nreturn items;"
+        "jsCode": "for (const item of items) {\n  const content = item.json.output;\n  if (typeof content === 'string') {\n    const cleanContent = content.replace(/^```json\\s*/, '').replace(/\\s*```$/, '');\n    try {\n      const parsed = JSON.parse(cleanContent);\n      // Stringify the nested content with full Unicode/control char escaping\n      if (parsed.content && typeof parsed.content === 'object') {\n        parsed.content = JSON.stringify(parsed.content, null, 0)\n          .replace(/\\n/g, '\\\\n')\n          .replace(/\\r/g, '\\\\r')\n          .replace(/\\t/g, '\\\\t');\n      }\n      item.json = parsed;\n    } catch(e) {\n      item.json.error = \"Failed to parse JSON: \" + e.message;\n    }\n  }\n}\nreturn items;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -804,6 +804,6 @@
   },
   "tags": [],
   "triggerCount": 2,
-  "updatedAt": "2026-04-03T04:03:13.265Z",
-  "versionId": "90bd215c-a8f2-44c9-ac22-bf4bd67a9456"
+  "updatedAt": "2026-05-12T05:11:14.468Z",
+  "versionId": "21d363c1-00d8-4fbb-88e2-ef0e159bb942"
 }
