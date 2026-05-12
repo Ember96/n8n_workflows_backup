@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-03T01:14:46.000Z",
-    "createdAt": "2026-01-03T01:14:17.213Z",
-    "versionId": "c4f1d0a0-f5f6-4fcf-8423-c48c2dd1857b",
+    "updatedAt": "2026-05-12T04:04:31.000Z",
+    "createdAt": "2026-04-07T00:25:05.082Z",
+    "versionId": "3c245a70-2cb3-4e73-ba14-a8c43b437d7d",
     "workflowId": "yf1h0La24U9nHdaP",
     "nodes": [
       {
@@ -336,11 +336,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version c4f1d0a0",
-    "description": "switched to a get request and now user_id is taken from the JWT payload.",
-    "autosaved": false
+    "name": "Version 3c245a70",
+    "description": "",
+    "autosaved": true
   },
-  "activeVersionId": "c4f1d0a0-f5f6-4fcf-8423-c48c2dd1857b",
+  "activeVersionId": "3c245a70-2cb3-4e73-ba14-a8c43b437d7d",
   "connections": {
     "Call '[Mimir-RBT] Mock exams DECOPLED'": {
       "main": [
