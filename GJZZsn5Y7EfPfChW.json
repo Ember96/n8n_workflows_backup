@@ -1,0 +1,569 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-05-13T04:49:51.276Z",
+    "createdAt": "2026-05-13T04:49:51.276Z",
+    "versionId": "52bd9660-0c8c-4169-9dd8-fed9b0737140",
+    "workflowId": "GJZZsn5Y7EfPfChW",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "471521bf-e012-4482-9954-87ef2d1060fa",
+          "authentication": "jwtAuth",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "name": "SOAP Note Webhook",
+        "id": "5b975d78-7b6c-4ce5-8500-851a2ff7b2c7",
+        "webhookId": "471521bf-e012-4482-9954-87ef2d1060fa",
+        "credentials": {
+          "jwtAuth": {
+            "id": "UZqDYFn9lmzwtyfS",
+            "name": "Mimir User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "for (const item of items) {\n  const d = item.json;\n\n  const sessionId = d.sessionId || `${d.clientName || 'client'}-${d.sessionDate || new Date().toISOString().split('T')[0]}-${Date.now()}`;\n\n  let programsSection = '';\n  if (Array.isArray(d.programs) && d.programs.length > 0) {\n    d.programs.forEach((p, i) => {\n      const skill = p.skill || 'N/A';\n      const prog = p.program || 'N/A';\n      const indep = p.independence ?? 'N/A';\n      const trials = p.totalTrials ?? 0;\n      const prompt = p.promptType || 'no prompts required';\n      programsSection += `o Program ${i + 1}: ${skill} - ${prog} Data: (${indep}% independence across ${trials} trials) (${prompt})\\n`;\n    });\n  } else {\n    programsSection = 'o No skill acquisition programs were targeted during this session.\\n';\n  }\n\n  let behaviorsSection = '';\n  if (Array.isArray(d.targetBehaviors) && d.targetBehaviors.length > 0) {\n    d.targetBehaviors.forEach((b, i) => {\n      const outcome = b.outcome ? `${b.outcome} - ${b.outcomeDescription || ''}` : 'No occurrences observed.';\n      behaviorsSection += `\\u2022 Target Behavior ${i + 1}: ${b.behavior || 'N/A'}\\n`;\n      behaviorsSection += `  o Data: ${b.instances ?? 0}\\n`;\n      behaviorsSection += `  o Antecedent: ${b.antecedent || 'N/A'}\\n`;\n      behaviorsSection += `  o Intervention Used (Reactive): ${b.interventionUsed || 'N/A'}\\n`;\n      behaviorsSection += `  o Outcome: ${outcome}\\n`;\n    });\n  } else {\n    behaviorsSection = '\\u2022 No target behaviors were observed during this session.\\n';\n  }\n\n  const parentComm = d.parentCommunicationProvided\n    ? 'Yes'\n    : `No${d.parentCommunicationReason ? ' - ' + d.parentCommunicationReason : ''}`;\n  const transRating = d.transitionsRating || 'moderate';\n  const transLabel = transRating.charAt(0).toUpperCase() + transRating.slice(1);\n  const esc = (s) => (s || '').replace(/\"/g, '\\\\\"');\n\n  const prefilledNote = `Location: ${d.location || 'Not specified'}\nSession Time: ${d.sessionTime || 'Not specified'}\nParticipants in the session: ${d.participants || 'client, therapist'}\n\nSession Overview\nClient was present for the full duration of the session. Services were provided on a 1:1 basis.\n\nTransitions: (${transLabel}): ${d.transitionsDescription || 'Not specified'}\nEnvironment changes (if any): ${d.environmentChanges || 'None'}\n\nSome of the Programs & Skill Acquisition\n\n${programsSection}\nSome of the Behavior Reduction Strategies\n${behaviorsSection}\nParent/Caregiver Communication\n\\u2022 Was communication provided? ${parentComm}\n\nPlan for Next Session\n\\u2022 Continue current programs\n\\u2022 Focus areas: ${d.focusAreas || 'Continue current programs'}`;\n\n  let parentReasonJson = 'null';\n  if (!d.parentCommunicationProvided && d.parentCommunicationReason) {\n    parentReasonJson = '\"' + esc(d.parentCommunicationReason) + '\"';\n  }\n\n  const prompt = `You are a BACB-certified clinical supervisor assistant. Below is a rough draft of an ABA session note. Polish it into a professional, BACB-compliant clinical note.\n\n=== DRAFT SESSION NOTE ===\n${prefilledNote}\n\n=== INSTRUCTIONS ===\n- Improve language to be objective, professional, and clinically precise.\n- Correct any grammatical or formatting issues.\n- Ensure all sections follow the template structure exactly.\n- Add BACB Ethics Code references relevant to the session data.\n- If a section says \"Not specified\" or shows no data, rewrite concisely.\n- Do NOT invent data that was not provided.\n- Return ONLY raw JSON, no markdown, no code fences, no explanations.\n\n=== OUTPUT FORMAT ===\n{\n  \"id\": \"<UUID v4>\",\n  \"session_date\": \"${esc(d.sessionDate)}\",\n  \"client_name\": \"${esc(d.clientName)}\",\n  \"rbt_name\": \"${esc(d.rbtName)}\",\n  \"location\": \"${esc(d.location)}\",\n  \"session_time\": \"${esc(d.sessionTime)}\",\n  \"participants\": \"${esc(d.participants)}\",\n  \"transitions_rating\": \"${transRating.toLowerCase()}\",\n  \"transitions_description\": \"<polished description>\",\n  \"environment_changes\": \"<polished>\",\n  \"rendered_note\": \"<FULL POLISHED NOTE as plain text following template structure>\",\n  \"programs\": ${json.dumps([{'number': i+1, 'skill': p.get('skill','N/A'), 'program': p.get('program','N/A'), 'independence': str(p.get('independence','N/A'))+'%', 'trials': p.get('totalTrials',0), 'prompt_type': p.get('promptType','none')} for i, p in enumerate(d.get('programs',[]))]) if d.get('programs') else '[{\"number\": 1, \"skill\": \"N/A\", \"program\": \"N/A\", \"independence\": \"0%\", \"trials\": 0, \"prompt_type\": \"none\"}]'},\n  \"target_behaviors\": ${json.dumps([{'number': i+1, 'behavior': b.get('behavior','N/A'), 'data': b.get('instances',0), 'antecedent': b.get('antecedent','N/A'), 'intervention': b.get('interventionUsed','N/A'), 'outcome': b.get('outcome','Positive'), 'outcome_description': b.get('outcomeDescription','')} for i, b in enumerate(d.get('targetBehaviors',[]))]) if d.get('targetBehaviors') else '[{\"number\": 1, \"behavior\": \"N/A\", \"data\": 0, \"antecedent\": \"N/A\", \"intervention\": \"N/A\", \"outcome\": \"Positive\", \"outcome_description\": \"\"}]'},\n  \"parent_communication_provided\": ${json.dumps(bool(d.get('parentCommunicationProvided', False)))},\n  \"parent_communication_reason\": ${parentReasonJson},\n  \"plan_continue_current\": true,\n  \"plan_focus_areas\": \"${esc(d.focusAreas)}\",\n  \"bacb_references\": [\n    {\"code\": \"<BACB code>\", \"title\": \"<code title>\", \"application\": \"<how applied in this session>\"}\n  ],\n  \"recommendations\": [\"<rec 1>\", \"<rec 2>\"],\n  \"created_at\": \"<ISO 8601 timestamp>\"\n}\n\nRules:\n- rendered_note must contain the COMPLETE polished note as plain text.\n- Include at least 3 BACB code references with specific applications.\n- Response must be raw JSON only.`;\n\n  item.json.chatInput = prompt;\n  item.json.sessionId = sessionId;\n}\nreturn items;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          0
+        ],
+        "name": "Build SOAP Prompt",
+        "id": "8530bdb7-0ee3-4ea9-a9f9-1172068dcff8"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "hXK1eZBbzYKWyuRf",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/hXK1eZBbzYKWyuRf",
+            "cachedResultName": "Mimir-RBT Decopled"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "query": "={{ $json.chatInput }}",
+              "sessionId": "={{ $json.sessionId }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "query",
+                "displayName": "query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "sessionId",
+                "displayName": "sessionId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          480,
+          0
+        ],
+        "name": "Call 'Mimir-RBT Decopled'",
+        "id": "a9b8ca64-9459-474a-a170-0edcd6770c63"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nfor (const item of items) {\n  const content = item.json.output;\n  if (typeof content === 'string') {\n    const cleanContent = content\n      .replace(/^```(?:json)?\\s*/m, '')\n      .replace(/\\s*```$/m, '')\n      .trim();\n    try {\n      const parsed = JSON.parse(cleanContent);\n\n      // Stringify object/array fields for Supabase text storage\n      for (const key of ['programs', 'target_behaviors', 'bacb_references', 'recommendations']) {\n        if (parsed[key] && typeof parsed[key] === 'object') {\n          parsed[key] = JSON.stringify(parsed[key]);\n        }\n      }\n\n      // Build structured_data as JSON string of all structured fields\n      const structured = {\n        location: parsed.location,\n        session_time: parsed.session_time,\n        participants: parsed.participants,\n        transitions_rating: parsed.transitions_rating,\n        transitions_description: parsed.transitions_description,\n        environment_changes: parsed.environment_changes,\n        programs: parsed.programs ? JSON.parse(parsed.programs) : [],\n        target_behaviors: parsed.target_behaviors ? JSON.parse(parsed.target_behaviors) : [],\n        parent_communication_provided: parsed.parent_communication_provided,\n        parent_communication_reason: parsed.parent_communication_reason,\n        plan_continue_current: parsed.plan_continue_current,\n        plan_focus_areas: parsed.plan_focus_areas,\n        recommendations: parsed.recommendations ? JSON.parse(parsed.recommendations) : []\n      };\n      parsed.structured_data = JSON.stringify(structured);\n\n      item.json = parsed;\n    } catch(e) {\n      item.json = {\n        error: \"Failed to parse session note JSON: \" + e.message,\n        raw_output: content.substring(0, 500)\n      };\n    }\n  }\n}\nreturn items;\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          0
+        ],
+        "name": "Parse Session Note JSON",
+        "id": "07693606-f110-4157-a8ee-36e526e4b0d4"
+      },
+      {
+        "parameters": {
+          "tableId": "soap_notes",
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "session_date",
+                "fieldValue": "={{ $json.session_date }}"
+              },
+              {
+                "fieldId": "client_name",
+                "fieldValue": "={{ $json.client_name }}"
+              },
+              {
+                "fieldId": "rbt_name",
+                "fieldValue": "={{ $json.rbt_name }}"
+              },
+              {
+                "fieldId": "location",
+                "fieldValue": "={{ $json.location }}"
+              },
+              {
+                "fieldId": "session_time",
+                "fieldValue": "={{ $json.session_time }}"
+              },
+              {
+                "fieldId": "participants",
+                "fieldValue": "={{ $json.participants }}"
+              },
+              {
+                "fieldId": "transitions_rating",
+                "fieldValue": "={{ $json.transitions_rating }}"
+              },
+              {
+                "fieldId": "transitions_description",
+                "fieldValue": "={{ $json.transitions_description }}"
+              },
+              {
+                "fieldId": "environment_changes",
+                "fieldValue": "={{ $json.environment_changes }}"
+              },
+              {
+                "fieldId": "rendered_note",
+                "fieldValue": "={{ $json.rendered_note }}"
+              },
+              {
+                "fieldId": "structured_data",
+                "fieldValue": "={{ $json.structured_data }}"
+              },
+              {
+                "fieldId": "bacb_references",
+                "fieldValue": "={{ $json.bacb_references }}"
+              },
+              {
+                "fieldId": "created_at",
+                "fieldValue": "={{ $now }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          960,
+          0
+        ],
+        "name": "Save to Supabase",
+        "id": "d7ad0951-7758-4b0e-8189-5d8855ec0a78",
+        "credentials": {
+          "supabaseApi": {
+            "id": "UjpfwLCOwOKmxVQn",
+            "name": "Supabase account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          0
+        ],
+        "name": "Return to App",
+        "id": "1b3cbd15-0694-4db9-9fe6-1b31ba14a406"
+      },
+      {
+        "parameters": {
+          "content": "The app couldn't fetch the SOAP note due to an error of the external database I use to save user data, its almost 1 am and I'm tired, but let me show you the resulting note, is cool"
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          624,
+          -256
+        ],
+        "id": "9e00a888-cfc4-4e42-89df-e18facb50de1",
+        "name": "Sticky Note"
+      }
+    ],
+    "connections": {
+      "SOAP Note Webhook": {
+        "main": [
+          [
+            {
+              "node": "Build SOAP Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build SOAP Prompt": {
+        "main": [
+          [
+            {
+              "node": "Call 'Mimir-RBT Decopled'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Mimir-RBT Decopled'": {
+        "main": [
+          [
+            {
+              "node": "Parse Session Note JSON",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Session Note JSON": {
+        "main": [
+          [
+            {
+              "node": "Save to Supabase",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save to Supabase": {
+        "main": [
+          [
+            {
+              "node": "Return to App",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "activeVersionId": "52bd9660-0c8c-4169-9dd8-fed9b0737140",
+  "connections": {
+    "SOAP Note Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build SOAP Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build SOAP Prompt": {
+      "main": [
+        [
+          {
+            "node": "Call 'Mimir-RBT Decopled'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Mimir-RBT Decopled'": {
+      "main": [
+        [
+          {
+            "node": "Parse Session Note JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Session Note JSON": {
+      "main": [
+        [
+          {
+            "node": "Save to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Return to App",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-05-12T23:29:53.178Z",
+  "id": "GJZZsn5Y7EfPfChW",
+  "isArchived": false,
+  "meta": null,
+  "name": "Mimir - SOAP Note Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "471521bf-e012-4482-9954-87ef2d1060fa",
+        "authentication": "jwtAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "name": "SOAP Note Webhook",
+      "id": "5b975d78-7b6c-4ce5-8500-851a2ff7b2c7",
+      "webhookId": "471521bf-e012-4482-9954-87ef2d1060fa",
+      "credentials": {
+        "jwtAuth": {
+          "id": "UZqDYFn9lmzwtyfS",
+          "name": "Mimir User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of items) {\n  const d = item.json;\n\n  const sessionId = d.sessionId || `${d.clientName || 'client'}-${d.sessionDate || new Date().toISOString().split('T')[0]}-${Date.now()}`;\n\n  let programsSection = '';\n  if (Array.isArray(d.programs) && d.programs.length > 0) {\n    d.programs.forEach((p, i) => {\n      const skill = p.skill || 'N/A';\n      const prog = p.program || 'N/A';\n      const indep = p.independence ?? 'N/A';\n      const trials = p.totalTrials ?? 0;\n      const prompt = p.promptType || 'no prompts required';\n      programsSection += `o Program ${i + 1}: ${skill} - ${prog} Data: (${indep}% independence across ${trials} trials) (${prompt})\\n`;\n    });\n  } else {\n    programsSection = 'o No skill acquisition programs were targeted during this session.\\n';\n  }\n\n  let behaviorsSection = '';\n  if (Array.isArray(d.targetBehaviors) && d.targetBehaviors.length > 0) {\n    d.targetBehaviors.forEach((b, i) => {\n      const outcome = b.outcome ? `${b.outcome} - ${b.outcomeDescription || ''}` : 'No occurrences observed.';\n      behaviorsSection += `\\u2022 Target Behavior ${i + 1}: ${b.behavior || 'N/A'}\\n`;\n      behaviorsSection += `  o Data: ${b.instances ?? 0}\\n`;\n      behaviorsSection += `  o Antecedent: ${b.antecedent || 'N/A'}\\n`;\n      behaviorsSection += `  o Intervention Used (Reactive): ${b.interventionUsed || 'N/A'}\\n`;\n      behaviorsSection += `  o Outcome: ${outcome}\\n`;\n    });\n  } else {\n    behaviorsSection = '\\u2022 No target behaviors were observed during this session.\\n';\n  }\n\n  const parentComm = d.parentCommunicationProvided\n    ? 'Yes'\n    : `No${d.parentCommunicationReason ? ' - ' + d.parentCommunicationReason : ''}`;\n  const transRating = d.transitionsRating || 'moderate';\n  const transLabel = transRating.charAt(0).toUpperCase() + transRating.slice(1);\n  const esc = (s) => (s || '').replace(/\"/g, '\\\\\"');\n\n  const prefilledNote = `Location: ${d.location || 'Not specified'}\nSession Time: ${d.sessionTime || 'Not specified'}\nParticipants in the session: ${d.participants || 'client, therapist'}\n\nSession Overview\nClient was present for the full duration of the session. Services were provided on a 1:1 basis.\n\nTransitions: (${transLabel}): ${d.transitionsDescription || 'Not specified'}\nEnvironment changes (if any): ${d.environmentChanges || 'None'}\n\nSome of the Programs & Skill Acquisition\n\n${programsSection}\nSome of the Behavior Reduction Strategies\n${behaviorsSection}\nParent/Caregiver Communication\n\\u2022 Was communication provided? ${parentComm}\n\nPlan for Next Session\n\\u2022 Continue current programs\n\\u2022 Focus areas: ${d.focusAreas || 'Continue current programs'}`;\n\n  let parentReasonJson = 'null';\n  if (!d.parentCommunicationProvided && d.parentCommunicationReason) {\n    parentReasonJson = '\"' + esc(d.parentCommunicationReason) + '\"';\n  }\n\n  const prompt = `You are a BACB-certified clinical supervisor assistant. Below is a rough draft of an ABA session note. Polish it into a professional, BACB-compliant clinical note.\n\n=== DRAFT SESSION NOTE ===\n${prefilledNote}\n\n=== INSTRUCTIONS ===\n- Improve language to be objective, professional, and clinically precise.\n- Correct any grammatical or formatting issues.\n- Ensure all sections follow the template structure exactly.\n- Add BACB Ethics Code references relevant to the session data.\n- If a section says \"Not specified\" or shows no data, rewrite concisely.\n- Do NOT invent data that was not provided.\n- Return ONLY raw JSON, no markdown, no code fences, no explanations.\n\n=== OUTPUT FORMAT ===\n{\n  \"id\": \"<UUID v4>\",\n  \"session_date\": \"${esc(d.sessionDate)}\",\n  \"client_name\": \"${esc(d.clientName)}\",\n  \"rbt_name\": \"${esc(d.rbtName)}\",\n  \"location\": \"${esc(d.location)}\",\n  \"session_time\": \"${esc(d.sessionTime)}\",\n  \"participants\": \"${esc(d.participants)}\",\n  \"transitions_rating\": \"${transRating.toLowerCase()}\",\n  \"transitions_description\": \"<polished description>\",\n  \"environment_changes\": \"<polished>\",\n  \"rendered_note\": \"<FULL POLISHED NOTE as plain text following template structure>\",\n  \"programs\": ${json.dumps([{'number': i+1, 'skill': p.get('skill','N/A'), 'program': p.get('program','N/A'), 'independence': str(p.get('independence','N/A'))+'%', 'trials': p.get('totalTrials',0), 'prompt_type': p.get('promptType','none')} for i, p in enumerate(d.get('programs',[]))]) if d.get('programs') else '[{\"number\": 1, \"skill\": \"N/A\", \"program\": \"N/A\", \"independence\": \"0%\", \"trials\": 0, \"prompt_type\": \"none\"}]'},\n  \"target_behaviors\": ${json.dumps([{'number': i+1, 'behavior': b.get('behavior','N/A'), 'data': b.get('instances',0), 'antecedent': b.get('antecedent','N/A'), 'intervention': b.get('interventionUsed','N/A'), 'outcome': b.get('outcome','Positive'), 'outcome_description': b.get('outcomeDescription','')} for i, b in enumerate(d.get('targetBehaviors',[]))]) if d.get('targetBehaviors') else '[{\"number\": 1, \"behavior\": \"N/A\", \"data\": 0, \"antecedent\": \"N/A\", \"intervention\": \"N/A\", \"outcome\": \"Positive\", \"outcome_description\": \"\"}]'},\n  \"parent_communication_provided\": ${json.dumps(bool(d.get('parentCommunicationProvided', False)))},\n  \"parent_communication_reason\": ${parentReasonJson},\n  \"plan_continue_current\": true,\n  \"plan_focus_areas\": \"${esc(d.focusAreas)}\",\n  \"bacb_references\": [\n    {\"code\": \"<BACB code>\", \"title\": \"<code title>\", \"application\": \"<how applied in this session>\"}\n  ],\n  \"recommendations\": [\"<rec 1>\", \"<rec 2>\"],\n  \"created_at\": \"<ISO 8601 timestamp>\"\n}\n\nRules:\n- rendered_note must contain the COMPLETE polished note as plain text.\n- Include at least 3 BACB code references with specific applications.\n- Response must be raw JSON only.`;\n\n  item.json.chatInput = prompt;\n  item.json.sessionId = sessionId;\n}\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "name": "Build SOAP Prompt",
+      "id": "8530bdb7-0ee3-4ea9-a9f9-1172068dcff8"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "hXK1eZBbzYKWyuRf",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/hXK1eZBbzYKWyuRf",
+          "cachedResultName": "Mimir-RBT Decopled"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ $json.chatInput }}",
+            "sessionId": "={{ $json.sessionId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        0
+      ],
+      "name": "Call 'Mimir-RBT Decopled'",
+      "id": "a9b8ca64-9459-474a-a170-0edcd6770c63"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfor (const item of items) {\n  const content = item.json.output;\n  if (typeof content === 'string') {\n    const cleanContent = content\n      .replace(/^```(?:json)?\\s*/m, '')\n      .replace(/\\s*```$/m, '')\n      .trim();\n    try {\n      const parsed = JSON.parse(cleanContent);\n\n      // Stringify object/array fields for Supabase text storage\n      for (const key of ['programs', 'target_behaviors', 'bacb_references', 'recommendations']) {\n        if (parsed[key] && typeof parsed[key] === 'object') {\n          parsed[key] = JSON.stringify(parsed[key]);\n        }\n      }\n\n      // Build structured_data as JSON string of all structured fields\n      const structured = {\n        location: parsed.location,\n        session_time: parsed.session_time,\n        participants: parsed.participants,\n        transitions_rating: parsed.transitions_rating,\n        transitions_description: parsed.transitions_description,\n        environment_changes: parsed.environment_changes,\n        programs: parsed.programs ? JSON.parse(parsed.programs) : [],\n        target_behaviors: parsed.target_behaviors ? JSON.parse(parsed.target_behaviors) : [],\n        parent_communication_provided: parsed.parent_communication_provided,\n        parent_communication_reason: parsed.parent_communication_reason,\n        plan_continue_current: parsed.plan_continue_current,\n        plan_focus_areas: parsed.plan_focus_areas,\n        recommendations: parsed.recommendations ? JSON.parse(parsed.recommendations) : []\n      };\n      parsed.structured_data = JSON.stringify(structured);\n\n      item.json = parsed;\n    } catch(e) {\n      item.json = {\n        error: \"Failed to parse session note JSON: \" + e.message,\n        raw_output: content.substring(0, 500)\n      };\n    }\n  }\n}\nreturn items;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "name": "Parse Session Note JSON",
+      "id": "07693606-f110-4157-a8ee-36e526e4b0d4"
+    },
+    {
+      "parameters": {
+        "tableId": "soap_notes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "session_date",
+              "fieldValue": "={{ $json.session_date }}"
+            },
+            {
+              "fieldId": "client_name",
+              "fieldValue": "={{ $json.client_name }}"
+            },
+            {
+              "fieldId": "rbt_name",
+              "fieldValue": "={{ $json.rbt_name }}"
+            },
+            {
+              "fieldId": "location",
+              "fieldValue": "={{ $json.location }}"
+            },
+            {
+              "fieldId": "session_time",
+              "fieldValue": "={{ $json.session_time }}"
+            },
+            {
+              "fieldId": "participants",
+              "fieldValue": "={{ $json.participants }}"
+            },
+            {
+              "fieldId": "transitions_rating",
+              "fieldValue": "={{ $json.transitions_rating }}"
+            },
+            {
+              "fieldId": "transitions_description",
+              "fieldValue": "={{ $json.transitions_description }}"
+            },
+            {
+              "fieldId": "environment_changes",
+              "fieldValue": "={{ $json.environment_changes }}"
+            },
+            {
+              "fieldId": "rendered_note",
+              "fieldValue": "={{ $json.rendered_note }}"
+            },
+            {
+              "fieldId": "structured_data",
+              "fieldValue": "={{ $json.structured_data }}"
+            },
+            {
+              "fieldId": "bacb_references",
+              "fieldValue": "={{ $json.bacb_references }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $now }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        960,
+        0
+      ],
+      "name": "Save to Supabase",
+      "id": "d7ad0951-7758-4b0e-8189-5d8855ec0a78",
+      "credentials": {
+        "supabaseApi": {
+          "id": "UjpfwLCOwOKmxVQn",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        0
+      ],
+      "name": "Return to App",
+      "id": "1b3cbd15-0694-4db9-9fe6-1b31ba14a406"
+    },
+    {
+      "parameters": {
+        "content": "The app couldn't fetch the SOAP note due to an error of the external database I use to save user data, its almost 1 am and I'm tired, but let me show you the resulting note, is cool"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -256
+      ],
+      "id": "9e00a888-cfc4-4e42-89df-e18facb50de1",
+      "name": "Sticky Note"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-05-12T23:29:53.182Z",
+      "createdAt": "2026-05-12T23:29:53.182Z",
+      "role": "workflow:owner",
+      "workflowId": "GJZZsn5Y7EfPfChW",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-05-13T04:49:51.274Z",
+  "versionId": "52bd9660-0c8c-4169-9dd8-fed9b0737140"
+}
