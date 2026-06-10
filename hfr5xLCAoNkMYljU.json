@@ -1,0 +1,268 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-06-10T02:54:10.114Z",
+    "createdAt": "2026-06-10T02:54:10.114Z",
+    "versionId": "726220dc-414e-446f-b4a6-c57997c608d2",
+    "workflowId": "hfr5xLCAoNkMYljU",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "autonote-script-bridge",
+          "responseMode": "responseNode",
+          "options": {
+            "rawBody": true,
+            "cors": true
+          }
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -480,
+          304
+        ],
+        "name": "Webhook",
+        "webhookId": "wb_script_bridge",
+        "id": "de2ae20e-f7d3-473d-bbe0-aff66bdfecb0"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "hXK1eZBbzYKWyuRf",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/hXK1eZBbzYKWyuRf",
+            "cachedResultName": "Mimir-RBT Decopled"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "sessionId": "={{ $json.body.sessionId }}",
+              "query": "=You are a clinical supervisor generating a guided reflection script for an RBT. Based on the trial data below, create a sequence of guiding questions that help the RBT explain the session results, accuracy rates, behaviors observed, and interventions used.\n\nReturn ONLY a valid JSON array of objects. Each object must have exactly one key: \"question\". No markdown, no code fences, no extra text.\n\nExample:\n[\n  {\"question\": \"Why does this program have a low accuracy?\"},\n  {\"question\": \"What behavior did the client exhibit during this task?\"},\n  {\"question\": \"How did you address this behavior?\"},\n  {\"question\": \"What were the results after applying the procedure?\"}\n]\n\nTrial Data:\n{{ $json.body.ocrText }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "query",
+                "displayName": "query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "sessionId",
+                "displayName": "sessionId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          -272,
+          304
+        ],
+        "name": "Call 'Mimir-RBT Decopled'",
+        "id": "d5eb1087-809e-4da0-8c0e-1528b5b78492"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          -64,
+          304
+        ],
+        "name": "Respond to Webhook",
+        "id": "aea2cad0-ee67-49a0-b101-2df3c592fb95"
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Call 'Mimir-RBT Decopled'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Mimir-RBT Decopled'": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "activeVersionId": "726220dc-414e-446f-b4a6-c57997c608d2",
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Call 'Mimir-RBT Decopled'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Mimir-RBT Decopled'": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-06-10T02:52:09.935Z",
+  "id": "hfr5xLCAoNkMYljU",
+  "isArchived": false,
+  "meta": null,
+  "name": "AutoNote → Script Bridge",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autonote-script-bridge",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true,
+          "cors": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        304
+      ],
+      "name": "Webhook",
+      "webhookId": "wb_script_bridge",
+      "id": "de2ae20e-f7d3-473d-bbe0-aff66bdfecb0"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "hXK1eZBbzYKWyuRf",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/hXK1eZBbzYKWyuRf",
+          "cachedResultName": "Mimir-RBT Decopled"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sessionId": "={{ $json.body.sessionId }}",
+            "query": "=You are a clinical supervisor generating a guided reflection script for an RBT. Based on the trial data below, create a sequence of guiding questions that help the RBT explain the session results, accuracy rates, behaviors observed, and interventions used.\n\nReturn ONLY a valid JSON array of objects. Each object must have exactly one key: \"question\". No markdown, no code fences, no extra text.\n\nExample:\n[\n  {\"question\": \"Why does this program have a low accuracy?\"},\n  {\"question\": \"What behavior did the client exhibit during this task?\"},\n  {\"question\": \"How did you address this behavior?\"},\n  {\"question\": \"What were the results after applying the procedure?\"}\n]\n\nTrial Data:\n{{ $json.body.ocrText }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        304
+      ],
+      "name": "Call 'Mimir-RBT Decopled'",
+      "id": "d5eb1087-809e-4da0-8c0e-1528b5b78492"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -64,
+        304
+      ],
+      "name": "Respond to Webhook",
+      "id": "aea2cad0-ee67-49a0-b101-2df3c592fb95"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-06-10T02:52:09.940Z",
+      "createdAt": "2026-06-10T02:52:09.940Z",
+      "role": "workflow:owner",
+      "workflowId": "hfr5xLCAoNkMYljU",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-06-10T02:54:10.113Z",
+  "versionId": "726220dc-414e-446f-b4a6-c57997c608d2"
+}
