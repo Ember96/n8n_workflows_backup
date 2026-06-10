@@ -1,0 +1,265 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-06-10T04:51:23.000Z",
+    "createdAt": "2026-06-10T04:51:13.154Z",
+    "versionId": "ca5adc09-0766-404a-b37f-8e955db5b694",
+    "workflowId": "wo7M3q0D0PQl6Yy7",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "autonote-soap-bridge",
+          "responseMode": "responseNode",
+          "options": {
+            "rawBody": true
+          }
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -480,
+          304
+        ],
+        "name": "Webhook (from AutoNote App)",
+        "webhookId": "390167de-2c7c-45c3-bdf3-59b1523f004b",
+        "id": "d797f40f-e6fa-4188-9a8c-e4e66b2e3cfa"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "hXK1eZBbzYKWyuRf",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/hXK1eZBbzYKWyuRf",
+            "cachedResultName": "Mimir-RBT Decopled"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "sessionId": "={{ $json.body.sessionId }}",
+              "query": "=You are a clinical note generator. Generate an ABA compliant SOAP RBT note and two ABC Statements from the therapy transcription below:\n\nTranscription:\n{{ $json.body.transcription }}\n\nFORMAT THE RESPONSE EXACTLY AS FOLLOWS:\n\nDate: {{ $json.body.date }}\nSetting: {{ $json.body.setting }}\nParticipants: {{ $json.body.participants }}\n\nS (Subjective):\n[What the patient/client reported]\n\nO (Objective):\n[Measurable observations — incorporate any trial or behavior data provided below]\n\nA (Assessment):\n[Analysis of the data — reference trends from trial data, ABC patterns]\n\nP (Plan):\n[Next steps/recommendations]\n\n===ABC Data===\n\nABC Statement 1:\n\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nABC Statement 2:\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nRULES:\n1. Do NOT include any Session ID in the response\n2. Do NOT include any preamble, introduction, or \"Here is a SOAP note...\" text\n3. Do NOT include a signature block\n4. Start directly with \"Date:\"\n5. The note must be ABA (Applied Behavior Analysis) compliant\n7. If trial data, behavior data, or ABC data is provided above, incorporate it into the O (Objective) and A (Assessment) sections with specific numbers and trends\n8. Use PLAIN TEXT only. Do NOT use markdown characters like ** for bolding. Use plain headers like \"S (Subjective):\" instead of \"S **(Subjective)**:\".\n9. For the ABC Statements avoid using behaviors that have the same objective (escape, attention, access, sensory/automatic reinforcement).\n10. Do not use bullet points or lists, pure prose."
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "query",
+                "displayName": "query",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "sessionId",
+                "displayName": "sessionId",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          -272,
+          304
+        ],
+        "name": "Call 'Mimir-RBT Decopled'",
+        "id": "e5635595-64be-46c2-bfea-4c122fb24c96"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          -64,
+          304
+        ],
+        "name": "Respond to Webhook",
+        "id": "c4c2838c-694f-4d50-91b0-eb209aa18c0e"
+      }
+    ],
+    "connections": {
+      "Webhook (from AutoNote App)": {
+        "main": [
+          [
+            {
+              "node": "Call 'Mimir-RBT Decopled'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'Mimir-RBT Decopled'": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": "Version ca5adc09",
+    "description": "",
+    "autosaved": true
+  },
+  "activeVersionId": "ca5adc09-0766-404a-b37f-8e955db5b694",
+  "connections": {
+    "Webhook (from AutoNote App)": {
+      "main": [
+        [
+          {
+            "node": "Call 'Mimir-RBT Decopled'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Mimir-RBT Decopled'": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-06-09T22:45:22.305Z",
+  "id": "wo7M3q0D0PQl6Yy7",
+  "isArchived": false,
+  "meta": null,
+  "name": "AutoNote → SOAP RBT Bridge",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autonote-soap-bridge",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        304
+      ],
+      "name": "Webhook (from AutoNote App)",
+      "webhookId": "390167de-2c7c-45c3-bdf3-59b1523f004b",
+      "id": "d797f40f-e6fa-4188-9a8c-e4e66b2e3cfa"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "hXK1eZBbzYKWyuRf",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/hXK1eZBbzYKWyuRf",
+          "cachedResultName": "Mimir-RBT Decopled"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sessionId": "={{ $json.body.sessionId }}",
+            "query": "=You are a clinical note generator. Generate an ABA compliant SOAP RBT note and two ABC Statements from the therapy transcription below:\n\nTranscription:\n{{ $json.body.transcription }}\n\nFORMAT THE RESPONSE EXACTLY AS FOLLOWS:\n\nDate: {{ $json.body.date }}\nSetting: {{ $json.body.setting }}\nParticipants: {{ $json.body.participants }}\n\nS (Subjective):\n[What the patient/client reported]\n\nO (Objective):\n[Measurable observations — incorporate any trial or behavior data provided below]\n\nA (Assessment):\n[Analysis of the data — reference trends from trial data, ABC patterns]\n\nP (Plan):\n[Next steps/recommendations]\n\n===ABC Data===\n\nABC Statement 1:\n\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nABC Statement 2:\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nRULES:\n1. Do NOT include any Session ID in the response\n2. Do NOT include any preamble, introduction, or \"Here is a SOAP note...\" text\n3. Do NOT include a signature block\n4. Start directly with \"Date:\"\n5. The note must be ABA (Applied Behavior Analysis) compliant\n7. If trial data, behavior data, or ABC data is provided above, incorporate it into the O (Objective) and A (Assessment) sections with specific numbers and trends\n8. Use PLAIN TEXT only. Do NOT use markdown characters like ** for bolding. Use plain headers like \"S (Subjective):\" instead of \"S **(Subjective)**:\".\n9. For the ABC Statements avoid using behaviors that have the same objective (escape, attention, access, sensory/automatic reinforcement).\n10. Do not use bullet points or lists, pure prose."
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        304
+      ],
+      "name": "Call 'Mimir-RBT Decopled'",
+      "id": "e5635595-64be-46c2-bfea-4c122fb24c96"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -64,
+        304
+      ],
+      "name": "Respond to Webhook",
+      "id": "c4c2838c-694f-4d50-91b0-eb209aa18c0e"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-06-09T22:45:22.307Z",
+      "createdAt": "2026-06-09T22:45:22.307Z",
+      "role": "workflow:owner",
+      "workflowId": "wo7M3q0D0PQl6Yy7",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-06-10T04:51:13.153Z",
+  "versionId": "ca5adc09-0766-404a-b37f-8e955db5b694"
+}
