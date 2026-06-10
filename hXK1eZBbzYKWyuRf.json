@@ -722,9 +722,10 @@
   "settings": {
     "executionOrder": "v1",
     "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
+    "availableInMCP": true,
     "errorWorkflow": "qRHduwvYzVPT4ave",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed"
   },
   "shared": [
     {
@@ -763,6 +764,6 @@
     }
   ],
   "triggerCount": 1,
-  "updatedAt": "2026-03-30T02:26:06.682Z",
+  "updatedAt": "2026-06-09T22:02:57.921Z",
   "versionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309"
 }
