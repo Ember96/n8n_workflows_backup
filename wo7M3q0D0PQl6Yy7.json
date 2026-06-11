@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-06-10T04:51:23.000Z",
-    "createdAt": "2026-06-10T04:51:13.154Z",
-    "versionId": "ca5adc09-0766-404a-b37f-8e955db5b694",
+    "updatedAt": "2026-06-10T21:18:02.000Z",
+    "createdAt": "2026-06-10T21:17:59.048Z",
+    "versionId": "d4a8230e-02c6-474c-8abb-f4049266db41",
     "workflowId": "wo7M3q0D0PQl6Yy7",
     "nodes": [
       {
@@ -38,7 +38,7 @@
             "mappingMode": "defineBelow",
             "value": {
               "sessionId": "={{ $json.body.sessionId }}",
-              "query": "=You are a clinical note generator. Generate an ABA compliant SOAP RBT note and two ABC Statements from the therapy transcription below:\n\nTranscription:\n{{ $json.body.transcription }}\n\nFORMAT THE RESPONSE EXACTLY AS FOLLOWS:\n\nDate: {{ $json.body.date }}\nSetting: {{ $json.body.setting }}\nParticipants: {{ $json.body.participants }}\n\nS (Subjective):\n[What the patient/client reported]\n\nO (Objective):\n[Measurable observations — incorporate any trial or behavior data provided below]\n\nA (Assessment):\n[Analysis of the data — reference trends from trial data, ABC patterns]\n\nP (Plan):\n[Next steps/recommendations]\n\n===ABC Data===\n\nABC Statement 1:\n\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nABC Statement 2:\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nRULES:\n1. Do NOT include any Session ID in the response\n2. Do NOT include any preamble, introduction, or \"Here is a SOAP note...\" text\n3. Do NOT include a signature block\n4. Start directly with \"Date:\"\n5. The note must be ABA (Applied Behavior Analysis) compliant\n7. If trial data, behavior data, or ABC data is provided above, incorporate it into the O (Objective) and A (Assessment) sections with specific numbers and trends\n8. Use PLAIN TEXT only. Do NOT use markdown characters like ** for bolding. Use plain headers like \"S (Subjective):\" instead of \"S **(Subjective)**:\".\n9. For the ABC Statements avoid using behaviors that have the same objective (escape, attention, access, sensory/automatic reinforcement).\n10. Do not use bullet points or lists, pure prose."
+              "query": "=You are a clinical note generator. Generate an ABA compliant SOAP RBT note and two ABC Statements from the therapy transcription below:\n\nTranscription:\n{{ $json.body.transcription }}\n\nFORMAT THE RESPONSE EXACTLY AS FOLLOWS:\n\nDate: {{ $json.body.date }}\nSetting: {{ $json.body.setting }}\nParticipants: {{ $json.body.participants }}\n\nS (Subjective):\n[What the patient/client reported]\n\nO (Objective):\n[Measurable observations — incorporate any trial or behavior data provided below]\n\nA (Assessment):\n[Analysis of the data — reference trends from trial data, ABC patterns]\n\nP (Plan):\n[Next steps/recommendations]\n\n===ABC Data===\n\nABC Statement 1:\n\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nABC Statement 2:\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\n=== FORMAT ===\nInstead of plain text, return a JSON object with two fields: soapNote (date, setting, participants and SOAP paragraphs) and abcData (the two ABC Statements of the ABC data section)\n\nRULES:\n1. Do NOT include any Session ID in the response\n2. Do NOT include any preamble, introduction, or \"Here is a SOAP note...\" text\n3. Do NOT include a signature block\n4. Start directly with \"Date:\"\n5. The note must be ABA (Applied Behavior Analysis) compliant\n7. If trial data, behavior data, or ABC data is provided above, incorporate it into the O (Objective) and A (Assessment) sections with specific numbers and trends\n8. Use PLAIN TEXT only. Do NOT use markdown characters like ** for bolding. Use plain headers like \"S (Subjective):\" instead of \"S **(Subjective)**:\".\n9. For the ABC Statements avoid using behaviors that have the same objective (escape, attention, access, sensory/automatic reinforcement).\n10. Do not use bullet points or lists, pure prose."
             },
             "matchingColumns": [],
             "schema": [
@@ -116,11 +116,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version ca5adc09",
+    "name": "Version d4a8230e",
     "description": "",
     "autosaved": true
   },
-  "activeVersionId": "ca5adc09-0766-404a-b37f-8e955db5b694",
+  "activeVersionId": "d4a8230e-02c6-474c-8abb-f4049266db41",
   "connections": {
     "Webhook (from AutoNote App)": {
       "main": [
@@ -183,7 +183,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "sessionId": "={{ $json.body.sessionId }}",
-            "query": "=You are a clinical note generator. Generate an ABA compliant SOAP RBT note and two ABC Statements from the therapy transcription below:\n\nTranscription:\n{{ $json.body.transcription }}\n\nFORMAT THE RESPONSE EXACTLY AS FOLLOWS:\n\nDate: {{ $json.body.date }}\nSetting: {{ $json.body.setting }}\nParticipants: {{ $json.body.participants }}\n\nS (Subjective):\n[What the patient/client reported]\n\nO (Objective):\n[Measurable observations — incorporate any trial or behavior data provided below]\n\nA (Assessment):\n[Analysis of the data — reference trends from trial data, ABC patterns]\n\nP (Plan):\n[Next steps/recommendations]\n\n===ABC Data===\n\nABC Statement 1:\n\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nABC Statement 2:\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nRULES:\n1. Do NOT include any Session ID in the response\n2. Do NOT include any preamble, introduction, or \"Here is a SOAP note...\" text\n3. Do NOT include a signature block\n4. Start directly with \"Date:\"\n5. The note must be ABA (Applied Behavior Analysis) compliant\n7. If trial data, behavior data, or ABC data is provided above, incorporate it into the O (Objective) and A (Assessment) sections with specific numbers and trends\n8. Use PLAIN TEXT only. Do NOT use markdown characters like ** for bolding. Use plain headers like \"S (Subjective):\" instead of \"S **(Subjective)**:\".\n9. For the ABC Statements avoid using behaviors that have the same objective (escape, attention, access, sensory/automatic reinforcement).\n10. Do not use bullet points or lists, pure prose."
+            "query": "=You are a clinical note generator. Generate an ABA compliant SOAP RBT note and two ABC Statements from the therapy transcription below:\n\nTranscription:\n{{ $json.body.transcription }}\n\nFORMAT THE RESPONSE EXACTLY AS FOLLOWS:\n\nDate: {{ $json.body.date }}\nSetting: {{ $json.body.setting }}\nParticipants: {{ $json.body.participants }}\n\nS (Subjective):\n[What the patient/client reported]\n\nO (Objective):\n[Measurable observations — incorporate any trial or behavior data provided below]\n\nA (Assessment):\n[Analysis of the data — reference trends from trial data, ABC patterns]\n\nP (Plan):\n[Next steps/recommendations]\n\n===ABC Data===\n\nABC Statement 1:\n\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\nABC Statement 2:\nAntecedent: [The program that was being implemented or instruction that was given]\nBehavior: [Behavior displayed by the client responding to the antecedent]\nConsequence: Intervention applied by the therapist to address the behavior and result obtained from it.\n\n=== FORMAT ===\nInstead of plain text, return a JSON object with two fields: soapNote (date, setting, participants and SOAP paragraphs) and abcData (the two ABC Statements of the ABC data section)\n\nRULES:\n1. Do NOT include any Session ID in the response\n2. Do NOT include any preamble, introduction, or \"Here is a SOAP note...\" text\n3. Do NOT include a signature block\n4. Start directly with \"Date:\"\n5. The note must be ABA (Applied Behavior Analysis) compliant\n7. If trial data, behavior data, or ABC data is provided above, incorporate it into the O (Objective) and A (Assessment) sections with specific numbers and trends\n8. Use PLAIN TEXT only. Do NOT use markdown characters like ** for bolding. Use plain headers like \"S (Subjective):\" instead of \"S **(Subjective)**:\".\n9. For the ABC Statements avoid using behaviors that have the same objective (escape, attention, access, sensory/automatic reinforcement).\n10. Do not use bullet points or lists, pure prose."
           },
           "matchingColumns": [],
           "schema": [
@@ -260,6 +260,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-06-10T04:51:13.153Z",
-  "versionId": "ca5adc09-0766-404a-b37f-8e955db5b694"
+  "updatedAt": "2026-06-10T21:17:59.047Z",
+  "versionId": "d4a8230e-02c6-474c-8abb-f4049266db41"
 }
