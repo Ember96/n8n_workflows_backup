@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-03-30T02:26:11.000Z",
-    "createdAt": "2026-03-30T02:26:06.683Z",
-    "versionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309",
+    "updatedAt": "2026-06-19T00:13:56.000Z",
+    "createdAt": "2026-06-19T00:13:19.362Z",
+    "versionId": "ec4921bf-e7df-486e-aad8-7fc3ae7511c4",
     "workflowId": "hXK1eZBbzYKWyuRf",
     "nodes": [
       {
@@ -191,7 +191,7 @@
       },
       {
         "parameters": {
-          "model": "openrouter/free",
+          "model": "google/gemini-2.5-flash",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -353,11 +353,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version c562a0c5",
-    "description": "",
+    "name": "Version ec4921bf",
+    "description": "Updating the Brain model because I'm not that cheap to use free",
     "autosaved": true
   },
-  "activeVersionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309",
+  "activeVersionId": "ec4921bf-e7df-486e-aad8-7fc3ae7511c4",
   "connections": {
     "Upload your file here": {
       "main": [
@@ -641,7 +641,7 @@
     },
     {
       "parameters": {
-        "model": "openrouter/free",
+        "model": "google/gemini-2.5-flash",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -764,6 +764,6 @@
     }
   ],
   "triggerCount": 1,
-  "updatedAt": "2026-06-09T22:02:57.921Z",
-  "versionId": "c562a0c5-9e77-4f0e-adf7-dc61170b7309"
+  "updatedAt": "2026-06-19T00:13:19.361Z",
+  "versionId": "ec4921bf-e7df-486e-aad8-7fc3ae7511c4"
 }
