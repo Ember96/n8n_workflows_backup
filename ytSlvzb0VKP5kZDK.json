@@ -1,9 +1,9 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-03-30T02:29:54.000Z",
-    "createdAt": "2026-03-30T02:29:04.608Z",
-    "versionId": "702bc98c-886f-4159-b6d9-33da7bfa7c02",
+    "updatedAt": "2026-06-19T00:14:16.000Z",
+    "createdAt": "2026-06-19T00:14:13.540Z",
+    "versionId": "48659a38-407f-4abd-b06e-4e2612f22aed",
     "workflowId": "ytSlvzb0VKP5kZDK",
     "nodes": [
       {
@@ -219,7 +219,7 @@
       },
       {
         "parameters": {
-          "model": "openrouter/free",
+          "model": "google/gemini-2.5-flash",
           "options": {}
         },
         "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -365,11 +365,11 @@
       }
     },
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version 702bc98c",
-    "description": "Setting brain to OpenRouter Free. Random models from the Free tier will be picked to ensure ininterrupted service.",
+    "name": "Version 48659a38",
+    "description": "",
     "autosaved": true
   },
-  "activeVersionId": "702bc98c-886f-4159-b6d9-33da7bfa7c02",
+  "activeVersionId": "48659a38-407f-4abd-b06e-4e2612f22aed",
   "connections": {
     "Upload your file here": {
       "main": [
@@ -687,7 +687,7 @@
     },
     {
       "parameters": {
-        "model": "openrouter/free",
+        "model": "google/gemini-2.5-flash",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
@@ -787,6 +787,6 @@
     }
   ],
   "triggerCount": 2,
-  "updatedAt": "2026-03-30T02:29:04.606Z",
-  "versionId": "702bc98c-886f-4159-b6d9-33da7bfa7c02"
+  "updatedAt": "2026-06-19T00:14:13.539Z",
+  "versionId": "48659a38-407f-4abd-b06e-4e2612f22aed"
 }
