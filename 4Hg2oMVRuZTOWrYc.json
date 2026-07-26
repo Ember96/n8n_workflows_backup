@@ -504,6 +504,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "system migration",
     "name": null,
     "description": null,
@@ -607,6 +608,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Worksheet Automation - Worksheet Creation",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
