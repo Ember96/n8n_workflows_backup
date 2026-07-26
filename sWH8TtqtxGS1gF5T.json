@@ -298,6 +298,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": null,
     "description": null,
@@ -390,6 +391,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[Mimir-RBT] Mock exams",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
@@ -624,7 +626,12 @@
   ],
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
     }
   },
   "tags": [],
