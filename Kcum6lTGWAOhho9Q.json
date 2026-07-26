@@ -1,0 +1,367 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Input ticker": {
+      "main": [
+        [
+          {
+            "node": "Normalize ticker1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize ticker1": {
+      "main": [
+        [
+          {
+            "node": "Fetch daily direction1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch daily direction1": {
+      "main": [
+        [
+          {
+            "node": "Choose calls or puts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose calls or puts1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Yahoo cookie (fc.yahoo.com)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Yahoo cookie (fc.yahoo.com)": {
+      "main": [
+        [
+          {
+            "node": "Extract cookie (name=value)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract cookie (name=value)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Yahoo crumb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Yahoo crumb": {
+      "main": [
+        [
+          {
+            "node": "Extract crumb",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract crumb": {
+      "main": [
+        [
+          {
+            "node": "Fetch Yahoo options chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Yahoo options chain": {
+      "main": [
+        [
+          {
+            "node": "Select 10 spread asks1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select 10 spread asks1": {
+      "main": [
+        [
+          {
+            "node": "Return ideal range1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-07-26T03:59:21.732Z",
+  "id": "Kcum6lTGWAOhho9Q",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "Options Price Range - Yahoo Finance (with session)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "403a8f17-dfcc-47e1-8508-3dfab383925a",
+      "name": "Input ticker",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "options-price-range-yahoo",
+        "responseMode": "lastNode"
+      },
+      "webhookId": "1677c706-a116-4a76-8805-ee0b092f260a"
+    },
+    {
+      "id": "76763d7c-e8a2-4ff3-98d5-c788a8212d2c",
+      "name": "Normalize ticker1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const ticker = String($json.body?.ticker ?? $json.ticker ?? 'AAPL').trim().toUpperCase();\nif (!/^[A-Z0-9.^=-]{1,15}$/.test(ticker)) throw new Error('Invalid ticker');\nreturn [{json:{ticker}}];"
+      }
+    },
+    {
+      "id": "921ad47a-0f25-4d41-89d5-deaf91e4b0ad",
+      "name": "Fetch daily direction1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "url": "=https://query1.finance.yahoo.com/v8/finance/chart/{{$json.ticker}}?range=5d&interval=1d",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "1fe0a00a-e2a2-48a1-9d50-e97b12fdbea7",
+      "name": "Choose calls or puts1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const r = $json.chart?.result?.[0];\nif (!r?.indicators?.quote?.[0]?.close) throw new Error('No historical prices returned');\nconst c = r.indicators.quote[0].close.filter(Number.isFinite);\nif (c.length < 2) throw new Error('Not enough daily history');\nconst previousDayBullish = c[c.length - 1] >= c[c.length - 2];\nreturn [{json:{ticker:$('Normalize ticker1').first().json.ticker, optionType:previousDayBullish?'C':'P', previousDayBullish}}];"
+      }
+    },
+    {
+      "id": "903bfc12-bfe5-487c-9722-0c9e50c099bf",
+      "name": "Fetch Yahoo cookie (fc.yahoo.com)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        -128
+      ],
+      "parameters": {
+        "url": "https://fc.yahoo.com/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "fullResponse": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "467f4ebf-3469-499a-97c6-1a9ae94b3ebe",
+      "name": "Extract cookie (name=value)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -128
+      ],
+      "parameters": {
+        "jsCode": "const setCookie = $json.headers?.['set-cookie'] ?? $json.headers?.['Set-Cookie'];\nlet cookieString = '';\nif (Array.isArray(setCookie)) cookieString = setCookie.map(c => c.split(';')[0]).join('; ');\nelse if (typeof setCookie === 'string') cookieString = setCookie.split(';')[0];\nif (!cookieString) throw new Error('No cookie from fc.yahoo.com. Headers: ' + JSON.stringify(Object.keys($json.headers || {})).slice(0,200));\nreturn [{ json: { cookie: cookieString } }];"
+      }
+    },
+    {
+      "id": "42558949-9eea-45fa-b9fd-4d22e4d35f7e",
+      "name": "Fetch Yahoo crumb",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        -128
+      ],
+      "parameters": {
+        "url": "https://query1.finance.yahoo.com/v1/test/getcrumb",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            },
+            {
+              "name": "Cookie",
+              "value": "={{$json.cookie}}"
+            },
+            {
+              "name": "Accept",
+              "value": "*/*"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0e88f448-5f75-4787-ba2e-bcf316549294",
+      "name": "Extract crumb",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -128
+      ],
+      "parameters": {
+        "jsCode": "const crumb = String($json.data ?? $json.body ?? '').trim();\nif (!crumb || crumb.length < 5) throw new Error('No crumb from Yahoo. Body: ' + String($json.data ?? $json.body).slice(0,80));\nreturn [{ json: { crumb, cookie: $('Extract cookie (name=value)').first().json.cookie } }];"
+      }
+    },
+    {
+      "id": "883f5bda-14fe-4190-ba71-57299371da41",
+      "name": "Fetch Yahoo options chain",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        0
+      ],
+      "parameters": {
+        "url": "=https://query1.finance.yahoo.com/v7/finance/options/{{$(\"Normalize ticker1\").first().json.ticker}}?crumb={{$json.crumb}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            },
+            {
+              "name": "Cookie",
+              "value": "={{$json.cookie}}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "c8e4d42a-dc2b-49e7-9d16-52fd51e73ddf",
+      "name": "Select 10 spread asks1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const base = $('Choose calls or puts1').first().json;\nconst chain = $json?.optionChain?.result?.[0];\nif (!chain) throw new Error('Yahoo options API returned no result');\nconst type = base.optionType;\nconst lists = [chain.options?.[0]];\nif (chain.options?.[1]) lists.push(chain.options[1]);\nconst all = lists.filter(Boolean).flatMap(b => (b[type === 'C' ? 'calls' : 'puts'] || []));\nconst eligible = all.filter(c => Number.isFinite(c.ask) && c.ask >= 20 && c.ask <= 600);\nif (eligible.length < 10) throw new Error('Only ' + eligible.length + ' eligible contracts (ask 20-600) from Yahoo API');\neligible.sort((a,b) => a.ask-b.ask);\nconst picked = [];\nfor (let i=0;i<10;i++) picked.push(eligible[Math.round(i*(eligible.length-1)/9)]);\nreturn picked.map(c => ({json:{...base, symbol:c.contractSymbol, contractType:type, strike:c.strike, expiration:c.expiration, ask:c.ask, daysRangeLow:c.dayLow, daysRangeTop:c.dayHigh}}));"
+      }
+    },
+    {
+      "id": "f78755be-1ba1-4e8f-85df-23fd61e507ac",
+      "name": "Return ideal range1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(x=>x.json);\nconst enriched = rows.map(r => {\n  const low = Number(r.daysRangeLow), high = Number(r.daysRangeTop);\n  const ok = Number.isFinite(low) && Number.isFinite(high) && low > 0 && high >= low;\n  return {...r, rangePct: ok ? (high-low)/low*100 : null, eligible: ok};\n});\nconst good = enriched.filter(r => r.eligible && Number.isFinite(r.rangePct));\nif (!good.length) throw new Error('No contract returned a usable day range');\ngood.sort((a,b)=>b.rangePct-a.rangePct);\nconst winners = good.slice(0, Math.min(3, good.length));\nconst round5 = n => Math.round(n/5)*5;\nreturn [{json:{ticker:rows[0].ticker, optionType:rows[0].optionType, previousDayBullish:rows[0].previousDayBullish, idealPriceRange:{min:round5(Math.min(...winners.map(x=>x.ask))),max:round5(Math.max(...winners.map(x=>x.ask)))}, selectedContracts:winners, allAnalyzed:enriched.sort((a,b)=>(b.rangePct??-1)-(a.rangePct??-1))}}];"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-07-26T03:59:21.736Z",
+      "createdAt": "2026-07-26T03:59:21.736Z",
+      "role": "workflow:owner",
+      "workflowId": "Kcum6lTGWAOhho9Q",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-07-26T03:59:21.732Z",
+  "versionId": "60c5e76b-c9c1-43a1-83e9-e1d5e2fc4bef"
+}
