@@ -385,6 +385,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 21d363c1",
     "description": "Getting tired of some much complexity and just returning the whole thing",
@@ -495,6 +496,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[Mimir-RBT] Daily trivia",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
@@ -799,7 +801,12 @@
   ],
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
     }
   },
   "tags": [],
