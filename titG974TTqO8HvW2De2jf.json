@@ -122,6 +122,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "AI Video Generator - Enhanced with Templates",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
