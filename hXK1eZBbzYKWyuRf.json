@@ -352,6 +352,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version ec4921bf",
     "description": "Updating the Brain model because I'm not that cheap to use free",
@@ -455,6 +456,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Mimir-RBT Decopled",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
