@@ -221,6 +221,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": null,
     "description": null,
@@ -291,6 +292,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[Mimir-RBT] Mock exams DECOPLED",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
