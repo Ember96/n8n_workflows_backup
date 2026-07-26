@@ -8,6 +8,7 @@
   "isArchived": true,
   "meta": null,
   "name": "Mimir",
+  "nodeGroups": [],
   "nodes": [],
   "origin": "n8n",
   "pinData": {},
