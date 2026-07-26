@@ -65,6 +65,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 2387a46e",
     "description": "",
@@ -94,6 +95,7 @@
   "isArchived": false,
   "meta": null,
   "name": "FastKokoro",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
