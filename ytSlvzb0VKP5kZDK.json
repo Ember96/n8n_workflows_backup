@@ -364,6 +364,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 48659a38",
     "description": "",
@@ -473,6 +474,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Mimir-RBT",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
