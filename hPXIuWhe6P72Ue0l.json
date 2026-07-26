@@ -113,6 +113,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "system migration",
     "name": null,
     "description": null,
@@ -150,6 +151,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Spreadsheet to Mail - PDF",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
