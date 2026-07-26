@@ -608,6 +608,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 72c5a783",
     "description": "",
@@ -797,6 +798,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[Mimir-RBT] Podcast generator",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
