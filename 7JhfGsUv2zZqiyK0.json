@@ -141,6 +141,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "system migration",
     "name": null,
     "description": null,
@@ -198,6 +199,7 @@
   "isArchived": false,
   "meta": null,
   "name": "Worksheet Automation - Schedule Extraction",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
