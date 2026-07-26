@@ -1,0 +1,407 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Input ticker": {
+      "main": [
+        [
+          {
+            "node": "Normalize input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize input": {
+      "main": [
+        [
+          {
+            "node": "Fetch previous day (delayed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch previous day (delayed)": {
+      "main": [
+        [
+          {
+            "node": "Choose calls or puts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose calls or puts": {
+      "main": [
+        [
+          {
+            "node": "Fetch option contracts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch option contracts": {
+      "main": [
+        [
+          {
+            "node": "Spread contract selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spread contract selection": {
+      "main": [
+        [
+          {
+            "node": "Fetch delayed snapshot (v3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch delayed snapshot (v3)": {
+      "main": [
+        [
+          {
+            "node": "Extract ask + day range from snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract ask + day range from snapshot": {
+      "main": [
+        [
+          {
+            "node": "Fallback: fetch previous-day aggregate (free tier)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback: fetch previous-day aggregate (free tier)": {
+      "main": [
+        [
+          {
+            "node": "Apply fallback range if snapshot lacked it",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply fallback range if snapshot lacked it": {
+      "main": [
+        [
+          {
+            "node": "Return ideal range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-07-25T14:43:44.113Z",
+  "id": "BskPa7m1EtWbhCfr",
+  "isArchived": false,
+  "meta": null,
+  "name": "Options Price Range - Polygon API (delayed)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "options-price-range-api",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "f0afaf8b-61a3-4fd2-875f-8333bde35f9a",
+      "name": "Input ticker",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -864
+      ],
+      "webhookId": "6b4790d2-101c-4b40-93ab-a43ce2d336ad"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticker = String($json.body?.ticker ?? $json.ticker ?? 'AAPL').trim().toUpperCase();\nif (!/^[A-Z0-9.^=-]{1,15}$/.test(ticker)) throw new Error('Invalid ticker');\nreturn [{json:{ticker}}];"
+      },
+      "id": "f4293700-6333-41ba-8deb-2c84adbb4d9e",
+      "name": "Normalize input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -864
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.polygon.io/v2/aggs/ticker/{{$json.ticker}}/prev?adjusted=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "0a38e027-2fab-4846-bb4e-d65773f3be05",
+      "name": "Fetch previous day (delayed)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        -864
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mImX5Ij8Az6e5EsM",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const d=$json.results?.[0]; if (!d) throw new Error('No previous-day aggregate returned'); const base=$('Normalize input').first().json; return [{json:{...base,optionType:d.c>=d.o?'C':'P', referenceClose:Number(d.c), referenceOpen:Number(d.o)}}];"
+      },
+      "id": "6d1d9e4f-e211-46c3-89c3-d1e7fc70f1f2",
+      "name": "Choose calls or puts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -864
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.polygon.io/v3/reference/options/contracts?underlying_ticker={{$json.ticker}}&contract_type={{$json.optionType==='C'?'call':'put'}}&expired=false&limit=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "a33ff45b-c38f-4e1b-8189-c9ac05079a16",
+      "name": "Fetch option contracts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        -864
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mImX5Ij8Az6e5EsM",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const base=$('Choose calls or puts').first().json; const results=$json.results||[]; const today=new Date(); const eligible=results.filter(x=>x.ticker && x.expiration_date && new Date(x.expiration_date)>=today && Number.isFinite(x.strike_price) && (!x.expired)).map(x=>({...base,contractTicker:x.ticker,strike:x.strike_price,expiration:x.expiration_date})); if(!eligible.length) throw new Error('No contracts returned'); eligible.sort((a,b)=>a.strike-b.strike); const sample=[]; const N=Math.min(10,eligible.length); for(let i=0;i<N;i++) sample.push(eligible[Math.round(i*(eligible.length-1)/Math.max(1,N-1))]); return sample;"
+      },
+      "id": "74511d05-0d90-44f1-8c7f-01f548984cb6",
+      "name": "Spread contract selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        -864
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.polygon.io/v3/snapshot/options/{{$json.ticker}}/{{$json.contractTicker}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "12bff6ae-be0e-4e6f-a4c8-cc5c4ac1e2ea",
+      "name": "Fetch delayed snapshot (v3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        -864
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mImX5Ij8Az6e5EsM",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const base=$('Spread contract selection').item.json; const r=$json?.results; if (r) { const day=r.day||{}; const last=r.last_quote||{}; const prevDay=r.prev_day||{}; const ask=Number(last.ask ?? day.c ?? r.last_trade?.p); const high=Number(day.h ?? prevDay.h); const low=Number(day.l ?? prevDay.l); return [{json:{...base, ask, daysRangeLow:low, daysRangeTop:high, eligible:Number.isFinite(ask)&&ask>=20&&ask<=600, eligibleRange:Number.isFinite(low)&&Number.isFinite(high)&&low>0&&high>=low, source:'snapshot'}}]; } throw new Error('Snapshot returned no result; will fall back to aggregates')"
+      },
+      "id": "df67d792-8c69-4838-bf49-9a51228d5a20",
+      "name": "Extract ask + day range from snapshot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        -864
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.polygon.io/v2/aggs/ticker/{{$json.contractTicker}}/prev?adjusted=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "508ff68b-fa9e-4dad-baff-b72c9199c798",
+      "name": "Fallback: fetch previous-day aggregate (free tier)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        -864
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mImX5Ij8Az6e5EsM",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const base=$('Extract ask + day range from snapshot').item.json; const d=$json.results?.[0]; if (!d) return [{json:{...base, eligible:false, eligibleRange:false, source:'aggregate-no-data'}}]; const high=Number(d.h), low=Number(d.l), ask=Number(d.c); return [{json:{...base, ask:Number.isFinite(base.ask)?base.ask:ask, daysRangeLow:low, daysRangeTop:high, eligible:Number.isFinite((Number.isFinite(base.ask)?base.ask:ask))&&(Number.isFinite(base.ask)?base.ask:ask)>=20&&(Number.isFinite(base.ask)?base.ask:ask)<=600, eligibleRange:Number.isFinite(low)&&Number.isFinite(high)&&low>0&&high>=low, source:'aggregate'}}];"
+      },
+      "id": "5a38a195-4428-4ce6-87b2-027b3e469542",
+      "name": "Apply fallback range if snapshot lacked it",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        -864
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows=$input.all().map(x=>x.json); const enriched=rows.map(r => { const low=Number(r.daysRangeLow), high=Number(r.daysRangeTop); const ok=Number.isFinite(low)&&Number.isFinite(high)&&low>0&&high>=low; return {...r, rangePct: ok?(high-low)/low*100 : null, eligible:r.eligible&&ok}; }); const good=enriched.filter(r => r.eligible && Number.isFinite(r.rangePct)); if (good.length < 3) throw new Error(`Only ${good.length} contracts have ask 20-600 and a usable delayed day range. Try a different ticker or a more liquid option chain.`); good.sort((a,b)=>b.rangePct-a.rangePct); const winners=good.slice(0,3); const round5=n=>Math.round(n/5)*5; return [{json:{ticker:rows[0].ticker,optionType:rows[0].optionType,referenceDirection:rows[0].referenceClose>=rows[0].referenceOpen?'bullish':'bearish',idealPriceRange:{min:round5(Math.min(...winners.map(x=>x.ask))),max:round5(Math.max(...winners.map(x=>x.ask)))},selectedContracts:winners,allAnalyzed:enriched.sort((a,b)=>(b.rangePct??-1)-(a.rangePct??-1)),dataNote:'delayed snapshot (Polygon free tier, 1-day lag acceptable)'}}];"
+      },
+      "id": "f2378336-6f15-48b0-a4d5-dacff21e5dfb",
+      "name": "Return ideal range",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        -864
+      ]
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {
+    "Input ticker": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.innerchildproject.us",
+            "user-agent": "curl/8.21.0",
+            "content-length": "17",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "162.195.114.67",
+            "cf-ipcountry": "US",
+            "cf-ray": "a20bf0f988f41350-MIA",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "1486a02e-38b7-40af-bcd4-83f44d142cc4",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "x-forwarded-for": "162.195.114.67",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "ticker": "AAPL"
+          },
+          "webhookUrl": "https://n8n.innerchildproject.us/webhook-test/options-price-range-api",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-07-25T14:43:44.119Z",
+      "createdAt": "2026-07-25T14:43:44.119Z",
+      "role": "workflow:owner",
+      "workflowId": "BskPa7m1EtWbhCfr",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-07-26T02:17:16.584Z",
+  "versionId": "f9a21881-b6c1-4391-a7e4-3f405a345a8f"
+}
