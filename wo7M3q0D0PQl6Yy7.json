@@ -115,6 +115,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version d4a8230e",
     "description": "",
@@ -150,6 +151,7 @@
   "isArchived": false,
   "meta": null,
   "name": "AutoNote → SOAP RBT Bridge",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
