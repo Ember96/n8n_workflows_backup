@@ -1153,6 +1153,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 4bc47a98",
     "description": "First commit",
@@ -1506,6 +1507,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Automated n8n workflow backup to GitHub with deletion tracking",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {},
@@ -2336,7 +2338,12 @@
   ],
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
     }
   },
   "tags": [],
