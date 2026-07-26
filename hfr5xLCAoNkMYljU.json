@@ -116,6 +116,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": null,
     "description": null,
@@ -151,6 +152,7 @@
   "isArchived": false,
   "meta": null,
   "name": "AutoNote → Script Bridge",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
