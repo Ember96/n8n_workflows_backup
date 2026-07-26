@@ -178,6 +178,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 5848a20a",
     "description": "Removing unnecessary note",
@@ -233,6 +234,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[Mimir-RBT] Test Results",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
