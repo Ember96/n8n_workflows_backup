@@ -125,6 +125,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": null,
     "description": null,
@@ -162,6 +163,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[ERR] Mission Control DLQ - Mimir-RBT",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {},
