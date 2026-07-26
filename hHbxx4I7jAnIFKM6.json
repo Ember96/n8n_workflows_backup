@@ -55,6 +55,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Content Creator",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {},
