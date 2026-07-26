@@ -1,0 +1,249 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Input ticker": {
+      "main": [
+        [
+          {
+            "node": "Normalize ticker1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Yahoo options chain (JSON API)": {
+      "main": [
+        [
+          {
+            "node": "Select 10 spread asks1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize ticker1": {
+      "main": [
+        [
+          {
+            "node": "Fetch daily direction1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch daily direction1": {
+      "main": [
+        [
+          {
+            "node": "Choose calls or puts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose calls or puts1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Yahoo options chain (JSON API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select 10 spread asks1": {
+      "main": [
+        [
+          {
+            "node": "Return ideal range1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-07-25T14:23:04.869Z",
+  "id": "fyUP5QpBikY2kfya",
+  "isArchived": false,
+  "meta": null,
+  "name": "Options Price Range - Yahoo Finance Scraper",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "options-price-range-yahoo",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "e9ed5c71-1021-46e8-9ba2-acaf69ce632c",
+      "name": "Input ticker",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "731071fd-baa1-4440-b365-7ff15bcf013a"
+    },
+    {
+      "parameters": {
+        "url": "=https://query1.finance.yahoo.com/v7/finance/options/{{$json.ticker}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "3c625f8a-bbc2-43c7-9b44-6467460b3229",
+      "name": "Fetch Yahoo options chain (JSON API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticker = String($json.body?.ticker ?? $json.ticker ?? 'AAPL').trim().toUpperCase();\nif (!/^[A-Z0-9.^=-]{1,15}$/.test(ticker)) throw new Error('Invalid ticker');\nreturn [{json:{ticker}}];"
+      },
+      "id": "015a11a1-6983-475d-8ebd-c13e7180f03a",
+      "name": "Normalize ticker1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://query1.finance.yahoo.com/v8/finance/chart/{{$json.ticker}}?range=5d&interval=1d",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "1791aaa0-2554-41c1-b9ed-ffb36d0c1fc5",
+      "name": "Fetch daily direction1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json.chart?.result?.[0];\nif (!r?.indicators?.quote?.[0]?.close) throw new Error('No historical prices returned');\nconst c = r.indicators.quote[0].close.filter(Number.isFinite);\nif (c.length < 2) throw new Error('Not enough daily history');\nconst previousDayBullish = c[c.length - 1] >= c[c.length - 2];\nreturn [{json:{ticker:$('Normalize ticker1').first().json.ticker, optionType:previousDayBullish?'C':'P', previousDayBullish}}];"
+      },
+      "id": "3038f7d2-25ca-4cf8-a5a6-95047f93c147",
+      "name": "Choose calls or puts1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base = $('Choose calls or puts1').first().json;\nconst chain = $json?.optionChain?.result?.[0];\nif (!chain) throw new Error('Yahoo options API returned no result');\nconst type = base.optionType;\nconst lists = [chain.options?.[0], ...(chain.options?.[0]?.expirationDates ? [] : []), ...(chain.options?.[1] ? [chain.options[1]] : [])];\nconst all = lists.filter(Boolean).flatMap(b => (b[type === 'C' ? 'calls' : 'puts'] || []));\nconst eligible = all.filter(c => Number.isFinite(c.ask) && c.ask >= 20 && c.ask <= 600 && (!c.inTheMoney));\nif (eligible.length < 10) throw new Error(`Only ${eligible.length} eligible contracts from Yahoo API`);\neligible.sort((a,b) => a.ask-b.ask);\nconst picked = [];\nfor (let i=0;i<10;i++) picked.push(eligible[Math.round(i*(eligible.length-1)/9)]);\nreturn picked.map(c => ({json:{...base, symbol:c.contractSymbol, contractType:type, strike:c.strike, expiration:c.expiration, ask:c.ask, daysRangeLow:c.dayLow, daysRangeTop:c.dayHigh}}));"
+      },
+      "id": "68e7af9e-b74b-48e0-b7a1-0a23d1d15f26",
+      "name": "Select 10 spread asks1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(x=>x.json);\nconst enriched = rows.map(r => {\n  const low = Number(r.daysRangeLow), high = Number(r.daysRangeTop);\n  const ok = Number.isFinite(low) && Number.isFinite(high) && low > 0 && high >= low;\n  return {...r, rangePct: ok ? (high-low)/low*100 : null, eligible: ok};\n});\nconst good = enriched.filter(r => r.eligible && Number.isFinite(r.rangePct));\nif (!good.length) throw new Error('No contract returned a usable day range');\ngood.sort((a,b)=>b.rangePct-a.rangePct);\nconst winners = good.slice(0, Math.min(3, good.length));\nconst round5 = n => Math.round(n/5)*5;\nreturn [{json:{ticker:rows[0].ticker, optionType:rows[0].optionType, previousDayBullish:rows[0].previousDayBullish, idealPriceRange:{min:round5(Math.min(...winners.map(x=>x.ask))),max:round5(Math.max(...winners.map(x=>x.ask)))}, selectedContracts:winners, allAnalyzed:enriched.sort((a,b)=>(b.rangePct??-1)-(a.rangePct??-1))}}];"
+      },
+      "id": "8e80ea83-7d96-4bfd-b563-35a36a80aeb1",
+      "name": "Return ideal range1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ]
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {
+    "Input ticker": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.innerchildproject.us",
+            "user-agent": "curl/8.21.0",
+            "content-length": "17",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "2601:582:c47e:b280::a111",
+            "cf-ipcountry": "US",
+            "cf-ray": "a20bd810cd371c1f-ATL",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-warp-tag-id": "1486a02e-38b7-40af-bcd4-83f44d142cc4",
+            "connection": "keep-alive",
+            "content-type": "application/json",
+            "x-forwarded-for": "2601:582:c47e:b280::a111",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "ticker": "AAPL"
+          },
+          "webhookUrl": "https://n8n.innerchildproject.us/webhook-test/options-price-range-yahoo",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-07-25T14:23:04.876Z",
+      "createdAt": "2026-07-25T14:23:04.876Z",
+      "role": "workflow:owner",
+      "workflowId": "fyUP5QpBikY2kfya",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-07-26T03:28:41.170Z",
+  "versionId": "4c5bdfbb-0469-4161-9a5f-bb7bb25e08e7"
+}
