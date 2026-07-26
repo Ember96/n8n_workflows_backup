@@ -150,6 +150,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "Content Fetcher",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
