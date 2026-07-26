@@ -248,6 +248,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 1f50ea71",
     "description": "Requesting for clear and consise responses to the RAG",
@@ -310,6 +311,7 @@
   "isArchived": false,
   "meta": null,
   "name": "Mimir - SOAP Note Generator",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
