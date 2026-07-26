@@ -335,6 +335,7 @@
         ]
       }
     },
+    "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 3c245a70",
     "description": "",
@@ -435,6 +436,7 @@
     "templateCredsSetupCompleted": true
   },
   "name": "[Mimir-RBT] Mock Exam - User Requested",
+  "nodeGroups": [],
   "nodes": [
     {
       "parameters": {
