@@ -1,0 +1,431 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-08-25T20:37:14.000Z",
+    "createdAt": "2026-08-25T20:37:01.162Z",
+    "versionId": "a010d5b6-7cdf-4c6e-9660-50d9e1daccd5",
+    "workflowId": "FwksS72A0qNi1rJC",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "icp-lead",
+          "options": {
+            "allowedOrigins": "*",
+            "ignoreBots": true
+          }
+        },
+        "id": "6e57164d-6d8b-47e6-8079-066c9945d949",
+        "name": "Lead Form Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "a1a74ed3-bc11-459f-8e66-fc90bc38b713"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "check-honeypot-empty",
+                "leftValue": "={{ $json.body.honeypot || \"\" }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": ""
+              },
+              {
+                "id": "check-email-present",
+                "leftValue": "={{ $json.body.email || \"\" }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "type": "string"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "fcadc35f-d7a9-428d-82b9-4c349dfcc929",
+        "name": "Valid Lead?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          224,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "lead-name",
+                "name": "name",
+                "value": "={{ $json.body.name }}",
+                "type": "string"
+              },
+              {
+                "id": "lead-email",
+                "name": "email",
+                "value": "={{ $json.body.email }}",
+                "type": "string"
+              },
+              {
+                "id": "lead-phone",
+                "name": "phone",
+                "value": "={{ $json.body.phone || \"\" }}",
+                "type": "string"
+              },
+              {
+                "id": "lead-message",
+                "name": "message",
+                "value": "={{ $json.body.message || \"\" }}",
+                "type": "string"
+              },
+              {
+                "id": "lead-source",
+                "name": "sourceForm",
+                "value": "={{ $json.body.source || \"landing-page\" }}",
+                "type": "string"
+              },
+              {
+                "id": "consent-text-version",
+                "name": "consentTextVersion",
+                "value": "={{ $json.body.consentTextVersion || \"v1\" }}",
+                "type": "string"
+              },
+              {
+                "id": "consent-timestamp",
+                "name": "consentTimestamp",
+                "value": "={{ $now.toISO() }}",
+                "type": "string"
+              },
+              {
+                "id": "consent-ip",
+                "name": "consentIp",
+                "value": "={{ $json.headers[\"x-forwarded-for\"] || \"\" }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "8aa2af71-98dd-4e89-b5fd-89cbd1417dcb",
+        "name": "Normalize Lead",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          448,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "lead",
+          "Company": "Individual",
+          "lastName": "={{ $json.name ? $json.name.split(' ').slice(-1)[0] : 'Unknown' }}",
+          "additionalFields": {
+            "Description": "={{ $json.message }}",
+            "Email": "={{ $json.email }}",
+            "First_Name": "={{ $json.name ? $json.name.split(' ')[0] : '' }}",
+            "Lead_Source": "={{ $json.sourceForm }}",
+            "Lead_Status": "Attempted to Contact",
+            "Mobile": "={{ $json.phone }}"
+          }
+        },
+        "id": "push-to-crm-zoho",
+        "name": "Create Zoho Lead",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          672,
+          0
+        ],
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Lead Form Webhook": {
+        "main": [
+          [
+            {
+              "node": "Valid Lead?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Valid Lead?": {
+        "main": [
+          [
+            {
+              "node": "Normalize Lead",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Lead": {
+        "main": [
+          [
+            {
+              "node": "Create Zoho Lead",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": "Version a010d5b6",
+    "description": "",
+    "autosaved": true
+  },
+  "activeVersionId": "a010d5b6-7cdf-4c6e-9660-50d9e1daccd5",
+  "connections": {
+    "Lead Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Valid Lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Lead?": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Lead": {
+      "main": [
+        [
+          {
+            "node": "Create Zoho Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-08-25T18:01:36.801Z",
+  "id": "FwksS72A0qNi1rJC",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "ICP Lead Intake",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "icp-lead",
+        "options": {
+          "allowedOrigins": "*",
+          "ignoreBots": true
+        }
+      },
+      "id": "6e57164d-6d8b-47e6-8079-066c9945d949",
+      "name": "Lead Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "a1a74ed3-bc11-459f-8e66-fc90bc38b713"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "check-honeypot-empty",
+              "leftValue": "={{ $json.body.honeypot || \"\" }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": ""
+            },
+            {
+              "id": "check-email-present",
+              "leftValue": "={{ $json.body.email || \"\" }}",
+              "operator": {
+                "operation": "notEmpty",
+                "type": "string"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fcadc35f-d7a9-428d-82b9-4c349dfcc929",
+      "name": "Valid Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "lead-name",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "lead-email",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "lead-phone",
+              "name": "phone",
+              "value": "={{ $json.body.phone || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "lead-message",
+              "name": "message",
+              "value": "={{ $json.body.message || \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "lead-source",
+              "name": "sourceForm",
+              "value": "={{ $json.body.source || \"landing-page\" }}",
+              "type": "string"
+            },
+            {
+              "id": "consent-text-version",
+              "name": "consentTextVersion",
+              "value": "={{ $json.body.consentTextVersion || \"v1\" }}",
+              "type": "string"
+            },
+            {
+              "id": "consent-timestamp",
+              "name": "consentTimestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "consent-ip",
+              "name": "consentIp",
+              "value": "={{ $json.headers[\"x-forwarded-for\"] || \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8aa2af71-98dd-4e89-b5fd-89cbd1417dcb",
+      "name": "Normalize Lead",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "Company": "Individual",
+        "lastName": "={{ $json.name ? $json.name.split(' ').slice(-1)[0] : 'Unknown' }}",
+        "additionalFields": {
+          "Description": "={{ $json.message }}",
+          "Email": "={{ $json.email }}",
+          "First_Name": "={{ $json.name ? $json.name.split(' ')[0] : '' }}",
+          "Lead_Source": "={{ $json.sourceForm }}",
+          "Lead_Status": "Attempted to Contact",
+          "Mobile": "={{ $json.phone }}"
+        }
+      },
+      "id": "push-to-crm-zoho",
+      "name": "Create Zoho Lead",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-08-25T18:01:36.810Z",
+      "createdAt": "2026-08-25T18:01:36.810Z",
+      "role": "workflow:owner",
+      "workflowId": "FwksS72A0qNi1rJC",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-08-25T20:37:01.161Z",
+  "versionId": "a010d5b6-7cdf-4c6e-9660-50d9e1daccd5"
+}
