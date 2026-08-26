@@ -1,0 +1,577 @@
+{
+  "active": true,
+  "activeVersion": {
+    "updatedAt": "2026-08-26T02:23:01.000Z",
+    "createdAt": "2026-08-26T02:06:55.582Z",
+    "versionId": "d11684fa-e784-4b0a-a9b2-3bc034d8d3ab",
+    "workflowId": "tdOi1jInGg9Ympup",
+    "nodes": [
+      {
+        "id": "65400d03-2be5-4bb5-9a04-aa829827ed12",
+        "name": "Feb 1 - Annual Report Reminder",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 1 2 *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "6e90cc4e-443a-4af5-b530-dee6439e388e",
+        "name": "AR Reminder",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "mode": "manual",
+          "includeOtherFields": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "ar-type",
+                "name": "type",
+                "value": "annual_report_reminder",
+                "type": "string"
+              },
+              {
+                "id": "ar-subject",
+                "name": "subject",
+                "value": "FL LLC Annual Report due May 1 — $138.75 fee, $400 late penalty after",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "1bb4f096-20c9-47ad-8469-55911568d1d3",
+        "name": "Apr 15 - Q1 Est Tax",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          224
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 15 4 *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "a4eb3c63-b514-47eb-ad27-a2c43161c0d1",
+        "name": "Q1 Tax Reminder",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          224
+        ],
+        "parameters": {
+          "mode": "manual",
+          "includeOtherFields": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "q1-type",
+                "name": "type",
+                "value": "estimated_tax_reminder",
+                "type": "string"
+              },
+              {
+                "id": "q1-subject",
+                "name": "subject",
+                "value": "Q2 estimated tax due June 15",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "8a1cf465-5915-4629-ba7f-e90fbbb72a09",
+        "name": "Jun 15 - Q2 Est Tax",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          448
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 15 6 *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "97ca8f22-8557-4744-b487-39961d51bdbe",
+        "name": "Q2 Tax Reminder",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          448
+        ],
+        "parameters": {
+          "mode": "manual",
+          "includeOtherFields": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "q2-type",
+                "name": "type",
+                "value": "estimated_tax_reminder",
+                "type": "string"
+              },
+              {
+                "id": "q2-subject",
+                "name": "subject",
+                "value": "Q3 estimated tax due Sep 15 + AR dissolution cliff 4th Fri Sep",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "1e8508dd-a82b-493f-a99f-711789f51d14",
+        "name": "Sep 15 - Q3 Est Tax",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          672
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 9 15 9 *"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "fd7861d2-7205-4b23-863d-e6b4ee778254",
+        "name": "Q3 Tax Reminder",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          672
+        ],
+        "parameters": {
+          "mode": "manual",
+          "includeOtherFields": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "q3-type",
+                "name": "type",
+                "value": "estimated_tax_reminder",
+                "type": "string"
+              },
+              {
+                "id": "q3-subject",
+                "name": "subject",
+                "value": "Q4 estimated tax due Jan 15",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Feb 1 - Annual Report Reminder": {
+        "main": [
+          [
+            {
+              "node": "AR Reminder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Apr 15 - Q1 Est Tax": {
+        "main": [
+          [
+            {
+              "node": "Q1 Tax Reminder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Jun 15 - Q2 Est Tax": {
+        "main": [
+          [
+            {
+              "node": "Q2 Tax Reminder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Sep 15 - Q3 Est Tax": {
+        "main": [
+          [
+            {
+              "node": "Q3 Tax Reminder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Initial compliance calendar",
+    "description": "Created with 8 nodes: Feb 1 - Annual Report Reminder, AR Reminder, Apr 15 - Q1 Est Tax, Q1 Tax Reminder, Jun 15 - Q2 Est Tax and 3 more",
+    "autosaved": false
+  },
+  "activeVersionId": "d11684fa-e784-4b0a-a9b2-3bc034d8d3ab",
+  "connections": {
+    "Feb 1 - Annual Report Reminder": {
+      "main": [
+        [
+          {
+            "node": "AR Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apr 15 - Q1 Est Tax": {
+      "main": [
+        [
+          {
+            "node": "Q1 Tax Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jun 15 - Q2 Est Tax": {
+      "main": [
+        [
+          {
+            "node": "Q2 Tax Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sep 15 - Q3 Est Tax": {
+      "main": [
+        [
+          {
+            "node": "Q3 Tax Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-08-26T02:06:55.575Z",
+  "id": "tdOi1jInGg9Ympup",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "ICP Compliance Calendar",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "65400d03-2be5-4bb5-9a04-aa829827ed12",
+      "name": "Feb 1 - Annual Report Reminder",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 1 2 *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6e90cc4e-443a-4af5-b530-dee6439e388e",
+      "name": "AR Reminder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ar-type",
+              "name": "type",
+              "value": "annual_report_reminder",
+              "type": "string"
+            },
+            {
+              "id": "ar-subject",
+              "name": "subject",
+              "value": "FL LLC Annual Report due May 1 — $138.75 fee, $400 late penalty after",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1bb4f096-20c9-47ad-8469-55911568d1d3",
+      "name": "Apr 15 - Q1 Est Tax",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        224
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 15 4 *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a4eb3c63-b514-47eb-ad27-a2c43161c0d1",
+      "name": "Q1 Tax Reminder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        224
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "q1-type",
+              "name": "type",
+              "value": "estimated_tax_reminder",
+              "type": "string"
+            },
+            {
+              "id": "q1-subject",
+              "name": "subject",
+              "value": "Q2 estimated tax due June 15",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "8a1cf465-5915-4629-ba7f-e90fbbb72a09",
+      "name": "Jun 15 - Q2 Est Tax",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        448
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 15 6 *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "97ca8f22-8557-4744-b487-39961d51bdbe",
+      "name": "Q2 Tax Reminder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        448
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "q2-type",
+              "name": "type",
+              "value": "estimated_tax_reminder",
+              "type": "string"
+            },
+            {
+              "id": "q2-subject",
+              "name": "subject",
+              "value": "Q3 estimated tax due Sep 15 + AR dissolution cliff 4th Fri Sep",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "1e8508dd-a82b-493f-a99f-711789f51d14",
+      "name": "Sep 15 - Q3 Est Tax",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        672
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 15 9 *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fd7861d2-7205-4b23-863d-e6b4ee778254",
+      "name": "Q3 Tax Reminder",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        672
+      ],
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "q3-type",
+              "name": "type",
+              "value": "estimated_tax_reminder",
+              "type": "string"
+            },
+            {
+              "id": "q3-subject",
+              "name": "subject",
+              "value": "Q4 estimated tax due Jan 15",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-08-26T02:06:55.580Z",
+      "createdAt": "2026-08-26T02:06:55.580Z",
+      "role": "workflow:owner",
+      "workflowId": "tdOi1jInGg9Ympup",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": {
+    "node:Feb 1 - Annual Report Reminder": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Apr 15 - Q1 Est Tax": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Jun 15 - Q2 Est Tax": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Sep 15 - Q3 Est Tax": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "tags": [],
+  "triggerCount": 4,
+  "updatedAt": "2026-08-26T02:22:17.855Z",
+  "versionId": "d11684fa-e784-4b0a-a9b2-3bc034d8d3ab"
+}
