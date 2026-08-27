@@ -1,30 +1,11 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-08-25T20:37:14.000Z",
-    "createdAt": "2026-08-25T20:37:01.162Z",
-    "versionId": "a010d5b6-7cdf-4c6e-9660-50d9e1daccd5",
+    "updatedAt": "2026-08-26T19:40:37.000Z",
+    "createdAt": "2026-08-26T19:40:06.125Z",
+    "versionId": "a2a2572a-6646-423d-9294-7c84b60b7999",
     "workflowId": "FwksS72A0qNi1rJC",
     "nodes": [
-      {
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "icp-lead",
-          "options": {
-            "allowedOrigins": "*",
-            "ignoreBots": true
-          }
-        },
-        "id": "6e57164d-6d8b-47e6-8079-066c9945d949",
-        "name": "Lead Form Webhook",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 2.1,
-        "position": [
-          0,
-          0
-        ],
-        "webhookId": "a1a74ed3-bc11-459f-8e66-fc90bc38b713"
-      },
       {
         "parameters": {
           "conditions": {
@@ -97,7 +78,7 @@
               {
                 "id": "lead-source",
                 "name": "sourceForm",
-                "value": "={{ $json.body.source || \"landing-page\" }}",
+                "value": "={{ $json.body.sourceForm || \"landing-page\" }}",
                 "type": "string"
               },
               {
@@ -159,20 +140,28 @@
             "name": "Zoho account"
           }
         }
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "icp-lead",
+          "options": {
+            "allowedOrigins": "*",
+            "ignoreBots": true
+          }
+        },
+        "id": "lead-form-webhook-fresh",
+        "name": "Lead Form Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "2543f984-be5b-4b69-bd66-76ac906a14f2"
       }
     ],
     "connections": {
-      "Lead Form Webhook": {
-        "main": [
-          [
-            {
-              "node": "Valid Lead?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Valid Lead?": {
         "main": [
           [
@@ -194,27 +183,27 @@
             }
           ]
         ]
+      },
+      "Lead Form Webhook": {
+        "main": [
+          [
+            {
+              "node": "Valid Lead?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia",
-    "name": "Version a010d5b6",
-    "description": "",
+    "name": "Version a2a2572a",
+    "description": "Fixing source field missmatch",
     "autosaved": true
   },
-  "activeVersionId": "a010d5b6-7cdf-4c6e-9660-50d9e1daccd5",
+  "activeVersionId": "a2a2572a-6646-423d-9294-7c84b60b7999",
   "connections": {
-    "Lead Form Webhook": {
-      "main": [
-        [
-          {
-            "node": "Valid Lead?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Valid Lead?": {
       "main": [
         [
@@ -236,6 +225,17 @@
           }
         ]
       ]
+    },
+    "Lead Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Valid Lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "createdAt": "2026-08-25T18:01:36.801Z",
@@ -248,25 +248,6 @@
   "name": "ICP Lead Intake",
   "nodeGroups": [],
   "nodes": [
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "icp-lead",
-        "options": {
-          "allowedOrigins": "*",
-          "ignoreBots": true
-        }
-      },
-      "id": "6e57164d-6d8b-47e6-8079-066c9945d949",
-      "name": "Lead Form Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        0,
-        0
-      ],
-      "webhookId": "a1a74ed3-bc11-459f-8e66-fc90bc38b713"
-    },
     {
       "parameters": {
         "conditions": {
@@ -339,7 +320,7 @@
             {
               "id": "lead-source",
               "name": "sourceForm",
-              "value": "={{ $json.body.source || \"landing-page\" }}",
+              "value": "={{ $json.body.sourceForm || \"landing-page\" }}",
               "type": "string"
             },
             {
@@ -401,6 +382,25 @@
           "name": "Zoho account"
         }
       }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "icp-lead",
+        "options": {
+          "allowedOrigins": "*",
+          "ignoreBots": true
+        }
+      },
+      "id": "lead-form-webhook-fresh",
+      "name": "Lead Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "2543f984-be5b-4b69-bd66-76ac906a14f2"
     }
   ],
   "origin": "n8n",
@@ -426,6 +426,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-08-25T20:37:01.161Z",
-  "versionId": "a010d5b6-7cdf-4c6e-9660-50d9e1daccd5"
+  "updatedAt": "2026-08-26T19:40:06.125Z",
+  "versionId": "a2a2572a-6646-423d-9294-7c84b60b7999"
 }
