@@ -1,0 +1,236 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Webhook — img.contact.upsert": {
+      "main": [
+        [
+          {
+            "node": "Code — validar canonico NAT-108",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — validar canonico NAT-108": {
+      "main": [
+        [
+          {
+            "node": "Upsert a contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert a contact": {
+      "main": [
+        [
+          {
+            "node": "IF — opt-out?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — opt-out?": {
+      "main": [
+        [
+          {
+            "node": "HTTP — Brevo blocklist",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder — 200 canonico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP — Brevo blocklist": {
+      "main": [
+        [
+          {
+            "node": "Responder — 200 canonico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-19T04:07:58.600Z",
+  "id": "e5xGO0kpruzegxDk",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "img.contact.upsert — canonico NAT-108",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "img.contact.upsert",
+        "options": {}
+      },
+      "id": "nat108-webhook",
+      "name": "Webhook — img.contact.upsert",
+      "position": [
+        0,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "webhookId": "6a0cf3bd-2ff3-4b54-b23c-4b71b1cc1709"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst c = raw.body ?? raw;\nif (!c.externalId) throw new Error('NAT-108: falta externalId (contrato canonico)');\nif (!c.email && !c.smsPhone) throw new Error('NAT-108: requiere email o smsPhone');\nreturn [{ json: { canonic: c } }];"
+      },
+      "id": "nat108-code",
+      "name": "Code — validar canonico NAT-108",
+      "position": [
+        224,
+        0
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, contract: 'NAT-108', externalId: $json.canonic.externalId }) }}",
+        "options": {}
+      },
+      "id": "nat108-resp",
+      "name": "Responder — 200 canonico",
+      "position": [
+        672,
+        0
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "email": "={{ $json.canonic.email }}",
+        "upsertAttributes": {
+          "upsertAttributesValues": [
+            {
+              "fieldName": "NOMBRE",
+              "fieldValue": "={{ $json.canonic.firstName }}"
+            },
+            {
+              "fieldName": "APELLIDOS",
+              "fieldValue": "={{ $json.canonic.lastName }}"
+            },
+            {
+              "fieldName": "SMS",
+              "fieldValue": "={{ $json.canonic.smsPhone }}"
+            },
+            {
+              "fieldName": "EXT_ID",
+              "fieldValue": "={{ $json.canonic.externalId }}"
+            }
+          ]
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.sendInBlue",
+      "typeVersion": 1,
+      "position": [
+        368,
+        48
+      ],
+      "id": "be6ec751-ed56-4fb2-8f45-fe4d3cffd7ca",
+      "name": "Upsert a contact",
+      "credentials": {
+        "sendInBlueApi": {
+          "id": "jyESufIOnZ60pFAw",
+          "name": "Brevo account"
+        }
+      }
+    },
+    {
+      "id": "up-if",
+      "name": "IF — opt-out?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ !(($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).emailMarketing && ($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).smsMarketing) }}",
+              "operation": "equal",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "up-http",
+      "name": "HTTP — Brevo blocklist",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ \"https://api.brevo.com/v3/contacts/\" + $(\"Code — validar canonico NAT-108\").item.json.canonic.email }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({emailBlacklisted: !(($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).emailMarketing), smsBlacklisted: !(($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).smsMarketing)}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-09-19T04:07:58.604Z",
+      "createdAt": "2026-09-19T04:07:58.604Z",
+      "role": "workflow:owner",
+      "workflowId": "e5xGO0kpruzegxDk",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-19T07:03:16.747Z",
+  "versionId": "32e94541-0247-43e7-8096-4502ed1c205e"
+}
