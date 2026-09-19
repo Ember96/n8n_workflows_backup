@@ -1,0 +1,144 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Webhook — img.campaign.send": {
+      "main": [
+        [
+          {
+            "node": "Code — validar canonico NAT-108",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — validar canonico NAT-108": {
+      "main": [
+        [
+          {
+            "node": "Brevo — POST v3 emailCampaigns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brevo — POST v3 emailCampaigns": {
+      "main": [
+        [
+          {
+            "node": "Responder — 200 canonico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-19T05:50:40.847Z",
+  "id": "lrWL0Ia8SQifPTjd",
+  "isArchived": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "img.campaign.send — canonico NAT-108",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "img.campaign.send",
+        "options": {}
+      },
+      "id": "w1",
+      "name": "Webhook — img.campaign.send",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "aed3517e-4049-4272-ba09-b50e8c6ffd48"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw=$input.first().json; const c=raw.body ?? raw; if(!c.subject) throw new Error(\"NAT-108: falta subject\"); if(!c.senderEmail) throw new Error(\"NAT-108: falta senderEmail\"); if(!c.htmlContent && !c.templateId) throw new Error(\"NAT-108: falta htmlContent o templateId\"); if(!(c.listIds||c.to)) throw new Error(\"NAT-108: falta audiencia listIds o to\"); const b={name:c.name||c.subject,subject:c.subject,sender:{name:c.senderName||\"GrowBusy\",email:c.senderEmail},recipients:{listIds:c.listIds}}; if(c.templateId){b.templateId=c.templateId;} else {b.htmlContent=c.htmlContent;} return [{json:{canonic:c,brevoBody:b}}];"
+      },
+      "id": "w2",
+      "name": "Code — validar canonico NAT-108",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/emailCampaigns",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.brevoBody) }}",
+        "options": {}
+      },
+      "id": "w3",
+      "name": "Brevo — POST v3 emailCampaigns",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ok:true,contract:\"NAT-108\",brevoCampaignId:$json.id||null}) }}",
+        "options": {}
+      },
+      "id": "w4",
+      "name": "Responder — 200 canonico",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-09-19T05:50:40.852Z",
+      "createdAt": "2026-09-19T05:50:40.852Z",
+      "role": "workflow:owner",
+      "workflowId": "lrWL0Ia8SQifPTjd",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-19T06:05:14.473Z",
+  "versionId": "38f58448-521c-412e-9890-d993f09c37e9"
+}
