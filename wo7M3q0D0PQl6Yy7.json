@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-06-10T21:18:02.000Z",
-    "createdAt": "2026-06-10T21:17:59.048Z",
     "versionId": "d4a8230e-02c6-474c-8abb-f4049266db41",
     "workflowId": "wo7M3q0D0PQl6Yy7",
     "nodes": [
@@ -119,7 +117,9 @@
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version d4a8230e",
     "description": "",
-    "autosaved": true
+    "autosaved": true,
+    "createdAt": "2026-06-10T21:17:59.048Z",
+    "updatedAt": "2026-06-10T21:18:02.000Z"
   },
   "activeVersionId": "d4a8230e-02c6-474c-8abb-f4049266db41",
   "connections": {
@@ -252,11 +252,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-06-09T22:45:22.307Z",
-      "createdAt": "2026-06-09T22:45:22.307Z",
       "role": "workflow:owner",
       "workflowId": "wo7M3q0D0PQl6Yy7",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-06-09T22:45:22.307Z",
+      "updatedAt": "2026-06-09T22:45:22.307Z"
     }
   ],
   "staticData": null,
