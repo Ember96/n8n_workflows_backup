@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-09-03T22:35:43.383Z",
-    "createdAt": "2026-09-03T22:35:43.383Z",
     "versionId": "50e95527-1a3f-4bcd-ae2e-27ec412e30cd",
     "workflowId": "FwksS72A0qNi1rJC",
     "nodes": [
@@ -350,7 +348,9 @@
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
     "name": "Revert bot protection",
     "description": "Revert ignoreBots to false after the bot-detection test.",
-    "autosaved": false
+    "autosaved": false,
+    "createdAt": "2026-09-03T22:35:43.383Z",
+    "updatedAt": "2026-09-03T22:35:43.383Z"
   },
   "activeVersionId": "50e95527-1a3f-4bcd-ae2e-27ec412e30cd",
   "connections": {
@@ -716,11 +716,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-08-25T18:01:36.810Z",
-      "createdAt": "2026-08-25T18:01:36.810Z",
       "role": "workflow:owner",
       "workflowId": "FwksS72A0qNi1rJC",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-08-25T18:01:36.810Z",
+      "updatedAt": "2026-08-25T18:01:36.810Z"
     }
   ],
   "staticData": null,
