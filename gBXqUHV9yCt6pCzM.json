@@ -69,6 +69,7 @@
     {
       "id": "r1",
       "name": "Webhook — reporte",
+      "webhookId": "55bcb4e3-039e-42ef-8d24-0a736009b424",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
@@ -80,8 +81,7 @@
         "httpMethod": "GET",
         "responseMode": "lastNode",
         "options": {}
-      },
-      "webhookId": "55bcb4e3-039e-42ef-8d24-0a736009b424"
+      }
     },
     {
       "id": "r2",
@@ -94,7 +94,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const q=$input.first().json.query||{}; const tok=q.token||null; const EXPECTED=\"QA-REPORTE-TOKEN-CAMBIAR\"; if(tok!==EXPECTED) throw new Error(\"forbidden: token invalido\"); return [{json:{client:(q.client||\"growbusy\"),authorized:true}}];"
+        "jsCode": "const q=$input.first().json.query||{}; const TOKENS={\"0ca422535d27d5c6c3bbaef922d61fd600e524311d3019b7b073aca7b3443d5b\":\"growbusy\"}; const tok=(q.token||null); const client=TOKENS[tok]; if(!client) throw new Error(\"forbidden: token invalido\"); return [{json:{client:((q.client||client)),authorized:true}}];"
       }
     },
     {
@@ -125,6 +125,7 @@
       "name": "Zoho — deals",
       "type": "n8n-nodes-base.zohoCrm",
       "typeVersion": 1,
+      "alwaysOutputData": true,
       "position": [
         440,
         220
@@ -138,8 +139,7 @@
           "id": "R5WqgTreF3p3gViM",
           "name": "Zoho account"
         }
-      },
-      "alwaysOutputData": true
+      }
     },
     {
       "id": "r5",
@@ -182,16 +182,16 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-09-20T03:00:13.443Z",
-      "createdAt": "2026-09-20T03:00:13.443Z",
       "role": "workflow:owner",
       "workflowId": "gBXqUHV9yCt6pCzM",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-20T03:00:13.443Z",
+      "updatedAt": "2026-09-20T03:00:13.443Z"
     }
   ],
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-20T03:04:31.463Z",
-  "versionId": "9f09173f-e494-43d7-aa2b-0ecd071d7a4a"
+  "updatedAt": "2026-09-20T03:42:04.449Z",
+  "versionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c"
 }
