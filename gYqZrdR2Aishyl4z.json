@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-01-13T02:39:09.000Z",
-    "createdAt": "2026-01-13T02:38:56.227Z",
     "versionId": "5848a20a-0d79-4d36-8fcf-61543d462861",
     "workflowId": "gYqZrdR2Aishyl4z",
     "nodes": [
@@ -182,7 +180,9 @@
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 5848a20a",
     "description": "Removing unnecessary note",
-    "autosaved": false
+    "autosaved": false,
+    "createdAt": "2026-01-13T02:38:56.227Z",
+    "updatedAt": "2026-01-13T02:39:09.000Z"
   },
   "activeVersionId": "5848a20a-0d79-4d36-8fcf-61543d462861",
   "connections": {
@@ -378,11 +378,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-01-02T23:53:46.836Z",
-      "createdAt": "2026-01-02T23:53:46.836Z",
       "role": "workflow:owner",
       "workflowId": "gYqZrdR2Aishyl4z",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-01-02T23:53:46.836Z",
+      "updatedAt": "2026-01-02T23:53:46.836Z"
     }
   ],
   "staticData": null,
