@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-06-19T00:14:16.000Z",
-    "createdAt": "2026-06-19T00:14:13.540Z",
     "versionId": "48659a38-407f-4abd-b06e-4e2612f22aed",
     "workflowId": "ytSlvzb0VKP5kZDK",
     "nodes": [
@@ -368,7 +366,9 @@
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 48659a38",
     "description": "",
-    "autosaved": true
+    "autosaved": true,
+    "createdAt": "2026-06-19T00:14:13.540Z",
+    "updatedAt": "2026-06-19T00:14:16.000Z"
   },
   "activeVersionId": "48659a38-407f-4abd-b06e-4e2612f22aed",
   "connections": {
@@ -754,38 +754,38 @@
   },
   "shared": [
     {
-      "updatedAt": "2025-12-10T00:25:34.716Z",
-      "createdAt": "2025-12-10T00:25:34.716Z",
       "role": "workflow:owner",
       "workflowId": "ytSlvzb0VKP5kZDK",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2025-12-10T00:25:34.716Z",
+      "updatedAt": "2025-12-10T00:25:34.716Z"
     }
   ],
   "staticData": null,
   "tags": [
     {
-      "updatedAt": "2025-12-10T00:25:12.441Z",
-      "createdAt": "2025-12-10T00:25:12.441Z",
       "id": "D9R2tLVFhy7dlFGj",
-      "name": "RAG"
+      "name": "RAG",
+      "createdAt": "2025-12-10T00:25:12.441Z",
+      "updatedAt": "2025-12-10T00:25:12.441Z"
     },
     {
-      "updatedAt": "2025-12-10T00:25:17.560Z",
-      "createdAt": "2025-12-10T00:25:17.560Z",
       "id": "HZR9DMawym1vcVbW",
-      "name": "AI"
+      "name": "AI",
+      "createdAt": "2025-12-10T00:25:17.560Z",
+      "updatedAt": "2025-12-10T00:25:17.560Z"
     },
     {
-      "updatedAt": "2025-12-10T00:25:22.718Z",
-      "createdAt": "2025-12-10T00:25:22.718Z",
       "id": "Qvbc7diNxfkohViA",
-      "name": "Supabase"
+      "name": "Supabase",
+      "createdAt": "2025-12-10T00:25:22.718Z",
+      "updatedAt": "2025-12-10T00:25:22.718Z"
     },
     {
-      "updatedAt": "2025-12-10T00:25:32.777Z",
-      "createdAt": "2025-12-10T00:25:32.777Z",
       "id": "efKqcu94yqJn8KKH",
-      "name": "Mimir"
+      "name": "Mimir",
+      "createdAt": "2025-12-10T00:25:32.777Z",
+      "updatedAt": "2025-12-10T00:25:32.777Z"
     }
   ],
   "triggerCount": 2,
