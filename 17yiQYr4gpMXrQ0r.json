@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-09-08T00:19:11.330Z",
-    "createdAt": "2026-09-08T00:19:11.330Z",
     "versionId": "61f05622-142e-46ab-b56e-e5f7c155f077",
     "workflowId": "17yiQYr4gpMXrQ0r",
     "nodes": [
@@ -142,7 +140,9 @@
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
     "name": "Fix base64 decode bug",
     "description": "Fix b64dec third-byte mask (e2&3 not e2&63)",
-    "autosaved": false
+    "autosaved": false,
+    "createdAt": "2026-09-08T00:19:11.330Z",
+    "updatedAt": "2026-09-08T00:19:11.330Z"
   },
   "activeVersionId": "61f05622-142e-46ab-b56e-e5f7c155f077",
   "connections": {
@@ -299,11 +299,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-09-07T19:25:36.276Z",
-      "createdAt": "2026-09-07T19:25:36.276Z",
       "role": "workflow:owner",
       "workflowId": "17yiQYr4gpMXrQ0r",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-07T19:25:36.276Z",
+      "updatedAt": "2026-09-07T19:25:36.276Z"
     }
   ],
   "staticData": null,
