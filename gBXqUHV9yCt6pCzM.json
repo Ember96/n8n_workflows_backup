@@ -1,0 +1,197 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Webhook — reporte": {
+      "main": [
+        [
+          {
+            "node": "Code — validar token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — validar token": {
+      "main": [
+        [
+          {
+            "node": "Brevo — campañas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brevo — campañas": {
+      "main": [
+        [
+          {
+            "node": "Zoho — deals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho — deals": {
+      "main": [
+        [
+          {
+            "node": "Code — unir y HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — unir y HTML": {
+      "main": [
+        [
+          {
+            "node": "Responder — HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-20T03:00:13.440Z",
+  "id": "gBXqUHV9yCt6pCzM",
+  "isArchived": false,
+  "meta": null,
+  "name": "img.reporte.cliente — reporte vivo NAT-116",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "r1",
+      "name": "Webhook — reporte",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "img.reporte.cliente",
+        "httpMethod": "GET",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "55bcb4e3-039e-42ef-8d24-0a736009b424"
+    },
+    {
+      "id": "r2",
+      "name": "Code — validar token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const q=$input.first().json.query||{}; const tok=q.token||null; const EXPECTED=\"QA-REPORTE-TOKEN-CAMBIAR\"; if(tok!==EXPECTED) throw new Error(\"forbidden: token invalido\"); return [{json:{client:(q.client||\"growbusy\"),authorized:true}}];"
+      }
+    },
+    {
+      "id": "r3",
+      "name": "Brevo — campañas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.brevo.com/v3/emailCampaigns?limit=20",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    },
+    {
+      "id": "r4",
+      "name": "Zoho — deals",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        440,
+        220
+      ],
+      "parameters": {
+        "resource": "deal",
+        "operation": "getAll"
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "r5",
+      "name": "Code — unir y HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        660,
+        110
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const bitems=$(\"Brevo — campañas\").all(); const zitems=$(\"Zoho — deals\").all(); const camps=((bitems[0]||{}).json||{}).campaigns||[]; let deals=[]; for(const it of zitems){const j=(it||{}).json||{}; if(Array.isArray(j.data)){deals=j.data;} else if(j.id&&j.Deal_Name){deals.push(j);}} let won=0,revenue=0; for(const d of deals){const st=String(d.Stage||\"\").toLowerCase(); if(/closed won|ganado/.test(st)){won++; revenue+=Number(d.Amount||0);}} const html=\"<html><head><meta charset=utf-8><title>Reporte GrowBusy</title></head><body><h1>Reporte GrowBusy</h1><p>Campañas: \"+camps.length+\"</p><p>Deals ganados: \"+won+\"</p><p>Revenue atribuido (last-touch 30d): $\"+revenue+\"</p><ul>\"+camps.map(c=>\"<li>\"+c.name+\" — \"+c.status+\"</li>\").join(\"\")+\"</ul></body></html>\"; return [{json:{html:html}}];"
+      }
+    },
+    {
+      "id": "r6",
+      "name": "Responder — HTML",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        110
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {}
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "updatedAt": "2026-09-20T03:00:13.443Z",
+      "createdAt": "2026-09-20T03:00:13.443Z",
+      "role": "workflow:owner",
+      "workflowId": "gBXqUHV9yCt6pCzM",
+      "projectId": "qxeR1gIEc01jkoF9"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-20T03:04:31.463Z",
+  "versionId": "9f09173f-e494-43d7-aa2b-0ecd071d7a4a"
+}
