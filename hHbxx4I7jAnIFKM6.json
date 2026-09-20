@@ -150,11 +150,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-01-27T02:38:23.656Z",
-      "createdAt": "2026-01-27T02:38:23.656Z",
       "role": "workflow:owner",
       "workflowId": "hHbxx4I7jAnIFKM6",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-01-27T02:38:23.656Z",
+      "updatedAt": "2026-01-27T02:38:23.656Z"
     }
   ],
   "staticData": null,
