@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-07-26T04:21:36.018Z",
-    "createdAt": "2026-07-26T04:21:36.018Z",
     "versionId": "d004fe43-136d-4fe7-83e6-0284dc84fb13",
     "workflowId": "RR2N6jsuCCVmaA7u",
     "nodes": [
@@ -338,7 +336,9 @@
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
     "name": "Initial version",
     "description": "Add fallback to bid/lastPrice when dayLow/dayHigh are missing or null in the Yahoo API response (common for thinly-traded OTM contracts). The range% computation now always has data to work with.",
-    "autosaved": false
+    "autosaved": false,
+    "createdAt": "2026-07-26T04:21:36.018Z",
+    "updatedAt": "2026-07-26T04:21:36.018Z"
   },
   "activeVersionId": "d004fe43-136d-4fe7-83e6-0284dc84fb13",
   "connections": {
@@ -691,11 +691,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-07-26T04:21:36.016Z",
-      "createdAt": "2026-07-26T04:21:36.016Z",
       "role": "workflow:owner",
       "workflowId": "RR2N6jsuCCVmaA7u",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-07-26T04:21:36.016Z",
+      "updatedAt": "2026-07-26T04:21:36.016Z"
     }
   ],
   "staticData": null,
