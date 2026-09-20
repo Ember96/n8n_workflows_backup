@@ -1,161 +1,7 @@
 {
-  "active": true,
-  "activeVersion": {
-    "updatedAt": "2026-09-19T21:35:08.413Z",
-    "createdAt": "2026-09-19T21:35:08.413Z",
-    "versionId": "9128fc68-7523-487c-b372-087a346cb747",
-    "workflowId": "mUapuI0CYaKh5T9o",
-    "nodes": [
-      {
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "img.event.in",
-          "options": {}
-        },
-        "id": "e1",
-        "name": "Webhook — img.event.in",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 1,
-        "position": [
-          0,
-          0
-        ],
-        "webhookId": "6e7798fd-c998-4feb-957b-70f03631748d"
-      },
-      {
-        "parameters": {
-          "jsCode": "const raw=$input.first().json; const b=(raw.body||raw); let t=String(b.event||b.eventType||\"\").toLowerCase(); if(t===\"click\") t=\"clicked\"; const allowed=[\"delivered\",\"opened\",\"clicked\",\"hardbounce\",\"softbounce\",\"unsubscribed\",\"blocked\",\"spam\",\"bounced\",\"blocklisted\",\"stopped\",\"replied\"]; if(allowed.indexOf(t)<0) throw new Error(\"NAT-108: eventType no soportado: \"+t); const ev={eventId:(t+\"|\"+(b.email||b.smsPhone||\"?\")+\"|\"+(b.ts_event||b.eventId||Date.now()))}; const c={eventId:ev.eventId,eventType:t,email:(b.email||null),smsPhone:(b.smsPhone||null),campaignBrevoId:(b.camp_id||b.campaignBrevoId||b.campaignId||null),occurredAt:(b.date_event||b.occurredAt||new Date().toISOString())}; const st=$getWorkflowStaticData(\"global\"); st.seen=st.seen||{}; if(st.seen[c.eventId]){return [{json:{duplicate:true,event:c}}];} st.seen[c.eventId]=1; return [{json:{duplicate:false,event:c}}];"
-        },
-        "id": "e2",
-        "name": "Code — normalizar evento NAT-108",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 1,
-        "position": [
-          224,
-          0
-        ]
-      },
-      {
-        "parameters": {
-          "conditions": {
-            "boolean": [
-              {
-                "value1": "={{ $json.duplicate }}",
-                "value2": true
-              }
-            ]
-          }
-        },
-        "id": "e3",
-        "name": "IF — duplicado?",
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 1,
-        "position": [
-          448,
-          0
-        ]
-      },
-      {
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "={{ JSON.stringify({ok:true,contract:\"NAT-108\",deduped:$json.duplicate}) }}",
-          "options": {}
-        },
-        "id": "e4",
-        "name": "Responder — 200 canonico",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1,
-        "position": [
-          672,
-          0
-        ]
-      },
-      {
-        "parameters": {
-          "resource": "contact",
-          "operation": "upsert",
-          "additionalFields": {
-            "Email": "={{ $json.event.email }}",
-            "Description": "={{ \"NAT-108 \" + $json.event.eventType + \" camp:\" + $json.event.campaignBrevoId + \" \" + $json.event.occurredAt }}"
-          },
-          "lastName": "={{ $json.event.lastName || $json.event.email }}"
-        },
-        "type": "n8n-nodes-base.zohoCrm",
-        "typeVersion": 1,
-        "position": [
-          640,
-          112
-        ],
-        "id": "869ec8e5-df71-4871-83a4-cc3795d1f1f7",
-        "name": "Create or Update a contact",
-        "credentials": {
-          "zohoOAuth2Api": {
-            "id": "R5WqgTreF3p3gViM",
-            "name": "Zoho account"
-          }
-        }
-      }
-    ],
-    "connections": {
-      "Webhook — img.event.in": {
-        "main": [
-          [
-            {
-              "node": "Code — normalizar evento NAT-108",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Code — normalizar evento NAT-108": {
-        "main": [
-          [
-            {
-              "node": "IF — duplicado?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "IF — duplicado?": {
-        "main": [
-          [
-            {
-              "node": "Responder — 200 canonico",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Create or Update a contact",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Create or Update a contact": {
-        "main": [
-          [
-            {
-              "node": "Responder — 200 canonico",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      }
-    },
-    "nodeGroups": [],
-    "authors": "Jose Ricardo Cedeno Garcia",
-    "name": null,
-    "description": null,
-    "autosaved": false
-  },
-  "activeVersionId": "9128fc68-7523-487c-b372-087a346cb747",
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
   "connections": {
     "Webhook — img.event.in": {
       "main": [
@@ -219,25 +65,22 @@
   "nodeGroups": [],
   "nodes": [
     {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "img.event.in",
-        "options": {}
-      },
       "id": "e1",
       "name": "Webhook — img.event.in",
+      "webhookId": "6e7798fd-c998-4feb-957b-70f03631748d",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
         0,
         0
       ],
-      "webhookId": "6e7798fd-c998-4feb-957b-70f03631748d"
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "img.event.in",
+        "options": {}
+      }
     },
     {
-      "parameters": {
-        "jsCode": "const raw=$input.first().json; const b=(raw.body||raw); let t=String(b.event||b.eventType||\"\").toLowerCase(); if(t===\"click\") t=\"clicked\"; const allowed=[\"delivered\",\"opened\",\"clicked\",\"hardbounce\",\"softbounce\",\"unsubscribed\",\"blocked\",\"spam\",\"bounced\",\"blocklisted\",\"stopped\",\"replied\"]; if(allowed.indexOf(t)<0) throw new Error(\"NAT-108: eventType no soportado: \"+t); const ev={eventId:(t+\"|\"+(b.email||b.smsPhone||\"?\")+\"|\"+(b.ts_event||b.eventId||Date.now()))}; const c={eventId:ev.eventId,eventType:t,email:(b.email||null),smsPhone:(b.smsPhone||null),campaignBrevoId:(b.camp_id||b.campaignBrevoId||b.campaignId||null),occurredAt:(b.date_event||b.occurredAt||new Date().toISOString())}; const st=$getWorkflowStaticData(\"global\"); st.seen=st.seen||{}; if(st.seen[c.eventId]){return [{json:{duplicate:true,event:c}}];} st.seen[c.eventId]=1; return [{json:{duplicate:false,event:c}}];"
-      },
       "id": "e2",
       "name": "Code — normalizar evento NAT-108",
       "type": "n8n-nodes-base.code",
@@ -245,9 +88,20 @@
       "position": [
         224,
         0
-      ]
+      ],
+      "parameters": {
+        "jsCode": "const raw=$input.first().json; const b=(raw.body||raw); let t=String(b.event||b.eventType||\"\").toLowerCase(); if(t===\"click\") t=\"clicked\"; const allowed=[\"delivered\",\"opened\",\"clicked\",\"hardbounce\",\"softbounce\",\"unsubscribed\",\"blocked\",\"spam\",\"bounced\",\"blocklisted\",\"stopped\",\"replied\"]; if(allowed.indexOf(t)<0) throw new Error(\"NAT-108: eventType no soportado: \"+t); const ev={eventId:(t+\"|\"+(b.email||b.smsPhone||\"?\")+\"|\"+(b.ts_event||b.eventId||Date.now()))}; const c={eventId:ev.eventId,eventType:t,email:(b.email||null),smsPhone:(b.smsPhone||null),campaignBrevoId:(b.camp_id||b.campaignBrevoId||b.campaignId||null),occurredAt:(b.date_event||b.occurredAt||new Date().toISOString())}; const st=$getWorkflowStaticData(\"global\"); st.seen=st.seen||{}; if(st.seen[c.eventId]){return [{json:{duplicate:true,event:c}}];} st.seen[c.eventId]=1; return [{json:{duplicate:false,event:c}}];"
+      }
     },
     {
+      "id": "e3",
+      "name": "IF — duplicado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
       "parameters": {
         "conditions": {
           "boolean": [
@@ -257,22 +111,9 @@
             }
           ]
         }
-      },
-      "id": "e3",
-      "name": "IF — duplicado?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        448,
-        0
-      ]
+      }
     },
     {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ok:true,contract:\"NAT-108\",deduped:$json.duplicate}) }}",
-        "options": {}
-      },
       "id": "e4",
       "name": "Responder — 200 canonico",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -280,26 +121,32 @@
       "position": [
         672,
         0
-      ]
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ok:true,contract:\"NAT-108\",deduped:$json.duplicate}) }}",
+        "options": {}
+      }
     },
     {
-      "parameters": {
-        "resource": "contact",
-        "operation": "upsert",
-        "additionalFields": {
-          "Email": "={{ $json.event.email }}",
-          "Description": "={{ \"NAT-108 \" + $json.event.eventType + \" camp:\" + $json.event.campaignBrevoId + \" \" + $json.event.occurredAt }}"
-        },
-        "lastName": "={{ $json.event.lastName || $json.event.email }}"
-      },
+      "id": "869ec8e5-df71-4871-83a4-cc3795d1f1f7",
+      "name": "Create or Update a contact",
       "type": "n8n-nodes-base.zohoCrm",
       "typeVersion": 1,
       "position": [
         640,
         112
       ],
-      "id": "869ec8e5-df71-4871-83a4-cc3795d1f1f7",
-      "name": "Create or Update a contact",
+      "parameters": {
+        "resource": "contact",
+        "operation": "upsert",
+        "additionalFields": {
+          "Email": "={{ $json.event.email }}",
+          "Description": "={{ \"NAT-108 \" + $json.event.eventType + \" camp:\" + $json.event.campaignBrevoId + \" \" + $json.event.occurredAt }}",
+          "Email_Opt_Out": true
+        },
+        "lastName": "={{ $json.event.lastName || $json.event.email }}"
+      },
       "credentials": {
         "zohoOAuth2Api": {
           "id": "R5WqgTreF3p3gViM",
@@ -320,11 +167,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-09-19T06:26:33.973Z",
-      "createdAt": "2026-09-19T06:26:33.973Z",
       "role": "workflow:owner",
       "workflowId": "mUapuI0CYaKh5T9o",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-19T06:26:33.973Z",
+      "updatedAt": "2026-09-19T06:26:33.973Z"
     }
   ],
   "staticData": {
@@ -334,12 +181,19 @@
         "NAT111-QA-EV-003": 1,
         "NAT-QA5-ZOHO-05": 1,
         "opened|gnomeaddict96@gmail.com": 1,
-        "clicked|gnomeaddict96@gmail.com|1789854000": 1
+        "clicked|gnomeaddict96@gmail.com|1789854000": 1,
+        "unsubscribed|nat111-qa-opt-todelete@example.com|NAT111-QA-OPT-001": 1,
+        "unsubscribed|nat111-qa-opt-todelete@example.com|NAT111-QA-OPT-002": 1,
+        "unsubscribed|nat111-qa-opt-todelete@example.com|NAT111-QA-OPT-003": 1,
+        "delivered|nat112-dup-todelete@example.com|NAT112-DUP-001": 1,
+        "delivered|nat112-b01-todelete@example.com|NAT112-B01-001": 1,
+        "hardbounce|nat112-b02-todelete@example.com|NAT112-B02-001": 1,
+        "delivered|?|NAT112-B08-001": 1
       }
     }
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-19T21:35:08.412Z",
-  "versionId": "9128fc68-7523-487c-b372-087a346cb747"
+  "updatedAt": "2026-09-20T03:45:49.851Z",
+  "versionId": "3dced210-4def-4d54-9c0e-2acb64b9c4fd"
 }
