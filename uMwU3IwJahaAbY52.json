@@ -44,7 +44,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const z=$input.first().json; const c=z.body ?? z; const mod=(c.module||c.Module||\"contact\").toLowerCase(); const email=(c.Email||c.email||null); const phone=(c.Mobile||c.Phone||c.Mobile_Phone||c.smsPhone||null); if(!email&&!phone) throw new Error(\"adapter.zoho: falta Email o Mobile/Phone\"); const idv=c.id||c.ID||c.CONTACTID||c.LEADID||null; return [{json:{externalId:String(idv||email||phone),email:email,smsPhone:phone,firstName:(c.First_Name||c.firstName||null),lastName:(c.Last_Name||c.lastName||null),company:(c.Company||c.Account_Name||null),leadStatus:(c.Lead_Status||null),consent:{emailMarketing:!(c.Email_Opt_Out===true||c.Email_Opt_Out===\"true\"),smsMarketing:true},sourceCrm:\"zoho\",sourceClient:(c.sourceClient||\"growbusy\"),sourceModule:mod}}];"
+        "jsCode": "const z=$input.first().json; const c=z.body ?? z; const mod=(c.module||c.Module||\"contact\").toLowerCase(); const email=(c.Email||c.email||null); const phone=(c.Mobile||c.Phone||c.Mobile_Phone||c.smsPhone||null); if(!email&&!phone) throw new Error(\"adapter.zoho: falta Email o Mobile/Phone\"); const idv=c.id||c.ID||c.CONTACTID||c.LEADID||null; return [{json:{externalId:String(idv||email||phone),email:email,smsPhone:phone,firstName:(c.First_Name||c.firstName||null),lastName:(c.Last_Name||c.lastName||null),company:(c.Company||c.Account_Name||null),leadStatus:(c.Lead_Status||null),consent:{emailMarketing:!(c.Email_Opt_Out===true||c.Email_Opt_Out===\"true\"),smsMarketing:true},sourceCrm:\"zoho\",contractVersion:\"1.0\",sourceClient:(c.sourceClient||\"growbusy\"),sourceModule:mod}}];"
       }
     }
   ],
@@ -59,16 +59,16 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-09-19T06:52:49.112Z",
-      "createdAt": "2026-09-19T06:52:49.112Z",
       "role": "workflow:owner",
       "workflowId": "uMwU3IwJahaAbY52",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-19T06:52:49.112Z",
+      "updatedAt": "2026-09-19T06:52:49.112Z"
     }
   ],
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-19T07:37:39.651Z",
-  "versionId": "658cf01e-eb97-4ce2-b373-f8fa8a4473b8"
+  "updatedAt": "2026-09-20T05:30:15.735Z",
+  "versionId": "36b265c7-90bd-462c-a9f0-a7774be77765"
 }
