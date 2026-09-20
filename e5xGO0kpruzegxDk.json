@@ -76,50 +76,58 @@
   "nodeGroups": [],
   "nodes": [
     {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "img.contact.upsert",
-        "options": {}
-      },
       "id": "nat108-webhook",
       "name": "Webhook — img.contact.upsert",
+      "webhookId": "6a0cf3bd-2ff3-4b54-b23c-4b71b1cc1709",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
       "position": [
         0,
         0
       ],
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "webhookId": "6a0cf3bd-2ff3-4b54-b23c-4b71b1cc1709"
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "img.contact.upsert",
+        "options": {}
+      }
     },
     {
-      "parameters": {
-        "jsCode": "const raw = $input.first().json;\nconst c = raw.body ?? raw;\nif (!c.externalId) throw new Error('NAT-108: falta externalId (contrato canonico)');\nif (!c.email && !c.smsPhone) throw new Error('NAT-108: requiere email o smsPhone');\nreturn [{ json: { canonic: c } }];"
-      },
       "id": "nat108-code",
       "name": "Code — validar canonico NAT-108",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
       "position": [
         224,
         0
       ],
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 1
+      "parameters": {
+        "jsCode": "const raw=$input.first().json; const c=(raw.body||raw); if(c.contractVersion!==\"1.0\") throw new Error(\"NAT-108: contractVersion debe ser 1.0\"); const srcc=(c.sourceCrm||\"\").toLowerCase(); if([\"zoho\",\"hubspot\",\"gohighlevel\",\"odoo\",\"brevo\",\"direct\"].indexOf(srcc)<0) throw new Error(\"NAT-108: sourceCrm desconocido\"); if(!c.externalId) throw new Error(\"NAT-108: falta externalId\"); if(!c.email && !c.smsPhone) throw new Error(\"NAT-108: requiere email o smsPhone\"); if(c.email && !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(c.email)) throw new Error(\"NAT-108: email invalido\"); if(c.smsPhone && !/^\\+[1-9][0-9]{7,14}$/.test(c.smsPhone)) throw new Error(\"NAT-108: smsPhone debe ser E.164\"); return [{json:{canonic:c}}];"
+      }
     },
     {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ ok: true, contract: 'NAT-108', externalId: $json.canonic.externalId }) }}",
-        "options": {}
-      },
       "id": "nat108-resp",
       "name": "Responder — 200 canonico",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
       "position": [
         672,
         0
       ],
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, contract: 'NAT-108', externalId: $json.canonic.externalId }) }}",
+        "options": {}
+      }
     },
     {
+      "id": "be6ec751-ed56-4fb2-8f45-fe4d3cffd7ca",
+      "name": "Upsert a contact",
+      "type": "n8n-nodes-base.sendInBlue",
+      "typeVersion": 1,
+      "position": [
+        368,
+        48
+      ],
       "parameters": {
         "resource": "contact",
         "operation": "upsert",
@@ -146,14 +154,6 @@
         },
         "requestOptions": {}
       },
-      "type": "n8n-nodes-base.sendInBlue",
-      "typeVersion": 1,
-      "position": [
-        368,
-        48
-      ],
-      "id": "be6ec751-ed56-4fb2-8f45-fe4d3cffd7ca",
-      "name": "Upsert a contact",
       "credentials": {
         "sendInBlueApi": {
           "id": "jyESufIOnZ60pFAw",
@@ -221,16 +221,16 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-09-19T04:07:58.604Z",
-      "createdAt": "2026-09-19T04:07:58.604Z",
       "role": "workflow:owner",
       "workflowId": "e5xGO0kpruzegxDk",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-19T04:07:58.604Z",
+      "updatedAt": "2026-09-19T04:07:58.604Z"
     }
   ],
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-19T20:27:48.946Z",
-  "versionId": "8a8b194e-aff2-445b-9d5a-d1025b25d53f"
+  "updatedAt": "2026-09-20T05:30:14.515Z",
+  "versionId": "ff4fe6fe-cc0a-4102-9c09-6910afb65517"
 }
