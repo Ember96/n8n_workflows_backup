@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-08-26T02:23:01.000Z",
-    "createdAt": "2026-08-26T02:06:55.582Z",
     "versionId": "d11684fa-e784-4b0a-a9b2-3bc034d8d3ab",
     "workflowId": "tdOi1jInGg9Ympup",
     "nodes": [
@@ -257,7 +255,9 @@
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
     "name": "Initial compliance calendar",
     "description": "Created with 8 nodes: Feb 1 - Annual Report Reminder, AR Reminder, Apr 15 - Q1 Est Tax, Q1 Tax Reminder, Jun 15 - Q2 Est Tax and 3 more",
-    "autosaved": false
+    "autosaved": false,
+    "createdAt": "2026-08-26T02:06:55.582Z",
+    "updatedAt": "2026-08-26T02:23:01.000Z"
   },
   "activeVersionId": "d11684fa-e784-4b0a-a9b2-3bc034d8d3ab",
   "connections": {
@@ -529,11 +529,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-08-26T02:06:55.580Z",
-      "createdAt": "2026-08-26T02:06:55.580Z",
       "role": "workflow:owner",
       "workflowId": "tdOi1jInGg9Ympup",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-08-26T02:06:55.580Z",
+      "updatedAt": "2026-08-26T02:06:55.580Z"
     }
   ],
   "staticData": {
