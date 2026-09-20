@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-06-19T00:13:56.000Z",
-    "createdAt": "2026-06-19T00:13:19.362Z",
     "versionId": "ec4921bf-e7df-486e-aad8-7fc3ae7511c4",
     "workflowId": "hXK1eZBbzYKWyuRf",
     "nodes": [
@@ -356,7 +354,9 @@
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version ec4921bf",
     "description": "Updating the Brain model because I'm not that cheap to use free",
-    "autosaved": true
+    "autosaved": true,
+    "createdAt": "2026-06-19T00:13:19.362Z",
+    "updatedAt": "2026-06-19T00:13:56.000Z"
   },
   "activeVersionId": "ec4921bf-e7df-486e-aad8-7fc3ae7511c4",
   "connections": {
@@ -731,38 +731,38 @@
   },
   "shared": [
     {
-      "updatedAt": "2025-12-21T19:43:44.231Z",
-      "createdAt": "2025-12-21T19:43:44.231Z",
       "role": "workflow:owner",
       "workflowId": "hXK1eZBbzYKWyuRf",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2025-12-21T19:43:44.231Z",
+      "updatedAt": "2025-12-21T19:43:44.231Z"
     }
   ],
   "staticData": null,
   "tags": [
     {
-      "updatedAt": "2025-12-10T00:25:12.441Z",
-      "createdAt": "2025-12-10T00:25:12.441Z",
       "id": "D9R2tLVFhy7dlFGj",
-      "name": "RAG"
+      "name": "RAG",
+      "createdAt": "2025-12-10T00:25:12.441Z",
+      "updatedAt": "2025-12-10T00:25:12.441Z"
     },
     {
-      "updatedAt": "2025-12-10T00:25:17.560Z",
-      "createdAt": "2025-12-10T00:25:17.560Z",
       "id": "HZR9DMawym1vcVbW",
-      "name": "AI"
+      "name": "AI",
+      "createdAt": "2025-12-10T00:25:17.560Z",
+      "updatedAt": "2025-12-10T00:25:17.560Z"
     },
     {
-      "updatedAt": "2025-12-10T00:25:22.718Z",
-      "createdAt": "2025-12-10T00:25:22.718Z",
       "id": "Qvbc7diNxfkohViA",
-      "name": "Supabase"
+      "name": "Supabase",
+      "createdAt": "2025-12-10T00:25:22.718Z",
+      "updatedAt": "2025-12-10T00:25:22.718Z"
     },
     {
-      "updatedAt": "2025-12-10T00:25:32.777Z",
-      "createdAt": "2025-12-10T00:25:32.777Z",
       "id": "efKqcu94yqJn8KKH",
-      "name": "Mimir"
+      "name": "Mimir",
+      "createdAt": "2025-12-10T00:25:32.777Z",
+      "updatedAt": "2025-12-10T00:25:32.777Z"
     }
   ],
   "triggerCount": 1,
