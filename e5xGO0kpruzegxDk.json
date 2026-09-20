@@ -127,11 +127,11 @@
         "upsertAttributes": {
           "upsertAttributesValues": [
             {
-              "fieldName": "NOMBRE",
+              "fieldName": "FIRSTNAME",
               "fieldValue": "={{ $json.canonic.firstName }}"
             },
             {
-              "fieldName": "APELLIDOS",
+              "fieldName": "LASTNAME",
               "fieldValue": "={{ $json.canonic.lastName }}"
             },
             {
@@ -139,7 +139,7 @@
               "fieldValue": "={{ $json.canonic.smsPhone }}"
             },
             {
-              "fieldName": "EXT_ID",
+              "fieldName": "EXTERNAL_ID",
               "fieldValue": "={{ $json.canonic.externalId }}"
             }
           ]
@@ -231,6 +231,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-19T07:03:16.747Z",
-  "versionId": "32e94541-0247-43e7-8096-4502ed1c205e"
+  "updatedAt": "2026-09-19T20:27:48.946Z",
+  "versionId": "8a8b194e-aff2-445b-9d5a-d1025b25d53f"
 }
