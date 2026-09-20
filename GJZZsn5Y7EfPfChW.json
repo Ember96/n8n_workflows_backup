@@ -1,8 +1,6 @@
 {
   "active": true,
   "activeVersion": {
-    "updatedAt": "2026-05-20T03:26:06.000Z",
-    "createdAt": "2026-05-20T03:25:40.544Z",
     "versionId": "1f50ea71-af32-4288-8780-eb582699cdd0",
     "workflowId": "GJZZsn5Y7EfPfChW",
     "nodes": [
@@ -252,7 +250,9 @@
     "authors": "Jose Ricardo Cedeno Garcia",
     "name": "Version 1f50ea71",
     "description": "Requesting for clear and consise responses to the RAG",
-    "autosaved": true
+    "autosaved": true,
+    "createdAt": "2026-05-20T03:25:40.544Z",
+    "updatedAt": "2026-05-20T03:26:06.000Z"
   },
   "activeVersionId": "1f50ea71-af32-4288-8780-eb582699cdd0",
   "connections": {
@@ -518,11 +518,11 @@
   },
   "shared": [
     {
-      "updatedAt": "2026-05-12T23:29:53.182Z",
-      "createdAt": "2026-05-12T23:29:53.182Z",
       "role": "workflow:owner",
       "workflowId": "GJZZsn5Y7EfPfChW",
-      "projectId": "qxeR1gIEc01jkoF9"
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-05-12T23:29:53.182Z",
+      "updatedAt": "2026-05-12T23:29:53.182Z"
     }
   ],
   "staticData": null,
