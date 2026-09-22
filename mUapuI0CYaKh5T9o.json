@@ -1,7 +1,162 @@
 {
-  "active": false,
-  "activeVersion": null,
-  "activeVersionId": null,
+  "active": true,
+  "activeVersion": {
+    "versionId": "3dced210-4def-4d54-9c0e-2acb64b9c4fd",
+    "workflowId": "mUapuI0CYaKh5T9o",
+    "nodes": [
+      {
+        "id": "e1",
+        "name": "Webhook — img.event.in",
+        "webhookId": "6e7798fd-c998-4feb-957b-70f03631748d",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "img.event.in",
+          "options": {}
+        }
+      },
+      {
+        "id": "e2",
+        "name": "Code — normalizar evento NAT-108",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const raw=$input.first().json; const b=(raw.body||raw); let t=String(b.event||b.eventType||\"\").toLowerCase(); if(t===\"click\") t=\"clicked\"; const allowed=[\"delivered\",\"opened\",\"clicked\",\"hardbounce\",\"softbounce\",\"unsubscribed\",\"blocked\",\"spam\",\"bounced\",\"blocklisted\",\"stopped\",\"replied\"]; if(allowed.indexOf(t)<0) throw new Error(\"NAT-108: eventType no soportado: \"+t); const ev={eventId:(t+\"|\"+(b.email||b.smsPhone||\"?\")+\"|\"+(b.ts_event||b.eventId||Date.now()))}; const c={eventId:ev.eventId,eventType:t,email:(b.email||null),smsPhone:(b.smsPhone||null),campaignBrevoId:(b.camp_id||b.campaignBrevoId||b.campaignId||null),occurredAt:(b.date_event||b.occurredAt||new Date().toISOString())}; const st=$getWorkflowStaticData(\"global\"); st.seen=st.seen||{}; if(st.seen[c.eventId]){return [{json:{duplicate:true,event:c}}];} st.seen[c.eventId]=1; return [{json:{duplicate:false,event:c}}];"
+        }
+      },
+      {
+        "id": "e3",
+        "name": "IF — duplicado?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          448,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.duplicate }}",
+                "value2": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "e4",
+        "name": "Responder — 200 canonico",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          672,
+          0
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify({ok:true,contract:\"NAT-108\",deduped:$json.duplicate}) }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "869ec8e5-df71-4871-83a4-cc3795d1f1f7",
+        "name": "Create or Update a contact",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          640,
+          112
+        ],
+        "parameters": {
+          "resource": "contact",
+          "operation": "upsert",
+          "additionalFields": {
+            "Email": "={{ $json.event.email }}",
+            "Description": "={{ \"NAT-108 \" + $json.event.eventType + \" camp:\" + $json.event.campaignBrevoId + \" \" + $json.event.occurredAt }}",
+            "Email_Opt_Out": true
+          },
+          "lastName": "={{ $json.event.lastName || $json.event.email }}"
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — img.event.in": {
+        "main": [
+          [
+            {
+              "node": "Code — normalizar evento NAT-108",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — normalizar evento NAT-108": {
+        "main": [
+          [
+            {
+              "node": "IF — duplicado?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF — duplicado?": {
+        "main": [
+          [
+            {
+              "node": "Responder — 200 canonico",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Create or Update a contact",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create or Update a contact": {
+        "main": [
+          [
+            {
+              "node": "Responder — 200 canonico",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-20T03:45:49.852Z",
+    "updatedAt": "2026-09-20T03:45:49.852Z"
+  },
+  "activeVersionId": "3dced210-4def-4d54-9c0e-2acb64b9c4fd",
   "connections": {
     "Webhook — img.event.in": {
       "main": [
@@ -188,12 +343,23 @@
         "delivered|nat112-dup-todelete@example.com|NAT112-DUP-001": 1,
         "delivered|nat112-b01-todelete@example.com|NAT112-B01-001": 1,
         "hardbounce|nat112-b02-todelete@example.com|NAT112-B02-001": 1,
-        "delivered|?|NAT112-B08-001": 1
+        "delivered|?|NAT112-B08-001": 1,
+        "delivered|garcia.research.mail@gmail.com|1790044978": 1,
+        "delivered|innerchildrbt@gmail.com|1790044979": 1,
+        "delivered|gnomeaddict96@gmail.com|1790044978": 1,
+        "delivered|linuxfanboy96@outlook.com|1790044981": 1,
+        "opened|garcia.research.mail@gmail.com|1790045352": 1,
+        "opened|innerchildrbt@gmail.com|1790045361": 1,
+        "clicked|innerchildrbt@gmail.com|1790045370": 1,
+        "opened|innerchildrbt@gmail.com|1790046425": 1,
+        "opened|garcia.research.mail@gmail.com|1790046441": 1,
+        "opened|innerchildrbt@gmail.com|1790046452": 1,
+        "opened|linuxfanboy96@outlook.com|1790046480": 1
       }
     }
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-20T03:45:49.851Z",
+  "updatedAt": "2026-09-22T00:12:59.487Z",
   "versionId": "3dced210-4def-4d54-9c0e-2acb64b9c4fd"
 }
