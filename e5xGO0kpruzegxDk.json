@@ -1,7 +1,216 @@
 {
-  "active": false,
-  "activeVersion": null,
-  "activeVersionId": null,
+  "active": true,
+  "activeVersion": {
+    "versionId": "ff4fe6fe-cc0a-4102-9c09-6910afb65517",
+    "workflowId": "e5xGO0kpruzegxDk",
+    "nodes": [
+      {
+        "id": "nat108-webhook",
+        "name": "Webhook — img.contact.upsert",
+        "webhookId": "6a0cf3bd-2ff3-4b54-b23c-4b71b1cc1709",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "img.contact.upsert",
+          "options": {}
+        }
+      },
+      {
+        "id": "nat108-code",
+        "name": "Code — validar canonico NAT-108",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const raw=$input.first().json; const c=(raw.body||raw); if(c.contractVersion!==\"1.0\") throw new Error(\"NAT-108: contractVersion debe ser 1.0\"); const srcc=(c.sourceCrm||\"\").toLowerCase(); if([\"zoho\",\"hubspot\",\"gohighlevel\",\"odoo\",\"brevo\",\"direct\"].indexOf(srcc)<0) throw new Error(\"NAT-108: sourceCrm desconocido\"); if(!c.externalId) throw new Error(\"NAT-108: falta externalId\"); if(!c.email && !c.smsPhone) throw new Error(\"NAT-108: requiere email o smsPhone\"); if(c.email && !/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(c.email)) throw new Error(\"NAT-108: email invalido\"); if(c.smsPhone && !/^\\+[1-9][0-9]{7,14}$/.test(c.smsPhone)) throw new Error(\"NAT-108: smsPhone debe ser E.164\"); return [{json:{canonic:c}}];"
+        }
+      },
+      {
+        "id": "nat108-resp",
+        "name": "Responder — 200 canonico",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          672,
+          0
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify({ ok: true, contract: 'NAT-108', externalId: $json.canonic.externalId }) }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "be6ec751-ed56-4fb2-8f45-fe4d3cffd7ca",
+        "name": "Upsert a contact",
+        "type": "n8n-nodes-base.sendInBlue",
+        "typeVersion": 1,
+        "position": [
+          368,
+          48
+        ],
+        "parameters": {
+          "resource": "contact",
+          "operation": "upsert",
+          "email": "={{ $json.canonic.email }}",
+          "upsertAttributes": {
+            "upsertAttributesValues": [
+              {
+                "fieldName": "FIRSTNAME",
+                "fieldValue": "={{ $json.canonic.firstName }}"
+              },
+              {
+                "fieldName": "LASTNAME",
+                "fieldValue": "={{ $json.canonic.lastName }}"
+              },
+              {
+                "fieldName": "SMS",
+                "fieldValue": "={{ $json.canonic.smsPhone }}"
+              },
+              {
+                "fieldName": "EXTERNAL_ID",
+                "fieldValue": "={{ $json.canonic.externalId }}"
+              }
+            ]
+          },
+          "requestOptions": {}
+        },
+        "credentials": {
+          "sendInBlueApi": {
+            "id": "jyESufIOnZ60pFAw",
+            "name": "Brevo account"
+          }
+        }
+      },
+      {
+        "id": "up-if",
+        "name": "IF — opt-out?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ !(($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).emailMarketing && ($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).smsMarketing) }}",
+                "operation": "equal",
+                "value2": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "up-http",
+        "name": "HTTP — Brevo blocklist",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          0
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ \"https://api.brevo.com/v3/contacts/\" + $(\"Code — validar canonico NAT-108\").item.json.canonic.email }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({emailBlacklisted: !(($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).emailMarketing), smsBlacklisted: !(($(\"Code — validar canonico NAT-108\").item.json.canonic.consent || {}).smsMarketing)}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6vAwCJCUoOYI0Mnz",
+            "name": "Brevo API key (header)"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — img.contact.upsert": {
+        "main": [
+          [
+            {
+              "node": "Code — validar canonico NAT-108",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — validar canonico NAT-108": {
+        "main": [
+          [
+            {
+              "node": "Upsert a contact",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upsert a contact": {
+        "main": [
+          [
+            {
+              "node": "IF — opt-out?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF — opt-out?": {
+        "main": [
+          [
+            {
+              "node": "HTTP — Brevo blocklist",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Responder — 200 canonico",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP — Brevo blocklist": {
+        "main": [
+          [
+            {
+              "node": "Responder — 200 canonico",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-20T05:30:14.517Z",
+    "updatedAt": "2026-09-20T05:30:14.517Z"
+  },
+  "activeVersionId": "ff4fe6fe-cc0a-4102-9c09-6910afb65517",
   "connections": {
     "Webhook — img.contact.upsert": {
       "main": [
@@ -231,6 +440,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-20T05:30:14.515Z",
+  "updatedAt": "2026-09-22T00:12:42.154Z",
   "versionId": "ff4fe6fe-cc0a-4102-9c09-6910afb65517"
 }
