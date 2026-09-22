@@ -1,7 +1,88 @@
 {
-  "active": false,
-  "activeVersion": null,
-  "activeVersionId": null,
+  "active": true,
+  "activeVersion": {
+    "versionId": "357ed2a3-9b2f-4b56-a03a-c9cd693b89b9",
+    "workflowId": "Yi2MS5lwRCA7CkO2",
+    "nodes": [
+      {
+        "id": "v1",
+        "name": "Webhook — img.deliverability",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "img.deliverability",
+          "httpMethod": "POST",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "webhookId": "e1f99b66-277c-4b75-8e7a-d04161e2e98a"
+      },
+      {
+        "id": "v2",
+        "name": "Code — gates deliverability",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const raw = $input.first().json;\nconst b = raw.body ?? raw;\nconst reasons = [];\nconst phone = b.smsPhone || null;\nconst consent = (b.consent && b.consent.smsMarketing === true);\nif (!phone) reasons.push('no-smsPhone');\nelse if (!/^\\+[1-9][0-9]{7,14}$/.test(phone)) reasons.push('formato-no-E164');\nif (!consent) reasons.push('sin-consentimiento-sms');\nconst txt = b.smsText || '';\nif (!txt) reasons.push('texto-vacio');\nif (txt.length > 160) reasons.push('longitud-excede-160');\nif (/\\$\\$\\$/.test(txt) || /FREE!!/.test(txt)) reasons.push('contenido-spam');\nconst st = $getWorkflowStaticData('global');\nst.freq = st.freq || {};\nconst key = phone || 'none';\nconst now = Date.now();\nst.freq[key] = (st.freq[key] || []).filter(t => now - t < 30*24*3600*1000);\nif (st.freq[key].length >= 3) reasons.push('frequency-cap-3-30d');\nst.warm = st.warm || {};\nconst sender = b.senderNumber || 'default';\nconst day = new Date(now).toISOString().slice(0,10);\nif (!st.warm[sender]) st.warm[sender] = {firstSeen: day, days: {}};\nconst w = st.warm[sender];\nconst ageDays = Math.floor((now - Date.parse(w.firstSeen + 'T00:00:00Z')) / 86400000);\nw.days[day] = w.days[day] || 0;\nif (ageDays < 7 && w.days[day] >= 200) reasons.push('warmup-cap-200-dia');\nconst ok = reasons.length === 0;\nif (ok) { st.freq[key].push(now); w.days[day]++; }\nreturn [{json:{ok:ok, reasons:reasons, quietHours:'ventana 09:00-21:00 LST se aplica en scheduler'}}];\n"
+        }
+      },
+      {
+        "id": "v3",
+        "name": "Responder — 200",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify({ok:$json.ok, reasons:$json.reasons}) }}"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — img.deliverability": {
+        "main": [
+          [
+            {
+              "node": "Code — gates deliverability",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — gates deliverability": {
+        "main": [
+          [
+            {
+              "node": "Responder — 200",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-20T07:19:31.205Z",
+    "updatedAt": "2026-09-20T07:19:31.205Z"
+  },
+  "activeVersionId": "357ed2a3-9b2f-4b56-a03a-c9cd693b89b9",
   "connections": {
     "Webhook — img.deliverability": {
       "main": [
@@ -120,6 +201,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-20T07:19:31.199Z",
+  "updatedAt": "2026-09-22T00:12:15.852Z",
   "versionId": "357ed2a3-9b2f-4b56-a03a-c9cd693b89b9"
 }
