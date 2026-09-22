@@ -1,7 +1,180 @@
 {
-  "active": false,
-  "activeVersion": null,
-  "activeVersionId": null,
+  "active": true,
+  "activeVersion": {
+    "versionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c",
+    "workflowId": "gBXqUHV9yCt6pCzM",
+    "nodes": [
+      {
+        "id": "r1",
+        "name": "Webhook — reporte",
+        "webhookId": "55bcb4e3-039e-42ef-8d24-0a736009b424",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "img.reporte.cliente",
+          "httpMethod": "GET",
+          "responseMode": "lastNode",
+          "options": {}
+        }
+      },
+      {
+        "id": "r2",
+        "name": "Code — validar token",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const q=$input.first().json.query||{}; const TOKENS={\"0ca422535d27d5c6c3bbaef922d61fd600e524311d3019b7b073aca7b3443d5b\":\"growbusy\"}; const tok=(q.token||null); const client=TOKENS[tok]; if(!client) throw new Error(\"forbidden: token invalido\"); return [{json:{client:((q.client||client)),authorized:true}}];"
+        }
+      },
+      {
+        "id": "r3",
+        "name": "Brevo — campañas",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.brevo.com/v3/emailCampaigns?limit=20",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6vAwCJCUoOYI0Mnz",
+            "name": "Brevo API key (header)"
+          }
+        }
+      },
+      {
+        "id": "r4",
+        "name": "Zoho — deals",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "alwaysOutputData": true,
+        "position": [
+          440,
+          220
+        ],
+        "parameters": {
+          "resource": "deal",
+          "operation": "getAll"
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      },
+      {
+        "id": "r5",
+        "name": "Code — unir y HTML",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          660,
+          110
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const bitems=$(\"Brevo — campañas\").all(); const zitems=$(\"Zoho — deals\").all(); const camps=((bitems[0]||{}).json||{}).campaigns||[]; let deals=[]; for(const it of zitems){const j=(it||{}).json||{}; if(Array.isArray(j.data)){deals=j.data;} else if(j.id&&j.Deal_Name){deals.push(j);}} let won=0,revenue=0; for(const d of deals){const st=String(d.Stage||\"\").toLowerCase(); if(/closed won|ganado/.test(st)){won++; revenue+=Number(d.Amount||0);}} const html=\"<html><head><meta charset=utf-8><title>Reporte GrowBusy</title></head><body><h1>Reporte GrowBusy</h1><p>Campañas: \"+camps.length+\"</p><p>Deals ganados: \"+won+\"</p><p>Revenue atribuido (last-touch 30d): $\"+revenue+\"</p><ul>\"+camps.map(c=>\"<li>\"+c.name+\" — \"+c.status+\"</li>\").join(\"\")+\"</ul></body></html>\"; return [{json:{html:html}}];"
+        }
+      },
+      {
+        "id": "r6",
+        "name": "Responder — HTML",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          880,
+          110
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ $json.html }}",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — reporte": {
+        "main": [
+          [
+            {
+              "node": "Code — validar token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — validar token": {
+        "main": [
+          [
+            {
+              "node": "Brevo — campañas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brevo — campañas": {
+        "main": [
+          [
+            {
+              "node": "Zoho — deals",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zoho — deals": {
+        "main": [
+          [
+            {
+              "node": "Code — unir y HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — unir y HTML": {
+        "main": [
+          [
+            {
+              "node": "Responder — HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-20T03:42:04.450Z",
+    "updatedAt": "2026-09-20T03:42:04.450Z"
+  },
+  "activeVersionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c",
   "connections": {
     "Webhook — reporte": {
       "main": [
@@ -192,6 +365,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-20T03:42:04.449Z",
+  "updatedAt": "2026-09-22T00:13:09.143Z",
   "versionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c"
 }
