@@ -1,0 +1,239 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "b84a3adf-3865-4e36-ba14-a0c91b758e11",
+    "workflowId": "iaup1RXO0QScnmWt",
+    "nodes": [
+      {
+        "id": "s2",
+        "name": "Code — comentario semanal",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const d=new Date().toISOString().slice(0,10); const q=\"mutation CommentCreate($input: CommentCreateInput!){ commentCreate(input: $input){ success } }\"; return [{json:{query:q, variables:{input:{issueId:\"9d9ed141-571f-49ec-8791-1eb195bfab55\", body:\"Recordatorio semanal NAT-119 (\"+d+\"): revisar reputacion en Postmaster (spam rate, reputacion dominio) y SNDS. Umbral: quejas <0,1%.\"}}}}];"
+        }
+      },
+      {
+        "id": "s3",
+        "name": "Linear — comentar NAT-119",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.linear.app/graphql",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "TptPxPkoIVE6vIGX",
+            "name": "Linear API key (header)"
+          }
+        }
+      },
+      {
+        "id": "f12218d9-e1d9-489e-bd19-84103f679f6b",
+        "name": "Schedule — lunes 9am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.4,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "weeksInterval": 1,
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 9,
+                "triggerAtMinute": 0
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Code — comentario semanal": {
+        "main": [
+          [
+            {
+              "node": "Linear — comentar NAT-119",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule — lunes 9am": {
+        "main": [
+          [
+            {
+              "node": "Code — comentario semanal",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Fix schedule trigger params",
+    "description": "Rebuild schedule node as v1.4 with triggerAtDay array",
+    "autosaved": false,
+    "createdAt": "2026-09-22T03:52:21.577Z",
+    "updatedAt": "2026-09-22T03:52:21.577Z"
+  },
+  "activeVersionId": "b84a3adf-3865-4e36-ba14-a0c91b758e11",
+  "connections": {
+    "Code — comentario semanal": {
+      "main": [
+        [
+          {
+            "node": "Linear — comentar NAT-119",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule — lunes 9am": {
+      "main": [
+        [
+          {
+            "node": "Code — comentario semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-22T03:47:56.938Z",
+  "id": "iaup1RXO0QScnmWt",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "img.recordatorio.semanal — NAT-119",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "s2",
+      "name": "Code — comentario semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const d=new Date().toISOString().slice(0,10); const q=\"mutation CommentCreate($input: CommentCreateInput!){ commentCreate(input: $input){ success } }\"; return [{json:{query:q, variables:{input:{issueId:\"9d9ed141-571f-49ec-8791-1eb195bfab55\", body:\"Recordatorio semanal NAT-119 (\"+d+\"): revisar reputacion en Postmaster (spam rate, reputacion dominio) y SNDS. Umbral: quejas <0,1%.\"}}}}];"
+      }
+    },
+    {
+      "id": "s3",
+      "name": "Linear — comentar NAT-119",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linear.app/graphql",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TptPxPkoIVE6vIGX",
+          "name": "Linear API key (header)"
+        }
+      }
+    },
+    {
+      "id": "f12218d9-e1d9-489e-bd19-84103f679f6b",
+      "name": "Schedule — lunes 9am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "iaup1RXO0QScnmWt",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-22T03:47:56.942Z",
+      "updatedAt": "2026-09-22T03:47:56.942Z"
+    }
+  ],
+  "staticData": {
+    "node:Schedule — lunes 9am": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-22T03:52:21.576Z",
+  "versionId": "b84a3adf-3865-4e36-ba14-a0c91b758e11"
+}
