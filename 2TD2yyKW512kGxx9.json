@@ -1,7 +1,182 @@
 {
-  "active": false,
-  "activeVersion": null,
-  "activeVersionId": null,
+  "active": true,
+  "activeVersion": {
+    "versionId": "9d392195-7fa9-490f-b5a6-fa5705e4e3c9",
+    "workflowId": "2TD2yyKW512kGxx9",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        },
+        "id": "p1",
+        "name": "Schedule — cada 15 min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "deal",
+          "operation": "getAll",
+          "options": {}
+        },
+        "id": "p2",
+        "name": "Zoho — Deals recientes",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          224,
+          0
+        ],
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const out=[]; const now=Date.now(); const items=$input.all(); for(const it of items){const d=it.json; const mt=new Date(d.Modified_Time||d.Created_Time||0).getTime(); if(now-mt>20*60*1000) continue; const stage=(d.Stage||\"\").toLowerCase(); let action=\"sync\"; if(/closed won|ganado/.test(stage)) action=\"won\"; let cid=null; try{cid=d.Contact_Name.id||d.Contact_Name||null;}catch(e){} out.push({json:{action:action,dealId:String(d.id),dealStage:(d.Stage||null),dealAmount:(d.Amount||null),contactId:cid,modified:d.Modified_Time||null}});} return out;"
+        },
+        "id": "p3",
+        "name": "Code — filtrar ventana + mapear",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          448,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://n8n.innerchildproject.us/webhook/img.contact.upsert",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.canonic) }}",
+          "options": {}
+        },
+        "id": "p4",
+        "name": "HTTP — POST upsert",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1120,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "contact",
+          "operation": "get",
+          "contactId": "={{ $json.contactId }}"
+        },
+        "id": "p3b",
+        "name": "Zoho — Get contact",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          672,
+          0
+        ],
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const c=$input.first().json; return [{json:{canonic:{externalId:String(c.id),email:(c.Email||null),smsPhone:(c.Mobile||c.Phone||null),firstName:(c.First_Name||null),lastName:(c.Last_Name||null),consent:{emailMarketing:true,smsMarketing:true},sourceCrm:\"zoho\",sourceClient:\"growbusy\",triggerDeal:\"Closed Won\"}}}];"
+        },
+        "id": "p3c",
+        "name": "Code — merge deal+contact",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          896,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Schedule — cada 15 min": {
+        "main": [
+          [
+            {
+              "node": "Zoho — Deals recientes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zoho — Deals recientes": {
+        "main": [
+          [
+            {
+              "node": "Code — filtrar ventana + mapear",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — filtrar ventana + mapear": {
+        "main": [
+          [
+            {
+              "node": "Zoho — Get contact",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zoho — Get contact": {
+        "main": [
+          [
+            {
+              "node": "Code — merge deal+contact",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — merge deal+contact": {
+        "main": [
+          [
+            {
+              "node": "HTTP — POST upsert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-19T07:29:22.398Z",
+    "updatedAt": "2026-09-19T07:29:22.398Z"
+  },
+  "activeVersionId": "9d392195-7fa9-490f-b5a6-fa5705e4e3c9",
   "connections": {
     "Schedule — cada 15 min": {
       "main": [
@@ -192,9 +367,18 @@
       "updatedAt": "2026-09-19T07:12:17.633Z"
     }
   ],
-  "staticData": null,
+  "staticData": {
+    "node:Schedule — cada 15 min": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
   "tags": [],
-  "triggerCount": 0,
-  "updatedAt": "2026-09-19T07:29:22.397Z",
+  "triggerCount": 1,
+  "updatedAt": "2026-09-22T00:13:16.508Z",
   "versionId": "9d392195-7fa9-490f-b5a6-fa5705e4e3c9"
 }
