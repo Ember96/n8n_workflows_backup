@@ -1,0 +1,570 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "5eff8f5b-0b0d-4c50-bfe4-a47a97e48ff5",
+    "workflowId": "R8yPcFnUir5uLgDA",
+    "nodes": [
+      {
+        "id": "g1",
+        "name": "Webhook — segment route",
+        "webhookId": "0aed4f4d-99bd-46e1-a81e-2c169ea4587d",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "img.segment.route",
+          "httpMethod": "POST",
+          "responseMode": "onReceived",
+          "options": {}
+        }
+      },
+      {
+        "id": "g2",
+        "name": "Code — route by event",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const raw=$input.first().json; const b=(raw.body||raw); const t=String(b.event||b.eventType||\"\").toLowerCase(); const map={opened:7,click:8,clicked:8}; const target=(map[t]||null); return [{json:{email:(b.email||null),targetList:target,skip:(target===null)}}];"
+        }
+      },
+      {
+        "id": "g3",
+        "name": "IF — skip?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.skip }}",
+                "operation": "equal",
+                "value2": true
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "g4",
+        "name": "Brevo — add to list",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "onError": "continueRegularOutput",
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://api.brevo.com/v3/contacts/lists/\" + $json.targetList + \"/contacts/add\" }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({emails:[$json.email]}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6vAwCJCUoOYI0Mnz",
+            "name": "Brevo API key (header)"
+          }
+        }
+      },
+      {
+        "id": "g5",
+        "name": "Brevo — remove from COLD",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "onError": "continueRegularOutput",
+        "position": [
+          880,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.brevo.com/v3/contacts/lists/6/contacts/remove",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({emails:[$(\"Code — route by event\").item.json.email]}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6vAwCJCUoOYI0Mnz",
+            "name": "Brevo API key (header)"
+          }
+        }
+      },
+      {
+        "id": "g6",
+        "name": "Responder — 200",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          1100,
+          0
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify({ok:true,routed:$json.targetList}) }}"
+        }
+      },
+      {
+        "id": "g7",
+        "name": "Brevo — remove from WARM",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "onError": "continueRegularOutput",
+        "position": [
+          1100,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.brevo.com/v3/contacts/lists/7/contacts/remove",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({emails:[$(\"Code — route by event\").item.json.email]}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6vAwCJCUoOYI0Mnz",
+            "name": "Brevo API key (header)"
+          }
+        }
+      },
+      {
+        "id": "g8",
+        "name": "IF — click?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          1100,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $(\"Code — route by event\").item.json.targetList }}",
+                "operation": "equal",
+                "value2": 8
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — segment route": {
+        "main": [
+          [
+            {
+              "node": "Code — route by event",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — route by event": {
+        "main": [
+          [
+            {
+              "node": "IF — skip?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF — skip?": {
+        "main": [
+          [
+            {
+              "node": "Responder — 200",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Brevo — add to list",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brevo — add to list": {
+        "main": [
+          [
+            {
+              "node": "Brevo — remove from COLD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brevo — remove from COLD": {
+        "main": [
+          [
+            {
+              "node": "IF — click?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF — click?": {
+        "main": [
+          [
+            {
+              "node": "Brevo — remove from WARM",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Responder — 200",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brevo — remove from WARM": {
+        "main": [
+          [
+            {
+              "node": "Responder — 200",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-22T03:02:28.791Z",
+    "updatedAt": "2026-09-22T03:02:28.791Z"
+  },
+  "activeVersionId": "5eff8f5b-0b0d-4c50-bfe4-a47a97e48ff5",
+  "connections": {
+    "Webhook — segment route": {
+      "main": [
+        [
+          {
+            "node": "Code — route by event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — route by event": {
+      "main": [
+        [
+          {
+            "node": "IF — skip?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — skip?": {
+      "main": [
+        [
+          {
+            "node": "Responder — 200",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Brevo — add to list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brevo — add to list": {
+      "main": [
+        [
+          {
+            "node": "Brevo — remove from COLD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brevo — remove from COLD": {
+      "main": [
+        [
+          {
+            "node": "IF — click?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF — click?": {
+      "main": [
+        [
+          {
+            "node": "Brevo — remove from WARM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder — 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brevo — remove from WARM": {
+      "main": [
+        [
+          {
+            "node": "Responder — 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-22T02:42:20.471Z",
+  "id": "R8yPcFnUir5uLgDA",
+  "isArchived": false,
+  "meta": null,
+  "name": "img.segment.route — NAT Cold to Warm",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "g1",
+      "name": "Webhook — segment route",
+      "webhookId": "0aed4f4d-99bd-46e1-a81e-2c169ea4587d",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "img.segment.route",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "g2",
+      "name": "Code — route by event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const raw=$input.first().json; const b=(raw.body||raw); const t=String(b.event||b.eventType||\"\").toLowerCase(); const map={opened:7,click:8,clicked:8}; const target=(map[t]||null); return [{json:{email:(b.email||null),targetList:target,skip:(target===null)}}];"
+      }
+    },
+    {
+      "id": "g3",
+      "name": "IF — skip?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.skip }}",
+              "operation": "equal",
+              "value2": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "g4",
+      "name": "Brevo — add to list",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://api.brevo.com/v3/contacts/lists/\" + $json.targetList + \"/contacts/add\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({emails:[$json.email]}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    },
+    {
+      "id": "g5",
+      "name": "Brevo — remove from COLD",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/contacts/lists/6/contacts/remove",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({emails:[$(\"Code — route by event\").item.json.email]}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    },
+    {
+      "id": "g6",
+      "name": "Responder — 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ok:true,routed:$json.targetList}) }}"
+      }
+    },
+    {
+      "id": "g7",
+      "name": "Brevo — remove from WARM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/contacts/lists/7/contacts/remove",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({emails:[$(\"Code — route by event\").item.json.email]}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    },
+    {
+      "id": "g8",
+      "name": "IF — click?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $(\"Code — route by event\").item.json.targetList }}",
+              "operation": "equal",
+              "value2": 8
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "R8yPcFnUir5uLgDA",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-22T02:42:20.475Z",
+      "updatedAt": "2026-09-22T02:42:20.475Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-22T03:02:28.790Z",
+  "versionId": "5eff8f5b-0b0d-4c50-bfe4-a47a97e48ff5"
+}
