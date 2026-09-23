@@ -1,0 +1,936 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "f3577e65-1525-4337-b69c-5d8019d3cb98",
+    "workflowId": "rjI7V4U68FuibOFt",
+    "nodes": [
+      {
+        "id": "7f80fab5-0e53-4cd8-b17f-dff17a3dcd55",
+        "name": "Webhook social-feedback",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "social-feedback",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          },
+          "multipleMethods": true
+        },
+        "webhookId": "65513ec2-c1f4-45be-8a26-578005bf4b39"
+      },
+      {
+        "id": "0c282fe1-840c-4159-bd40-c4073637a3e8",
+        "name": "Verify webhook",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const q=$input.first().json.query||$input.first().json; const b=$input.first().json.body||$input.first().json; const token='growbusy-social-verify-2026'; if(q['hub.mode']==='subscribe'&&q['hub.verify_token']===token){return [{json:{__respond:String(q['hub.challenge']), _isVerify:true}}];} return [{json:b, _isVerify:false}];"
+        }
+      },
+      {
+        "id": "fb66f4cd-cf99-432a-95e5-9475f6f237fe",
+        "name": "Normalize raw",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          448,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const p=$input.first().json; const e=p.entry?.[0]; const c=e?.changes?.[0]; const v=c?.value||p; const t=v.text||v.message||v.comment||''; const cid=v.id||v.comment_id||v.message_id||p.social_id||''; const mid=v.media?.id||v.post_id||v.media_id||''; const f=v.from||p.from||{}; const uid=f.id||v.sender?.id||p.sender_id||null; return [{json:{source:(v.source||(String(cid).includes('ig')?'instagram':'facebook')), social_id:String(cid), user_id: uid?String(uid):null, social_handle:f.username||f.name||p.username||null, display_name:f.name||p.name||null, post_id: String(mid||'')||null, message:String(t).slice(0,2000), _raw:p}}]"
+        }
+      },
+      {
+        "id": "65c18e3b-82a3-4ab5-917c-4ffbb48fa0be",
+        "name": "IF LINK|ENLACE",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          672,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.message }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                },
+                "rightValue": "link"
+              }
+            ],
+            "combinator": "or"
+          }
+        }
+      },
+      {
+        "id": "628bfcb7-3fab-4281-a359-cdd0d12bfeae",
+        "name": "IF self? (skip loop)",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          896,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {},
+            "conditions": [
+              {
+                "id": "self",
+                "leftValue": "={{ $json.social_handle }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "isNotEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "a265af1a-6261-46ca-89c1-db5e7c06e9b0",
+        "name": "Dedupe 24h (stub)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1120,
+          0
+        ],
+        "parameters": {
+          "jsCode": "return [{json:{...$input.first().json, _dedupe:'pass'}}]"
+        }
+      },
+      {
+        "id": "7932518a-fd68-48b9-ae3e-24d3896b9647",
+        "name": "Map to canonical",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1344,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const r=$input.first().json; const now=new Date().toISOString(); const E=/^\\+[1-9]\\d{1,14}$/; const s=r.smsPhone&&E.test(r.smsPhone)?r.smsPhone:null; return [{json:{externalId:String(r.social_id), userId: r.user_id||null, email:r.email||null, smsPhone:s, name:(r.display_name||r.social_handle||'Social lead').slice(0,120), socialHandle:r.social_handle||null, source:r.source, sourceCrm:($env.SOURCE_CRM||'zoho').toLowerCase(), sourceClient:$env.SOURCE_CLIENT||'growbusy-main', postId:r.post_id||null, message:r.message||null, consent:{emailMarketing:false,smsMarketing:false,version:'v1',capturedAt:now}, capturedAt:now}}]"
+        }
+      },
+      {
+        "id": "023bfab9-a127-4bfe-94d5-a5819d498ec4",
+        "name": "Switch adapter",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          1568,
+          0
+        ],
+        "parameters": {
+          "mode": "expression",
+          "rules": {
+            "values": [
+              {
+                "value1": "={{ $json.sourceCrm }}",
+                "operation": "equal",
+                "value2": "zoho"
+              },
+              {
+                "value1": "={{ $json.sourceCrm }}",
+                "operation": "equal",
+                "value2": "hubspot"
+              },
+              {
+                "value1": "={{ $json.sourceCrm }}",
+                "operation": "equal",
+                "value2": "ghl"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "7d609046-c706-44bb-92f7-43f10faeeb8d",
+        "name": "Adapter Zoho",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1792,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const c=$input.first().json; const p=c.name.trim().split(/\\s+/); const l=p.pop()||c.name; const f=p.join(' ')||undefined; return [{json:{_canonical:c,_zoho:{Last_Name:l, First_Name:f, Email:c.email||undefined, Phone:c.smsPhone||undefined, Lead_Source:'Social - '+(c.source==='instagram'?'Instagram':'Facebook'), Description:('Social:'+(c.message||'')+'|Post:'+(c.postId||'')+'|Handle:'+(c.socialHandle||'')+'|externalId:'+c.externalId).slice(0,2000)}}]"
+        }
+      },
+      {
+        "id": "b3cb0a8b-a97a-4b06-896d-1959581ab749",
+        "name": "CRM upsert (Zoho example)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2016,
+          0
+        ],
+        "parameters": {
+          "url": "={{ $env.ZOHO_CRM_URL || 'https://www.zohoapis.com/crm/v2/Leads/upsert' }}",
+          "method": "POST",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "data",
+                "value": "={{ $json._zoho }}"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "687426aa-3c33-4b25-8e22-87536d45ffe8",
+        "name": "Graph reply public",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2240,
+          0
+        ],
+        "parameters": {
+          "url": "={{ 'https://graph.facebook.com/v19.0/' + $('Map to canonical').first().json.externalId + '/replies?access_token=EAAQbY5kJZAokBSsbciCo5HnSqcMbkYZAIp2NBhG2HUzMSRzzzzzFU5mUiYY74yNo9d39FvjzVSJgoVXG9F9unR5uEKcnh8Cek8n5cItGrdYQOMz59Br1ZCPSjFciRepf4uYg9l3XZBYyMNWmB6m66LvGnxrKazHfDBcCsZCbhXVyaE2RIaNulAP1m79VC0ukHMNVvLrM6AXu89HvYIourw777Mr2athenm4pklRZBMO9Pz52DSUR2acHfK' }}",
+          "method": "POST",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "message",
+                "value": "Te envié el link por DM — revisa tus mensajes ✉️ https://growbusy.net"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "47a2c5ac-934b-4c9b-8d3e-0a720cc449c3",
+        "name": "Graph DM link",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2464,
+          0
+        ],
+        "parameters": {
+          "url": "https://graph.facebook.com/v19.0/me/messages?access_token=EAAQbY5kJZAokBSsbciCo5HnSqcMbkYZAIp2NBhG2HUzMSRzzzzzFU5mUiYY74yNo9d39FvjzVSJgoVXG9F9unR5uEKcnh8Cek8n5cItGrdYQOMz59Br1ZCPSjFciRepf4uYg9l3XZBYyMNWmB6m66LvGnxrKazHfDBcCsZCbhXVyaE2RIaNulAP1m79VC0ukHMNVvLrM6AXu89HvYIourw777Mr2athenm4pklRZBMO9Pz52DSUR2acHfK",
+          "method": "POST",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "recipient",
+                "value": "={{ {id: $('Map to canonical').first().json.userId || $('Map to canonical').first().json.externalId} }}"
+              },
+              {
+                "name": "message",
+                "value": "={{ {text: 'Aquí tienes el link: https://growbusy.net — responde STOP para no recibir más.'} }}"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "f8a843e8-ae1a-499d-98f5-878798e87466",
+        "name": "IF isVerify?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          320,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json._isVerify }}",
+                "operation": "equal",
+                "value2": true
+              }
+            ],
+            "conditions": [
+              {
+                "id": "checkRespondExists",
+                "leftValue": "={{ $json.__respond }}",
+                "operator": {
+                  "operation": "exists",
+                  "type": "string"
+                },
+                "rightValue": ""
+              }
+            ],
+            "combinator": "and",
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "8ade0673-1515-447b-a601-5a441bbdebde",
+        "name": "Respond Verify",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          520,
+          -120
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ $json.__respond }}",
+          "options": {
+            "responseCode": 200
+          },
+          "responseData": "={{ $json.__respond }}"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook social-feedback": {
+        "main": [
+          [
+            {
+              "node": "Verify webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize raw": {
+        "main": [
+          [
+            {
+              "node": "IF LINK|ENLACE",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF LINK|ENLACE": {
+        "main": [
+          [
+            {
+              "node": "IF self? (skip loop)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF self? (skip loop)": {
+        "main": [
+          [
+            {
+              "node": "Dedupe 24h (stub)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Dedupe 24h (stub)": {
+        "main": [
+          [
+            {
+              "node": "Map to canonical",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Map to canonical": {
+        "main": [
+          [
+            {
+              "node": "Switch adapter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch adapter": {
+        "main": [
+          [
+            {
+              "node": "Adapter Zoho",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Adapter Zoho": {
+        "main": [
+          [
+            {
+              "node": "CRM upsert (Zoho example)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "CRM upsert (Zoho example)": {
+        "main": [
+          [
+            {
+              "node": "Graph reply public",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Graph reply public": {
+        "main": [
+          [
+            {
+              "node": "Graph DM link",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Verify webhook": {
+        "main": [
+          [
+            {
+              "node": "IF isVerify?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IF isVerify?": {
+        "main": [
+          [
+            {
+              "node": "Respond Verify",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Normalize raw",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated Graph DM link",
+    "description": "Updated nodes: Graph DM link",
+    "autosaved": false,
+    "createdAt": "2026-09-23T04:10:55.444Z",
+    "updatedAt": "2026-09-23T04:10:55.444Z"
+  },
+  "activeVersionId": "f3577e65-1525-4337-b69c-5d8019d3cb98",
+  "connections": {
+    "Webhook social-feedback": {
+      "main": [
+        [
+          {
+            "node": "Verify webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize raw": {
+      "main": [
+        [
+          {
+            "node": "IF LINK|ENLACE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF LINK|ENLACE": {
+      "main": [
+        [
+          {
+            "node": "IF self? (skip loop)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF self? (skip loop)": {
+      "main": [
+        [
+          {
+            "node": "Dedupe 24h (stub)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe 24h (stub)": {
+      "main": [
+        [
+          {
+            "node": "Map to canonical",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map to canonical": {
+      "main": [
+        [
+          {
+            "node": "Switch adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch adapter": {
+      "main": [
+        [
+          {
+            "node": "Adapter Zoho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adapter Zoho": {
+      "main": [
+        [
+          {
+            "node": "CRM upsert (Zoho example)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM upsert (Zoho example)": {
+      "main": [
+        [
+          {
+            "node": "Graph reply public",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Graph reply public": {
+      "main": [
+        [
+          {
+            "node": "Graph DM link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify webhook": {
+      "main": [
+        [
+          {
+            "node": "IF isVerify?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF isVerify?": {
+      "main": [
+        [
+          {
+            "node": "Respond Verify",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Normalize raw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-22T23:22:20.584Z",
+  "id": "rjI7V4U68FuibOFt",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 — Social feedback → canonical → adapter",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "7f80fab5-0e53-4cd8-b17f-dff17a3dcd55",
+      "name": "Webhook social-feedback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "social-feedback",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        },
+        "multipleMethods": true
+      },
+      "webhookId": "65513ec2-c1f4-45be-8a26-578005bf4b39"
+    },
+    {
+      "id": "0c282fe1-840c-4159-bd40-c4073637a3e8",
+      "name": "Verify webhook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const q=$input.first().json.query||$input.first().json; const b=$input.first().json.body||$input.first().json; const token='growbusy-social-verify-2026'; if(q['hub.mode']==='subscribe'&&q['hub.verify_token']===token){return [{json:{__respond:String(q['hub.challenge']), _isVerify:true}}];} return [{json:b, _isVerify:false}];"
+      }
+    },
+    {
+      "id": "fb66f4cd-cf99-432a-95e5-9475f6f237fe",
+      "name": "Normalize raw",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const p=$input.first().json; const e=p.entry?.[0]; const c=e?.changes?.[0]; const v=c?.value||p; const t=v.text||v.message||v.comment||''; const cid=v.id||v.comment_id||v.message_id||p.social_id||''; const mid=v.media?.id||v.post_id||v.media_id||''; const f=v.from||p.from||{}; const uid=f.id||v.sender?.id||p.sender_id||null; return [{json:{source:(v.source||(String(cid).includes('ig')?'instagram':'facebook')), social_id:String(cid), user_id: uid?String(uid):null, social_handle:f.username||f.name||p.username||null, display_name:f.name||p.name||null, post_id: String(mid||'')||null, message:String(t).slice(0,2000), _raw:p}}]"
+      }
+    },
+    {
+      "id": "65c18e3b-82a3-4ab5-917c-4ffbb48fa0be",
+      "name": "IF LINK|ENLACE",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.message }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "rightValue": "link"
+            }
+          ],
+          "combinator": "or"
+        }
+      }
+    },
+    {
+      "id": "628bfcb7-3fab-4281-a359-cdd0d12bfeae",
+      "name": "IF self? (skip loop)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {},
+          "conditions": [
+            {
+              "id": "self",
+              "leftValue": "={{ $json.social_handle }}",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "a265af1a-6261-46ca-89c1-db5e7c06e9b0",
+      "name": "Dedupe 24h (stub)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{...$input.first().json, _dedupe:'pass'}}]"
+      }
+    },
+    {
+      "id": "7932518a-fd68-48b9-ae3e-24d3896b9647",
+      "name": "Map to canonical",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const r=$input.first().json; const now=new Date().toISOString(); const E=/^\\+[1-9]\\d{1,14}$/; const s=r.smsPhone&&E.test(r.smsPhone)?r.smsPhone:null; return [{json:{externalId:String(r.social_id), userId: r.user_id||null, email:r.email||null, smsPhone:s, name:(r.display_name||r.social_handle||'Social lead').slice(0,120), socialHandle:r.social_handle||null, source:r.source, sourceCrm:($env.SOURCE_CRM||'zoho').toLowerCase(), sourceClient:$env.SOURCE_CLIENT||'growbusy-main', postId:r.post_id||null, message:r.message||null, consent:{emailMarketing:false,smsMarketing:false,version:'v1',capturedAt:now}, capturedAt:now}}]"
+      }
+    },
+    {
+      "id": "023bfab9-a127-4bfe-94d5-a5819d498ec4",
+      "name": "Switch adapter",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1568,
+        0
+      ],
+      "parameters": {
+        "mode": "expression",
+        "rules": {
+          "values": [
+            {
+              "value1": "={{ $json.sourceCrm }}",
+              "operation": "equal",
+              "value2": "zoho"
+            },
+            {
+              "value1": "={{ $json.sourceCrm }}",
+              "operation": "equal",
+              "value2": "hubspot"
+            },
+            {
+              "value1": "={{ $json.sourceCrm }}",
+              "operation": "equal",
+              "value2": "ghl"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "7d609046-c706-44bb-92f7-43f10faeeb8d",
+      "name": "Adapter Zoho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const c=$input.first().json; const p=c.name.trim().split(/\\s+/); const l=p.pop()||c.name; const f=p.join(' ')||undefined; return [{json:{_canonical:c,_zoho:{Last_Name:l, First_Name:f, Email:c.email||undefined, Phone:c.smsPhone||undefined, Lead_Source:'Social - '+(c.source==='instagram'?'Instagram':'Facebook'), Description:('Social:'+(c.message||'')+'|Post:'+(c.postId||'')+'|Handle:'+(c.socialHandle||'')+'|externalId:'+c.externalId).slice(0,2000)}}]"
+      }
+    },
+    {
+      "id": "b3cb0a8b-a97a-4b06-896d-1959581ab749",
+      "name": "CRM upsert (Zoho example)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2016,
+        0
+      ],
+      "parameters": {
+        "url": "={{ $env.ZOHO_CRM_URL || 'https://www.zohoapis.com/crm/v2/Leads/upsert' }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{ $json._zoho }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "687426aa-3c33-4b25-8e22-87536d45ffe8",
+      "name": "Graph reply public",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        0
+      ],
+      "parameters": {
+        "url": "={{ 'https://graph.facebook.com/v19.0/' + $('Map to canonical').first().json.externalId + '/replies?access_token=EAAQbY5kJZAokBSsbciCo5HnSqcMbkYZAIp2NBhG2HUzMSRzzzzzFU5mUiYY74yNo9d39FvjzVSJgoVXG9F9unR5uEKcnh8Cek8n5cItGrdYQOMz59Br1ZCPSjFciRepf4uYg9l3XZBYyMNWmB6m66LvGnxrKazHfDBcCsZCbhXVyaE2RIaNulAP1m79VC0ukHMNVvLrM6AXu89HvYIourw777Mr2athenm4pklRZBMO9Pz52DSUR2acHfK' }}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Te envié el link por DM — revisa tus mensajes ✉️ https://growbusy.net"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "47a2c5ac-934b-4c9b-8d3e-0a720cc449c3",
+      "name": "Graph DM link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2464,
+        0
+      ],
+      "parameters": {
+        "url": "https://graph.facebook.com/v19.0/me/messages?access_token=EAAQbY5kJZAokBSsbciCo5HnSqcMbkYZAIp2NBhG2HUzMSRzzzzzFU5mUiYY74yNo9d39FvjzVSJgoVXG9F9unR5uEKcnh8Cek8n5cItGrdYQOMz59Br1ZCPSjFciRepf4uYg9l3XZBYyMNWmB6m66LvGnxrKazHfDBcCsZCbhXVyaE2RIaNulAP1m79VC0ukHMNVvLrM6AXu89HvYIourw777Mr2athenm4pklRZBMO9Pz52DSUR2acHfK",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "recipient",
+              "value": "={{ {id: $('Map to canonical').first().json.userId || $('Map to canonical').first().json.externalId} }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ {text: 'Aquí tienes el link: https://growbusy.net — responde STOP para no recibir más.'} }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f8a843e8-ae1a-499d-98f5-878798e87466",
+      "name": "IF isVerify?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        320,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json._isVerify }}",
+              "operation": "equal",
+              "value2": true
+            }
+          ],
+          "conditions": [
+            {
+              "id": "checkRespondExists",
+              "leftValue": "={{ $json.__respond }}",
+              "operator": {
+                "operation": "exists",
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "8ade0673-1515-447b-a601-5a441bbdebde",
+      "name": "Respond Verify",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        520,
+        -120
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.__respond }}",
+        "options": {
+          "responseCode": 200
+        },
+        "responseData": "={{ $json.__respond }}"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "rjI7V4U68FuibOFt",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-22T23:22:20.588Z",
+      "updatedAt": "2026-09-22T23:22:20.588Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-23T04:10:55.438Z",
+  "versionId": "f3577e65-1525-4337-b69c-5d8019d3cb98"
+}
