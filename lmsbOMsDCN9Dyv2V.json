@@ -1,0 +1,120 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "GET probe": {
+      "main": [
+        [
+          {
+            "node": "dump input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dump input": {
+      "main": [
+        [
+          {
+            "node": "echo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-24T01:12:11.588Z",
+  "id": "lmsbOMsDCN9Dyv2V",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "GET probe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "09f8a781-2e74-42bd-be22-b91943135012",
+      "name": "GET probe",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "get-probe-test",
+        "httpMethod": [
+          "GET",
+          "POST"
+        ],
+        "multipleMethods": true,
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "9513388a-9273-41d3-b00b-606de139cb33",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "07f37f12-382b-489d-8e21-fce3ba65da30",
+      "name": "dump input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst p = items.length ? items[0].json : {};\nreturn [{ json: { itemCount: items.length, keys: Object.keys(p).join(','), query: JSON.stringify(p.query || null), mode: (p.query && p.query['hub.mode']) || p['hub.mode'] || '' } }];"
+      }
+    },
+    {
+      "id": "de1d807d-16b9-45b8-9ca5-ba17c5fdbb39",
+      "name": "echo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "lmsbOMsDCN9Dyv2V",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-24T01:12:11.590Z",
+      "updatedAt": "2026-09-24T01:12:11.590Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-24T01:14:12.000Z",
+  "versionId": "8d16e5f6-ac0e-4cd1-b07e-f94ba46a3c81"
+}
