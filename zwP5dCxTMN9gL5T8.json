@@ -1,0 +1,349 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Instagram Webhook": {
+      "main": [
+        [
+          {
+            "node": "1. Parse IG + Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Parse IG + Guard": {
+      "main": [
+        [
+          {
+            "node": "2. Is actionable IG comment?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Is actionable IG comment?": {
+      "main": [
+        [
+          {
+            "node": "3. Canonical Contact (NAT-97)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "4. Ack (not actionable)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Canonical Contact (NAT-97)": {
+      "main": [
+        [
+          {
+            "node": "4. Ack Meta (fast 200)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Ack Meta (fast 200)": {
+      "main": [
+        [
+          {
+            "node": "5. Zoho Lead (adapter: zoho)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Zoho Lead (adapter: zoho)": {
+      "main": [
+        [
+          {
+            "node": "6. Reply on IG comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Reply on IG comment": {
+      "main": [
+        [
+          {
+            "node": "7. Instagram DM with link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-24T01:10:34.630Z",
+  "id": "zwP5dCxTMN9gL5T8",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 - Instagram comment to DM to CRM",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "d07aec61-eaa2-4aa1-971e-40708b132af5",
+      "name": "Instagram Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        96
+      ],
+      "parameters": {
+        "path": "instagram-feedback",
+        "httpMethod": [
+          "POST",
+          "GET"
+        ],
+        "multipleMethods": true,
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "3ef849f3-9588-4f43-bcf8-78b8dc4317c8",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "6d13d4d8-8834-449a-9f53-9349a1cf88b3",
+      "name": "1. Parse IG + Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const IG_ID = '17841431723301731';\nlet out = { route: 'skip', challenge: '', commentId: '', psid: '', username: '', text: '', mediaId: '', source: 'instagram', reason: '' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  const query = p.query || {};\n  const mode = query['hub.mode'] || p['hub.mode'] || '';\n  if (mode === 'subscribe') {\n    out.route = 'verify';\n    out.challenge = String(query['hub.challenge'] || p['hub.challenge'] || '');\n    return [{ json: out }];\n  }\n  let data = (p.body !== undefined && p.body !== null) ? p.body : p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      const v = ch.value || {};\n      const from = v.from || {};\n      const psid = String(from.id || '');\n      const text = String(v.text !== undefined ? v.text : (v.message || '')).slice(0, 2000);\n      const low = text.toLowerCase();\n      if (psid === IG_ID) { out.route = 'skip'; out.reason = 'self-account'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route = 'skip'; out.reason = 'not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route = 'skip'; out.reason = 'own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route = 'skip'; out.reason = 'no-keyword'; continue; }\n      out.route = 'lead'; out.reason = 'match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.psid = psid;\n      out.username = from.username || 'instagram-lead';\n      out.text = text;\n      out.mediaId = String((v.media && v.media.id) || v.media_id || '');\n    }\n  }\n} catch (err) { out.route = 'skip'; out.reason = 'error'; }\nreturn [{ json: out }];"
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "53e91861-e2b0-49e8-bdb0-2dd59d94b9db",
+      "name": "2. Is actionable IG comment?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "route",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "lead"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "8bfaf6c7-e5dc-40b0-be4c-2f7643958467",
+      "name": "3. Canonical Contact (NAT-97)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst uname = d.username || 'instagram-lead';\nreturn [{ json: {\n  externalId: d.commentId, userId: d.psid, name: uname, handle: uname,\n  message: d.text || '', mediaId: d.mediaId || '', source: 'instagram',\n  sourceCrm: 'zoho', sourceClient: 'growbusy-main',\n  consent: { emailMarketing: false, smsMarketing: false, version: 'v1', capturedAt: now },\n  capturedAt: now\n} }];"
+      }
+    },
+    {
+      "id": "dd3f977c-2629-49e6-a182-360b819e13f8",
+      "name": "4. Ack Meta (fast 200)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=ok",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "753aefe2-1912-4c71-8969-ed2c40b44ed0",
+      "name": "5. Zoho Lead (adapter: zoho)",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "Company": "Individual",
+        "lastName": "={{ $json.name || \"Unknown\" }}",
+        "additionalFields": {
+          "Lead_Source": "Social - Instagram",
+          "Lead_Status": "Attempted to Contact",
+          "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nsourceCrm: \" + $json.sourceCrm + \" / client: \" + $json.sourceClient + \"\\nconsent smsMarketing=\" + $json.consent.smsMarketing + \" v\" + $json.consent.version }}"
+        }
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "af82ef56-23e9-4492-9cdb-2469ffd4894b",
+      "name": "6. Reply on IG comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $(\"3. Canonical Contact (NAT-97)\").first().json.externalId }}/replies",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Gracias! Te enviamos el link por mensaje privado."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "jw9ITGUd1gNoMiMe",
+          "name": "Meta Graph Growbusy Social Token"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "06ff03cb-cd5a-45e9-ace4-9d25cf83bfa7",
+      "name": "7. Instagram DM with link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/17841431723301731/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "messaging_type",
+              "value": "RESPONSE"
+            },
+            {
+              "name": "recipient",
+              "value": "={{ JSON.stringify({ id: $(\"3. Canonical Contact (NAT-97)\").first().json.userId }) }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ JSON.stringify({ text: \"Aqui tienes el link: https://growbusy.net\" }) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "jw9ITGUd1gNoMiMe",
+          "name": "Meta Graph Growbusy Social Token"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "5216de10-6316-44dc-913c-20897a4e91d6",
+      "name": "4. Ack (not actionable)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        192
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.challenge || \"ok\" }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "zwP5dCxTMN9gL5T8",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-24T01:10:34.633Z",
+      "updatedAt": "2026-09-24T01:10:34.633Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-24T02:23:57.000Z",
+  "versionId": "47f4d132-f2a0-408e-8f10-11ae4e03662b"
+}
