@@ -1,0 +1,52 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {},
+  "createdAt": "2026-09-23T23:28:32.173Z",
+  "id": "ajRuRvT7Teb9OjKI",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 credential",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "b8a57b28-f45c-4a4e-aa12-3c7f6221ca26",
+      "name": "M",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "ajRuRvT7Teb9OjKI",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-23T23:28:32.177Z",
+      "updatedAt": "2026-09-23T23:28:32.177Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-23T23:29:36.000Z",
+  "versionId": "a8252d52-9d2b-45ce-8918-c4feb5e35f7c"
+}
