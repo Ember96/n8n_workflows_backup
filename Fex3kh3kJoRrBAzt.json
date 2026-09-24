@@ -1,0 +1,119 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "POST hook": {
+      "main": [
+        [
+          {
+            "node": "echo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET hook": {
+      "main": [
+        [
+          {
+            "node": "echo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-24T01:38:19.133Z",
+  "id": "Fex3kh3kJoRrBAzt",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "two hook test",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "291a6c48-5cb5-4be8-82fe-f981ed43c4a3",
+      "name": "POST hook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "two-hook-test",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "dc384486-c31a-45b1-9331-368fd9238922"
+    },
+    {
+      "id": "79f2bd38-6825-44c3-bb9d-d6b6ae052ecd",
+      "name": "echo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ ($json.query && $json.query[\"hub.challenge\"]) || $json.body || \"none\" }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "1776e922-af04-4d06-8d4f-4c5be8fda6f7",
+      "name": "GET hook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ],
+      "parameters": {
+        "path": "two-hook-test",
+        "httpMethod": "GET",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "60d3ea5d-b6a1-4a74-b404-628fa7388dd8"
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Fex3kh3kJoRrBAzt",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-24T01:38:19.144Z",
+      "updatedAt": "2026-09-24T01:38:19.144Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 2,
+  "updatedAt": "2026-09-24T01:38:45.000Z",
+  "versionId": "3c487c1d-cf15-4ec0-93d1-d794ff8b376a"
+}
