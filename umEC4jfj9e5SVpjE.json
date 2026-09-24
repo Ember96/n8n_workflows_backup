@@ -1,0 +1,298 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Meta Webhook (FB/IG)": {
+      "main": [
+        [
+          {
+            "node": "1. Extract + Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Extract + Guard": {
+      "main": [
+        [
+          {
+            "node": "2. Is actionable LINK comment?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Is actionable LINK comment?": {
+      "main": [
+        [
+          {
+            "node": "3. Canonical Contact (NAT-97)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "6. Respond (verify / skip)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Create Zoho Lead (adapter)": {
+      "main": [
+        [
+          {
+            "node": "5. Reply on comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Reply on comment": {
+      "main": [
+        [
+          {
+            "node": "6. Respond (lead created)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Canonical Contact (NAT-97)": {
+      "main": [
+        [
+          {
+            "node": "6. Respond (lead created)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-23T22:16:57.569Z",
+  "id": "umEC4jfj9e5SVpjE",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 - Social FB/IG to Canonical to CRM (v5)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "67624fb5-360c-46cd-af70-0fcc523726f3",
+      "name": "Meta Webhook (FB/IG)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        96
+      ],
+      "parameters": {
+        "path": "social-feedback-v4",
+        "httpMethod": [
+          "POST",
+          "GET"
+        ],
+        "multipleMethods": true,
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "f114a1b7-c701-4d92-8a8a-4af975998737"
+    },
+    {
+      "id": "3e9f2a68-5ee2-4258-9974-d22559af388d",
+      "name": "1. Extract + Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nreturn [{ json: { route: 'skip', challenge: '', seen: 'keys=' + Object.keys(p).join(',') + ' | query=' + JSON.stringify(p.query || null) + ' | raw=' + JSON.stringify(p).slice(0,300) } }];",
+        "alwaysOutputData": true
+      }
+    },
+    {
+      "id": "5a3f67db-aec6-4af4-9d33-49d2c4acc61e",
+      "name": "2. Is actionable LINK comment?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "route-is-lead",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "lead"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "edf25ff1-c272-42a5-a533-bf15c32179d2",
+      "name": "3. Canonical Contact (NAT-97)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst name = d.displayName || 'Social lead';\nconst parts = name.trim().split(/\\s+/);\nconst lastName = parts.pop() || name;\nconst firstName = parts.join(' ');\nreturn [{ json: {\n  externalId: d.externalId, userId: d.userId, name: name,\n  firstName: firstName, lastName: lastName, message: d.message || '',\n  postId: d.postId || null, permalink: d.permalink || null, source: 'facebook',\n  sourceCrm: 'zoho', sourceClient: 'growbusy-main',\n  consent: { emailMarketing: false, smsMarketing: false, version: 'v1', capturedAt: now },\n  capturedAt: now\n} }];"
+      }
+    },
+    {
+      "id": "0551fd68-7438-420f-9505-6de599e1aca8",
+      "name": "4. Create Zoho Lead (adapter)",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "Company": "Individual",
+        "lastName": "={{ $json.lastName || \"Unknown\" }}",
+        "additionalFields": {
+          "First_Name": "={{ $json.firstName || \"\" }}",
+          "Lead_Source": "Social - Facebook",
+          "Lead_Status": "Attempted to Contact",
+          "Description": "={{ \"Social comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nPermalink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nuserId: \" + ($json.userId || \"n/a\") + \"\\nsourceCrm: \" + $json.sourceCrm + \" / client: \" + $json.sourceClient + \"\\nconsent smsMarketing=\" + $json.consent.smsMarketing + \" v\" + $json.consent.version }}"
+        }
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "788b2c50-ccb2-4c7c-9b0c-9045ffab9664",
+      "name": "5. Reply on comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.externalId }}/replies",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "access_token",
+              "value": "EAAQbY5kJZAokBSrsTxZAs5SHwjOTdYCuPUYCaCrZChKWQulGXPWUVBiMav1BLXKZCVZAKXs1kAr2gFMiVlH9izEUqZAI198upYJWC1h93iWKLVp7PNi7oBZAO5fkZBkwGZB7Cz22fIyvDdD5fqbMwwZBJMUmsYo2cGkpevzH3eFu5uQV69GNT6ZB3r8XSSbh98lYFRLlQTi4T9ZAe53HWTP1Yxs7DqGuLIHTt3fxohO5DAbRlA8bKtkgLrRiZBuQZD"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Gracias! Te envie el link por mensaje privado."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "2bbb3b4c-3427-4419-b613-33a11778b902",
+      "name": "6. Respond (lead created)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=ok-lead",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "8f7ed37b-8016-4bce-b430-a691a1fdd51a",
+      "name": "6. Respond (verify / skip)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        192
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.seen || 'nothing' }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "umEC4jfj9e5SVpjE",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-23T22:16:57.572Z",
+      "updatedAt": "2026-09-23T22:16:57.572Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-23T22:23:00.000Z",
+  "versionId": "5122cc13-313a-45d8-a2cf-5c424d8d1071"
+}
