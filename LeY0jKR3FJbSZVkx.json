@@ -1,0 +1,478 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "0edff64c-5e43-4575-bf8b-51f86acb11d1",
+    "workflowId": "LeY0jKR3FJbSZVkx",
+    "nodes": [
+      {
+        "id": "cffc534f-23d1-48e6-a362-98268dbcd178",
+        "name": "Verify GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "meta-social",
+          "httpMethod": "GET",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "webhookId": "8a4122d6-7930-45dc-a774-d868414d432b"
+      },
+      {
+        "id": "057e09d0-9729-4fb4-a000-68296f5fcf22",
+        "name": "Echo challenge",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ ($json.query && $json.query[\"hub.challenge\"]) || \"\" }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "700fa934-8135-4099-b5c2-92d3876b5695",
+        "name": "Receive POST",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          320
+        ],
+        "parameters": {
+          "path": "meta-social",
+          "httpMethod": "POST",
+          "responseMode": "onReceived",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "webhookId": "4d5a23a9-33b8-4146-994d-1c5597ddf473"
+      },
+      {
+        "id": "bcb85b5b-45d7-499e-ae57-49e2c62e6ae4",
+        "name": "Detect channel",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          320
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nlet data = p.body || p;\nif (typeof data === 'string') { data = JSON.parse(data); }\nif (!data || typeof data !== 'object') { data = {}; }\nconst obj = String(data.object || '');\nconst entries = Array.isArray(data.entry) ? data.entry : [];\nlet field = '';\nfor (const en of entries) { if (en.changes && en.changes[0]) { field = String(en.changes[0].field || ''); break; } }\nconst channel = (obj === 'instagram' || field === 'comments') ? 'instagram' : 'facebook';\nreturn [{ json: { channel: channel, payload: data } }];"
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "09454c66-10f9-42a1-a47c-387c49d08b3b",
+        "name": "Is Instagram?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          320
+        ],
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ch",
+                "leftValue": "={{ $json.channel }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "instagram"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "3441b767-56e8-464f-bd24-673f8b7ec2d8",
+        "name": "Call Instagram sub-workflow",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          672,
+          224
+        ],
+        "parameters": {
+          "mode": "each",
+          "source": "database",
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "ntX5efjAdbG2HAL1"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "payload": "={{ $json.payload }}"
+            },
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          }
+        }
+      },
+      {
+        "id": "c50184e7-d4b7-4101-89c8-819cd4929b75",
+        "name": "Call Facebook sub-workflow",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          672,
+          416
+        ],
+        "parameters": {
+          "mode": "each",
+          "source": "database",
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "4S4QobrFX3omdY87"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "payload": "={{ $json.payload }}"
+            },
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Verify GET": {
+        "main": [
+          [
+            {
+              "node": "Echo challenge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Receive POST": {
+        "main": [
+          [
+            {
+              "node": "Detect channel",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Detect channel": {
+        "main": [
+          [
+            {
+              "node": "Is Instagram?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Instagram?": {
+        "main": [
+          [
+            {
+              "node": "Call Instagram sub-workflow",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call Facebook sub-workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Initial version",
+    "description": "Created with 7 nodes: Verify GET, Echo challenge, Receive POST, Detect channel, Is Instagram? and 2 more",
+    "autosaved": false,
+    "createdAt": "2026-09-24T01:45:47.525Z",
+    "updatedAt": "2026-09-24T01:45:47.525Z"
+  },
+  "activeVersionId": "0edff64c-5e43-4575-bf8b-51f86acb11d1",
+  "connections": {
+    "Verify GET": {
+      "main": [
+        [
+          {
+            "node": "Echo challenge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive POST": {
+      "main": [
+        [
+          {
+            "node": "Detect channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect channel": {
+      "main": [
+        [
+          {
+            "node": "Is Instagram?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Instagram?": {
+      "main": [
+        [
+          {
+            "node": "Call Instagram sub-workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Facebook sub-workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-24T01:45:47.519Z",
+  "id": "LeY0jKR3FJbSZVkx",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 - Meta social router (single public URL)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "cffc534f-23d1-48e6-a362-98268dbcd178",
+      "name": "Verify GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "meta-social",
+        "httpMethod": "GET",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "8a4122d6-7930-45dc-a774-d868414d432b"
+    },
+    {
+      "id": "057e09d0-9729-4fb4-a000-68296f5fcf22",
+      "name": "Echo challenge",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ ($json.query && $json.query[\"hub.challenge\"]) || \"\" }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "700fa934-8135-4099-b5c2-92d3876b5695",
+      "name": "Receive POST",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        320
+      ],
+      "parameters": {
+        "path": "meta-social",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "4d5a23a9-33b8-4146-994d-1c5597ddf473"
+    },
+    {
+      "id": "bcb85b5b-45d7-499e-ae57-49e2c62e6ae4",
+      "name": "Detect channel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        320
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nlet data = p.body || p;\nif (typeof data === 'string') { data = JSON.parse(data); }\nif (!data || typeof data !== 'object') { data = {}; }\nconst obj = String(data.object || '');\nconst entries = Array.isArray(data.entry) ? data.entry : [];\nlet field = '';\nfor (const en of entries) { if (en.changes && en.changes[0]) { field = String(en.changes[0].field || ''); break; } }\nconst channel = (obj === 'instagram' || field === 'comments') ? 'instagram' : 'facebook';\nreturn [{ json: { channel: channel, payload: data } }];"
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "09454c66-10f9-42a1-a47c-387c49d08b3b",
+      "name": "Is Instagram?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        320
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ch",
+              "leftValue": "={{ $json.channel }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "instagram"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "3441b767-56e8-464f-bd24-673f8b7ec2d8",
+      "name": "Call Instagram sub-workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        224
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ntX5efjAdbG2HAL1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json.payload }}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    },
+    {
+      "id": "c50184e7-d4b7-4101-89c8-819cd4929b75",
+      "name": "Call Facebook sub-workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        416
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "4S4QobrFX3omdY87"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json.payload }}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "LeY0jKR3FJbSZVkx",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-24T01:45:47.523Z",
+      "updatedAt": "2026-09-24T01:45:47.523Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 2,
+  "updatedAt": "2026-09-24T01:45:47.519Z",
+  "versionId": "0edff64c-5e43-4575-bf8b-51f86acb11d1"
+}
