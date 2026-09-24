@@ -1,0 +1,219 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Meta Webhook (FB/IG)": {
+      "main": [
+        [
+          {
+            "node": "1. Extract + Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Extract + Guard": {
+      "main": [
+        [
+          {
+            "node": "2. Canonical Contact (NAT-97)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Canonical Contact (NAT-97)": {
+      "main": [
+        [
+          {
+            "node": "3. Create Zoho Lead (adapter: zoho)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Create Zoho Lead (adapter: zoho)": {
+      "main": [
+        [
+          {
+            "node": "4. Public reply on comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Public reply on comment": {
+      "main": [
+        [
+          {
+            "node": "5. Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-23T22:12:42.858Z",
+  "id": "hJ9II9C2Uz4SB8HZ",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 - Social FB/IG to Canonical to CRM (v2)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "a902c824-b706-4926-911b-4cd9acdb3437",
+      "name": "Meta Webhook (FB/IG)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "social-feedback-v2",
+        "httpMethod": [
+          "POST",
+          "GET"
+        ],
+        "multipleMethods": true,
+        "responseMode": "lastNode",
+        "responseData": "firstEntryJson",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "e74bb164-ffbe-443e-8736-27280056e24c"
+    },
+    {
+      "id": "2d7b2013-5ec1-493d-b85f-f5303f249afc",
+      "name": "1. Extract + Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const p = $input.first().json;\nconst q = p.query || {};\nif (q['hub.mode'] === 'subscribe') {\n  return [{ json: { __challenge: String(q['hub.challenge'] || '') } }];\n}\nconst data = p.body || p;\nconst entry = data.entry && data.entry[0];\nconst change = entry && entry.changes && entry.changes[0];\nconst v = (change && change.value) || {};\nconst from = v.from || {};\nconst message = String(v.message || v.text || '').slice(0, 2000);\nconst isCommentAdd = v.item === 'comment' && v.verb === 'add';\nconst lower = message.toLowerCase();\nconst wantsLink = lower.includes('link') || lower.includes('enlace');\nif (!isCommentAdd || !wantsLink) { return [{ json: { __skip: true } }]; }\nreturn [{ json: {\n  externalId: String(v.comment_id || v.id || ''),\n  userId: from.id ? String(from.id) : null,\n  displayName: from.name || 'Social lead',\n  message: message,\n  postId: v.post_id || (v.post && v.post.id) || null,\n  permalink: (v.post && v.post.permalink_url) || null,\n  source: 'facebook'\n} }];"
+      }
+    },
+    {
+      "id": "a265aaad-59ad-4293-897c-df437ff53f9c",
+      "name": "2. Canonical Contact (NAT-97)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst parts = d.displayName.trim().split(/\\s+/);\nconst lastName = parts.pop() || d.displayName;\nconst firstName = parts.join(' ');\nreturn [{ json: {\n  externalId: d.externalId, userId: d.userId, name: d.displayName,\n  firstName: firstName, lastName: lastName, message: d.message,\n  postId: d.postId, permalink: d.permalink, source: d.source,\n  sourceCrm: 'zoho', sourceClient: 'growbusy-main',\n  consent: { emailMarketing: false, smsMarketing: false, version: 'v1', capturedAt: now },\n  capturedAt: now\n} }];"
+      }
+    },
+    {
+      "id": "06e41ab0-7f7f-4daf-8d1b-995a8ba6a4d7",
+      "name": "3. Create Zoho Lead (adapter: zoho)",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "Company": "Individual",
+        "lastName": "={{ $json.lastName || \"Unknown\" }}",
+        "additionalFields": {
+          "First_Name": "={{ $json.firstName || \"\" }}",
+          "Lead_Source": "Social - Facebook",
+          "Lead_Status": "Attempted to Contact",
+          "Description": "={{ \"Social comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nPermalink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nuserId: \" + ($json.userId || \"n/a\") + \"\\nsourceCrm: \" + $json.sourceCrm + \" / sourceClient: \" + $json.sourceClient + \"\\nconsent smsMarketing=\" + $json.consent.smsMarketing + \" v\" + $json.consent.version + \" at \" + $json.consent.capturedAt }}"
+        }
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "ec0f6017-629a-4200-a941-c849c97cf4ae",
+      "name": "4. Public reply on comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://graph.facebook.com/v19.0/\" + $json.externalId + \"/replies?access_token=EAAQbY5kJZAokBSrsTxZAs5SHwjOTdYCuPUYCaCrZChKWQulGXPWUVBiMav1BLXKZCVZAKXs1kAr2gFMiVlH9izEUqZAI198upYJWC1h93iWKLVp7PNi7oBZAO5fkZBkwGZB7Cz22fIyvDdD5fqbMwwZBJMUmsYo2cGkpevzH3eFu5uQV69GNT6ZB3r8XSSbh98lYFRLlQTi4T9ZAe53HWTP1Yxs7DqGuLIHTt3fxohO5DAbRlA8bKtkgLrRiZBuQZD\" }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Gracias! Te envie el link por mensaje privado. Responde STOP para opt-out."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "0178eb40-af8f-456b-b4f7-b709a548bfcd",
+      "name": "5. Respond",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nif (d.__challenge !== undefined) { return [{ json: String(d.__challenge) }]; }\nif (d.__skip) { return [{ json: { ok: true, skipped: true } }]; }\nreturn [{ json: { ok: true, externalId: d.externalId, leadId: d.id || null } }];"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "hJ9II9C2Uz4SB8HZ",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-23T22:12:42.862Z",
+      "updatedAt": "2026-09-23T22:12:42.862Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-23T22:14:51.000Z",
+  "versionId": "e66eaea1-22b3-4630-b030-09f987219108"
+}
