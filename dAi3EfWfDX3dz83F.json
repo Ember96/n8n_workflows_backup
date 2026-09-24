@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Manual": {
+      "main": [
+        [
+          {
+            "node": "Use Meta credential",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-23T23:29:22.417Z",
+  "id": "dAi3EfWfDX3dz83F",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-120 credential 3",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "d5f9acfc-d7c0-4a21-9820-c4c7d6ac46b4",
+      "name": "Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c171caba-418e-4f3a-90f0-c56855d9179e",
+      "name": "Use Meta credential",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://graph.facebook.com/v19.0/me?fields=id,name",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mImX5Ij8Az6e5EsM",
+          "name": "Header Auth account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "dAi3EfWfDX3dz83F",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-23T23:29:22.419Z",
+      "updatedAt": "2026-09-23T23:29:22.419Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-23T23:29:36.000Z",
+  "versionId": "3dd31e3d-ea38-443d-9982-755247875f5a"
+}
