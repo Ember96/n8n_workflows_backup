@@ -1,0 +1,189 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "W": {
+      "main": [
+        [
+          {
+            "node": "Dedupe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe": {
+      "main": [
+        [
+          {
+            "node": "IsDup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IsDup": {
+      "main": [
+        [
+          {
+            "node": "R-lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "R-skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-25T00:12:31.106Z",
+  "id": "QlsXvuMSA6xchxwT",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "dedupe probe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "2eb96207-cce7-468c-adad-e54916ceaaa8",
+      "name": "W",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        96
+      ],
+      "parameters": {
+        "path": "dedupe-probe",
+        "httpMethod": [
+          "POST"
+        ],
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "4026e945-d054-4093-b7da-b8d9a2e55b06"
+    },
+    {
+      "id": "417edfd2-ab2b-42d4-a860-96b53c4e2719",
+      "name": "Dedupe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const p = $input.first().json;\nconst b = p.body || p;\nconst store = $getWorkflowStaticData('global');\nif (!store.social_dedupe || typeof store.social_dedupe !== 'object') store.social_dedupe = {};\nconst map = store.social_dedupe;\nconst now = Date.now();\nfor (const k of Object.keys(map)) { if (now - map[k] > 48*3600*1000) delete map[k]; }\nconst day = new Date().toISOString().slice(0,10);\nconst uid = b.userId || '';\nconst pid = b.postId || '';\nlet duplicate = false;\nlet key = '';\nif (uid && pid) {\n  key = uid + '|' + pid + '|' + day;\n  if (map[key]) { duplicate = true; } else { map[key] = now; }\n}\nreturn [{ json: { duplicate: duplicate, key: key, storeSize: Object.keys(map).length } }];"
+      }
+    },
+    {
+      "id": "7be6ba34-1325-4782-9fc3-955473c391a3",
+      "name": "IsDup",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "notdup",
+              "leftValue": "={{ $json.duplicate }}",
+              "operator": {
+                "operation": "equal",
+                "type": "boolean"
+              },
+              "rightValue": false
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "828f12c1-ba0f-4725-8c77-81d561bd7aa9",
+      "name": "R-lead",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ \"LEAD-PATH dup=\" + $json.duplicate }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "4fa23c79-641c-48e0-942d-e21fd20de7a7",
+      "name": "R-skip",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        192
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ \"SKIP-PATH dup=\" + $json.duplicate }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "QlsXvuMSA6xchxwT",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-25T00:12:31.112Z",
+      "updatedAt": "2026-09-25T00:12:31.112Z"
+    }
+  ],
+  "staticData": {
+    "global": {
+      "social_dedupe": {
+        "UU1|PP1|2026-09-25": 1790295313719
+      }
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-25T00:16:40.000Z",
+  "versionId": "ec0311ef-3807-4353-b839-c76cd125339f"
+}
