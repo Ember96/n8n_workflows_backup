@@ -1,0 +1,156 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "a7736536-5eaf-45ce-bd60-b113669483dd",
+    "workflowId": "19qRA7zY88h4fgMB",
+    "nodes": [
+      {
+        "id": "e5eca304-2468-4e5b-a1d5-134849d4f090",
+        "name": "W",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "zoho-recent",
+          "httpMethod": "POST",
+          "responseMode": "lastNode",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "webhookId": "25064358-d228-4645-8430-ef40a40801ae"
+      },
+      {
+        "id": "7c50f79e-d18a-4788-a69d-e9de60cd7924",
+        "name": "Recent leads",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "resource": "lead",
+          "operation": "getAll",
+          "limit": 8
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "W": {
+        "main": [
+          [
+            {
+              "node": "Recent leads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated W",
+    "description": "Updated nodes: W",
+    "autosaved": false,
+    "createdAt": "2026-09-25T00:19:21.007Z",
+    "updatedAt": "2026-09-25T00:19:21.007Z"
+  },
+  "activeVersionId": "a7736536-5eaf-45ce-bd60-b113669483dd",
+  "connections": {
+    "W": {
+      "main": [
+        [
+          {
+            "node": "Recent leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-25T00:19:00.328Z",
+  "id": "19qRA7zY88h4fgMB",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "zoho recent",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "e5eca304-2468-4e5b-a1d5-134849d4f090",
+      "name": "W",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "zoho-recent",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "webhookId": "25064358-d228-4645-8430-ef40a40801ae"
+    },
+    {
+      "id": "7c50f79e-d18a-4788-a69d-e9de60cd7924",
+      "name": "Recent leads",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "getAll",
+        "limit": 8
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "19qRA7zY88h4fgMB",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-25T00:19:00.333Z",
+      "updatedAt": "2026-09-25T00:19:00.333Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-25T00:19:21.006Z",
+  "versionId": "a7736536-5eaf-45ce-bd60-b113669483dd"
+}
