@@ -1,20 +1,11 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "5dfa4a3d-a0dc-4ff7-b5e6-a201ef4efec0",
+    "versionId": "8c106304-d1e4-409e-b804-82a643c84cde",
     "workflowId": "ntX5efjAdbG2HAL1",
     "nodes": [
       {
-        "id": "c34dd7f4-b86e-4f55-b0a6-8b02abef9427",
-        "name": "From router",
-        "type": "n8n-nodes-base.executeWorkflowTrigger",
-        "typeVersion": 1.2,
-        "position": [
-          0,
-          0
-        ],
         "parameters": {
-          "inputSource": "workflowInputs",
           "workflowInputs": {
             "values": [
               {
@@ -23,9 +14,20 @@
               }
             ]
           }
-        }
+        },
+        "id": "c34dd7f4-b86e-4f55-b0a6-8b02abef9427",
+        "name": "From router",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "const IG_ID = '17841431723301731';\nlet out = { route:'skip', reason:'', commentId:'', psid:'', username:'', text:'', mediaId:'', source:'instagram' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'comments') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const psid = String(from.id || '');\n      const text = String(v.text !== undefined ? v.text : (v.message || '')).slice(0, 2000);\n      const low = text.toLowerCase();\n      if (psid === IG_ID) { out.route='skip'; out.reason='self-account'; continue; }\n      if (!text) { out.route='skip'; out.reason='empty-text'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.psid = psid;\n      out.username = from.username || 'instagram-lead';\n      out.text = text;\n      out.mediaId = String((v.media && v.media.id) || v.media_id || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+        },
         "id": "2747970a-d3ed-4386-8c4a-1e9ae8c67256",
         "name": "IG 1. Parse + Guard",
         "type": "n8n-nodes-base.code",
@@ -34,22 +36,9 @@
           224,
           0
         ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "const IG_ID = '17841431723301731';\nlet out = { route:'skip', reason:'', commentId:'', psid:'', username:'', text:'', mediaId:'', source:'instagram' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'comments') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const psid = String(from.id || '');\n      const text = String(v.text !== undefined ? v.text : (v.message || '')).slice(0, 2000);\n      const low = text.toLowerCase();\n      if (psid === IG_ID) { out.route='skip'; out.reason='self-account'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.psid = psid;\n      out.username = from.username || 'instagram-lead';\n      out.text = text;\n      out.mediaId = String((v.media && v.media.id) || v.media_id || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
-        },
         "alwaysOutputData": true
       },
       {
-        "id": "3b99675e-ae77-417e-876e-d93e35c5967a",
-        "name": "IG 2. Is actionable?",
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.3,
-        "position": [
-          448,
-          0
-        ],
         "parameters": {
           "conditions": {
             "combinator": "and",
@@ -72,9 +61,20 @@
             }
           },
           "options": {}
-        }
+        },
+        "id": "3b99675e-ae77-417e-876e-d93e35c5967a",
+        "name": "IG 2. Is actionable?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          0
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst uname = d.username || 'instagram-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.psid, name:uname, handle:uname, message:d.text||'', mediaId:d.mediaId||'', source:'instagram', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+        },
         "id": "323fd7cd-f8eb-4436-9242-44459b293aa9",
         "name": "IG 3. Canonical (NAT-97)",
         "type": "n8n-nodes-base.code",
@@ -82,32 +82,27 @@
         "position": [
           672,
           0
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst uname = d.username || 'instagram-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.psid, name:uname, handle:uname, message:d.text||'', mediaId:d.mediaId||'', source:'instagram', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
-        }
+        ]
       },
       {
-        "id": "73a6a02a-0561-4c00-97f4-cd3ff5eb7512",
-        "name": "IG 4. Zoho Lead",
-        "type": "n8n-nodes-base.zohoCrm",
-        "typeVersion": 1,
-        "position": [
-          896,
-          0
-        ],
         "parameters": {
           "resource": "lead",
           "Company": "Individual",
           "lastName": "={{ $json.name || \"Unknown\" }}",
           "additionalFields": {
+            "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nchannel: \" + $json.source }}",
             "Lead_Source": "Social - Instagram",
-            "Lead_Status": "Attempted to Contact",
-            "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nchannel: \" + $json.source }}"
+            "Lead_Status": "Attempted to Contact"
           }
         },
+        "id": "73a6a02a-0561-4c00-97f4-cd3ff5eb7512",
+        "name": "IG 6. Zoho Lead",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          1344,
+          0
+        ],
         "credentials": {
           "zohoOAuth2Api": {
             "id": "R5WqgTreF3p3gViM",
@@ -117,14 +112,6 @@
         "onError": "continueErrorOutput"
       },
       {
-        "id": "a1581b6b-4d1d-4567-a2a7-2590ece200c1",
-        "name": "IG 5. Reply (replies endpoint)",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          1120,
-          0
-        ],
         "parameters": {
           "method": "POST",
           "url": "=https://graph.facebook.com/v19.0/{{ $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }}/replies",
@@ -141,6 +128,14 @@
           },
           "options": {}
         },
+        "id": "a1581b6b-4d1d-4567-a2a7-2590ece200c1",
+        "name": "IG 7. Reply (replies endpoint)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1568,
+          0
+        ],
         "credentials": {
           "httpHeaderAuth": {
             "id": "jw9ITGUd1gNoMiMe",
@@ -150,29 +145,17 @@
         "onError": "continueErrorOutput"
       },
       {
-        "id": "f728d9c9-4b2e-4520-9771-79c02d0a61de",
-        "name": "IG 6. DM with link",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          1344,
-          0
-        ],
         "parameters": {
           "method": "POST",
-          "url": "=https://graph.facebook.com/v19.0/17841431723301731/messages",
+          "url": "=https://graph.facebook.com/v19.0/1348081288382156/messages",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
           "sendBody": true,
           "bodyParameters": {
             "parameters": [
               {
-                "name": "messaging_type",
-                "value": "RESPONSE"
-              },
-              {
                 "name": "recipient",
-                "value": "={{ JSON.stringify({ id: $(\"IG 3. Canonical (NAT-97)\").first().json.userId }) }}"
+                "value": "={{ JSON.stringify({ comment_id: $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }) }}"
               },
               {
                 "name": "message",
@@ -182,6 +165,14 @@
           },
           "options": {}
         },
+        "id": "f728d9c9-4b2e-4520-9771-79c02d0a61de",
+        "name": "IG 8. DM with link",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1792,
+          0
+        ],
         "credentials": {
           "httpHeaderAuth": {
             "id": "jw9ITGUd1gNoMiMe",
@@ -225,33 +216,33 @@
           ]
         ]
       },
+      "IG 6. Zoho Lead": {
+        "main": [
+          [
+            {
+              "node": "IG 7. Reply (replies endpoint)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IG 7. Reply (replies endpoint)": {
+        "main": [
+          [
+            {
+              "node": "IG 8. DM with link",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
       "IG 3. Canonical (NAT-97)": {
         "main": [
           [
             {
-              "node": "IG 4. Zoho Lead",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "IG 4. Zoho Lead": {
-        "main": [
-          [
-            {
-              "node": "IG 5. Reply (replies endpoint)",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "IG 5. Reply (replies endpoint)": {
-        "main": [
-          [
-            {
-              "node": "IG 6. DM with link",
+              "node": "IG 6. Zoho Lead",
               "type": "main",
               "index": 0
             }
@@ -261,13 +252,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated IG 1. Parse + Guard",
-    "description": "Updated nodes: IG 1. Parse + Guard",
+    "name": "Use router-level dedupe",
+    "description": "Removed the Instagram-local dedupe gate. The router now performs the single 24-hour dedupe before routing, and Instagram canonical connects directly to Zoho.",
     "autosaved": false,
-    "createdAt": "2026-09-24T01:44:08.517Z",
-    "updatedAt": "2026-09-24T01:44:08.517Z"
+    "createdAt": "2026-09-25T02:56:47.704Z",
+    "updatedAt": "2026-09-25T02:56:47.704Z"
   },
-  "activeVersionId": "5dfa4a3d-a0dc-4ff7-b5e6-a201ef4efec0",
+  "activeVersionId": "8c106304-d1e4-409e-b804-82a643c84cde",
   "connections": {
     "From router": {
       "main": [
@@ -302,33 +293,33 @@
         ]
       ]
     },
+    "IG 6. Zoho Lead": {
+      "main": [
+        [
+          {
+            "node": "IG 7. Reply (replies endpoint)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 7. Reply (replies endpoint)": {
+      "main": [
+        [
+          {
+            "node": "IG 8. DM with link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "IG 3. Canonical (NAT-97)": {
       "main": [
         [
           {
-            "node": "IG 4. Zoho Lead",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IG 4. Zoho Lead": {
-      "main": [
-        [
-          {
-            "node": "IG 5. Reply (replies endpoint)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IG 5. Reply (replies endpoint)": {
-      "main": [
-        [
-          {
-            "node": "IG 6. DM with link",
+            "node": "IG 6. Zoho Lead",
             "type": "main",
             "index": 0
           }
@@ -347,16 +338,7 @@
   "nodeGroups": [],
   "nodes": [
     {
-      "id": "c34dd7f4-b86e-4f55-b0a6-8b02abef9427",
-      "name": "From router",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        0,
-        0
-      ],
       "parameters": {
-        "inputSource": "workflowInputs",
         "workflowInputs": {
           "values": [
             {
@@ -365,9 +347,20 @@
             }
           ]
         }
-      }
+      },
+      "id": "c34dd7f4-b86e-4f55-b0a6-8b02abef9427",
+      "name": "From router",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const IG_ID = '17841431723301731';\nlet out = { route:'skip', reason:'', commentId:'', psid:'', username:'', text:'', mediaId:'', source:'instagram' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'comments') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const psid = String(from.id || '');\n      const text = String(v.text !== undefined ? v.text : (v.message || '')).slice(0, 2000);\n      const low = text.toLowerCase();\n      if (psid === IG_ID) { out.route='skip'; out.reason='self-account'; continue; }\n      if (!text) { out.route='skip'; out.reason='empty-text'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.psid = psid;\n      out.username = from.username || 'instagram-lead';\n      out.text = text;\n      out.mediaId = String((v.media && v.media.id) || v.media_id || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+      },
       "id": "2747970a-d3ed-4386-8c4a-1e9ae8c67256",
       "name": "IG 1. Parse + Guard",
       "type": "n8n-nodes-base.code",
@@ -376,22 +369,9 @@
         224,
         0
       ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const IG_ID = '17841431723301731';\nlet out = { route:'skip', reason:'', commentId:'', psid:'', username:'', text:'', mediaId:'', source:'instagram' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'comments') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const psid = String(from.id || '');\n      const text = String(v.text !== undefined ? v.text : (v.message || '')).slice(0, 2000);\n      const low = text.toLowerCase();\n      if (psid === IG_ID) { out.route='skip'; out.reason='self-account'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.psid = psid;\n      out.username = from.username || 'instagram-lead';\n      out.text = text;\n      out.mediaId = String((v.media && v.media.id) || v.media_id || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
-      },
       "alwaysOutputData": true
     },
     {
-      "id": "3b99675e-ae77-417e-876e-d93e35c5967a",
-      "name": "IG 2. Is actionable?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        448,
-        0
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
@@ -414,9 +394,20 @@
           }
         },
         "options": {}
-      }
+      },
+      "id": "3b99675e-ae77-417e-876e-d93e35c5967a",
+      "name": "IG 2. Is actionable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst uname = d.username || 'instagram-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.psid, name:uname, handle:uname, message:d.text||'', mediaId:d.mediaId||'', source:'instagram', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+      },
       "id": "323fd7cd-f8eb-4436-9242-44459b293aa9",
       "name": "IG 3. Canonical (NAT-97)",
       "type": "n8n-nodes-base.code",
@@ -424,32 +415,27 @@
       "position": [
         672,
         0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst uname = d.username || 'instagram-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.psid, name:uname, handle:uname, message:d.text||'', mediaId:d.mediaId||'', source:'instagram', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
-      }
+      ]
     },
     {
-      "id": "73a6a02a-0561-4c00-97f4-cd3ff5eb7512",
-      "name": "IG 4. Zoho Lead",
-      "type": "n8n-nodes-base.zohoCrm",
-      "typeVersion": 1,
-      "position": [
-        896,
-        0
-      ],
       "parameters": {
         "resource": "lead",
         "Company": "Individual",
         "lastName": "={{ $json.name || \"Unknown\" }}",
         "additionalFields": {
+          "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nchannel: \" + $json.source }}",
           "Lead_Source": "Social - Instagram",
-          "Lead_Status": "Attempted to Contact",
-          "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nchannel: \" + $json.source }}"
+          "Lead_Status": "Attempted to Contact"
         }
       },
+      "id": "73a6a02a-0561-4c00-97f4-cd3ff5eb7512",
+      "name": "IG 6. Zoho Lead",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        0
+      ],
       "credentials": {
         "zohoOAuth2Api": {
           "id": "R5WqgTreF3p3gViM",
@@ -459,14 +445,6 @@
       "onError": "continueErrorOutput"
     },
     {
-      "id": "a1581b6b-4d1d-4567-a2a7-2590ece200c1",
-      "name": "IG 5. Reply (replies endpoint)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1120,
-        0
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://graph.facebook.com/v19.0/{{ $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }}/replies",
@@ -483,6 +461,14 @@
         },
         "options": {}
       },
+      "id": "a1581b6b-4d1d-4567-a2a7-2590ece200c1",
+      "name": "IG 7. Reply (replies endpoint)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        0
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "jw9ITGUd1gNoMiMe",
@@ -492,29 +478,17 @@
       "onError": "continueErrorOutput"
     },
     {
-      "id": "f728d9c9-4b2e-4520-9771-79c02d0a61de",
-      "name": "IG 6. DM with link",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1344,
-        0
-      ],
       "parameters": {
         "method": "POST",
-        "url": "=https://graph.facebook.com/v19.0/17841431723301731/messages",
+        "url": "=https://graph.facebook.com/v19.0/1348081288382156/messages",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
             {
-              "name": "messaging_type",
-              "value": "RESPONSE"
-            },
-            {
               "name": "recipient",
-              "value": "={{ JSON.stringify({ id: $(\"IG 3. Canonical (NAT-97)\").first().json.userId }) }}"
+              "value": "={{ JSON.stringify({ comment_id: $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }) }}"
             },
             {
               "name": "message",
@@ -524,6 +498,14 @@
         },
         "options": {}
       },
+      "id": "f728d9c9-4b2e-4520-9771-79c02d0a61de",
+      "name": "IG 8. DM with link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        0
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "jw9ITGUd1gNoMiMe",
@@ -534,14 +516,15 @@
     }
   ],
   "origin": "n8n",
-  "pinData": null,
+  "pinData": {},
   "repo": {
     "owner": "Ember96",
     "name": "n8n_workflows_backup"
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -552,9 +535,18 @@
       "updatedAt": "2026-09-24T01:40:54.321Z"
     }
   ],
-  "staticData": null,
+  "staticData": {
+    "global": {
+      "social_dedupe": {
+        "17999999999999999|17890000000000001|2026-09-25": 1790294826136
+      },
+      "socialDedupe24h": {
+        "17909350467308667": 1790303503453
+      }
+    }
+  },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-24T01:44:08.516Z",
-  "versionId": "5dfa4a3d-a0dc-4ff7-b5e6-a201ef4efec0"
+  "updatedAt": "2026-09-25T02:56:47.701Z",
+  "versionId": "8c106304-d1e4-409e-b804-82a643c84cde"
 }
