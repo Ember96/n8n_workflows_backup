@@ -1,0 +1,338 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "3f2543b2-3bc5-4404-96ef-2fe89ab09446",
+    "workflowId": "zICPJYgtV8WIf88i",
+    "nodes": [
+      {
+        "id": "77d95546-184b-4184-ac25-29b92dbd6665",
+        "name": "W",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          96
+        ],
+        "parameters": {
+          "path": "if-min-probe",
+          "httpMethod": [
+            "POST"
+          ],
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "webhookId": "96b76fe1-3960-4dd3-9743-f761d1900ffd"
+      },
+      {
+        "id": "cfa97b66-4b8a-461a-9d25-4a1c9a585392",
+        "name": "Hard",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          96
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "return [{ json: { dedupe: 'instagram' } }];"
+        }
+      },
+      {
+        "id": "a9caa78b-0593-433d-8fb6-05e399565a8e",
+        "name": "IFx",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          96
+        ],
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "ch",
+                "leftValue": "={{ $json.dedupe }}",
+                "operator": {
+                  "operation": "equal",
+                  "type": "string"
+                },
+                "rightValue": "instagram"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "c3d51909-5e73-49c8-a49b-f6455c533aaa",
+        "name": "R-true",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          672,
+          0
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "=TRUE-BRANCH",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "4e1b5ea8-8d72-4d1e-b7af-8777059fb503",
+        "name": "R-false",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          672,
+          192
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "=FALSE-BRANCH",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      }
+    ],
+    "connections": {
+      "W": {
+        "main": [
+          [
+            {
+              "node": "Hard",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Hard": {
+        "main": [
+          [
+            {
+              "node": "IFx",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IFx": {
+        "main": [
+          [
+            {
+              "node": "R-true",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "R-false",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated Hard, IFx",
+    "description": "Updated nodes: Hard, IFx",
+    "autosaved": false,
+    "createdAt": "2026-09-25T00:25:04.143Z",
+    "updatedAt": "2026-09-25T00:25:04.143Z"
+  },
+  "activeVersionId": "3f2543b2-3bc5-4404-96ef-2fe89ab09446",
+  "connections": {
+    "W": {
+      "main": [
+        [
+          {
+            "node": "Hard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hard": {
+      "main": [
+        [
+          {
+            "node": "IFx",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IFx": {
+      "main": [
+        [
+          {
+            "node": "R-true",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "R-false",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-25T00:22:36.480Z",
+  "id": "zICPJYgtV8WIf88i",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "if min probe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "77d95546-184b-4184-ac25-29b92dbd6665",
+      "name": "W",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        96
+      ],
+      "parameters": {
+        "path": "if-min-probe",
+        "httpMethod": [
+          "POST"
+        ],
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "96b76fe1-3960-4dd3-9743-f761d1900ffd"
+    },
+    {
+      "id": "cfa97b66-4b8a-461a-9d25-4a1c9a585392",
+      "name": "Hard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: { dedupe: 'instagram' } }];"
+      }
+    },
+    {
+      "id": "a9caa78b-0593-433d-8fb6-05e399565a8e",
+      "name": "IFx",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "ch",
+              "leftValue": "={{ $json.dedupe }}",
+              "operator": {
+                "operation": "equal",
+                "type": "string"
+              },
+              "rightValue": "instagram"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c3d51909-5e73-49c8-a49b-f6455c533aaa",
+      "name": "R-true",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=TRUE-BRANCH",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "4e1b5ea8-8d72-4d1e-b7af-8777059fb503",
+      "name": "R-false",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        192
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=FALSE-BRANCH",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "zICPJYgtV8WIf88i",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-25T00:22:36.483Z",
+      "updatedAt": "2026-09-25T00:22:36.483Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-25T00:25:04.142Z",
+  "versionId": "3f2543b2-3bc5-4404-96ef-2fe89ab09446"
+}
