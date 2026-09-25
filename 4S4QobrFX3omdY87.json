@@ -1,20 +1,11 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "6bc5b6b6-ec1c-4e67-8c82-2365a42916c0",
+    "versionId": "80ab6e6d-696f-4f3e-860c-8c10762dfbb1",
     "workflowId": "4S4QobrFX3omdY87",
     "nodes": [
       {
-        "id": "18cb4844-b6b9-426d-b926-99365a63461a",
-        "name": "From router",
-        "type": "n8n-nodes-base.executeWorkflowTrigger",
-        "typeVersion": 1.2,
-        "position": [
-          0,
-          0
-        ],
         "parameters": {
-          "inputSource": "workflowInputs",
           "workflowInputs": {
             "values": [
               {
@@ -23,9 +14,20 @@
               }
             ]
           }
-        }
+        },
+        "id": "18cb4844-b6b9-426d-b926-99365a63461a",
+        "name": "From router",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "const PAGE_ID = '1348081288382156';\nlet out = { route:'skip', reason:'', commentId:'', authorId:'', authorName:'', text:'', postId:'', permalink:'', source:'facebook' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'feed') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const authorId = String(from.id || '');\n      const text = String(v.message || '').slice(0, 2000);\n      const low = text.toLowerCase();\n      if (authorId === PAGE_ID) { out.route='skip'; out.reason='self-page'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.authorId = authorId;\n      out.authorName = from.name || 'facebook-lead';\n      out.text = text;\n      out.postId = String(v.post_id || (v.post && v.post.id) || '');\n      out.permalink = String((v.post && v.post.permalink_url) || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+        },
         "id": "62a29eb7-9824-4d52-a3bc-6010c3c2bb04",
         "name": "FB 1. Parse + Guard",
         "type": "n8n-nodes-base.code",
@@ -34,22 +36,9 @@
           224,
           0
         ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "const PAGE_ID = '1348081288382156';\nlet out = { route:'skip', reason:'', commentId:'', authorId:'', authorName:'', text:'', postId:'', permalink:'', source:'facebook' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'feed') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const authorId = String(from.id || '');\n      const text = String(v.message || '').slice(0, 2000);\n      const low = text.toLowerCase();\n      if (authorId === PAGE_ID) { out.route='skip'; out.reason='self-page'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.authorId = authorId;\n      out.authorName = from.name || 'facebook-lead';\n      out.text = text;\n      out.postId = String(v.post_id || (v.post && v.post.id) || '');\n      out.permalink = String((v.post && v.post.permalink_url) || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
-        },
         "alwaysOutputData": true
       },
       {
-        "id": "73dcc48b-30de-4ac0-a548-45da86f3ad1f",
-        "name": "FB 2. Is actionable?",
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.3,
-        "position": [
-          448,
-          0
-        ],
         "parameters": {
           "conditions": {
             "combinator": "and",
@@ -72,9 +61,20 @@
             }
           },
           "options": {}
-        }
+        },
+        "id": "73dcc48b-30de-4ac0-a548-45da86f3ad1f",
+        "name": "FB 2. Is actionable?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          0
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst n = d.authorName || 'facebook-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.authorId, name:n, message:d.text||'', postId:d.postId||'', permalink:d.permalink||'', source:'facebook', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+        },
         "id": "4ea77de8-e819-4bde-8255-e9f190135205",
         "name": "FB 3. Canonical (NAT-97)",
         "type": "n8n-nodes-base.code",
@@ -82,32 +82,27 @@
         "position": [
           672,
           0
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst n = d.authorName || 'facebook-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.authorId, name:n, message:d.text||'', postId:d.postId||'', permalink:d.permalink||'', source:'facebook', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
-        }
+        ]
       },
       {
-        "id": "8aacc097-ccc5-434d-9ab1-54c64a8c0755",
-        "name": "FB 4. Zoho Lead",
-        "type": "n8n-nodes-base.zohoCrm",
-        "typeVersion": 1,
-        "position": [
-          896,
-          0
-        ],
         "parameters": {
           "resource": "lead",
           "Company": "Individual",
           "lastName": "={{ $json.name || \"Unknown\" }}",
           "additionalFields": {
+            "Description": "={{ \"FB comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nLink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nauthorId: \" + ($json.userId || \"n/a\") + \"\\nchannel: \" + $json.source }}",
             "Lead_Source": "Social - Facebook",
-            "Lead_Status": "Attempted to Contact",
-            "Description": "={{ \"FB comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nLink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nauthorId: \" + ($json.userId || \"n/a\") + \"\\nchannel: \" + $json.source }}"
+            "Lead_Status": "Attempted to Contact"
           }
         },
+        "id": "8aacc097-ccc5-434d-9ab1-54c64a8c0755",
+        "name": "FB 6. Zoho Lead",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          1344,
+          0
+        ],
         "credentials": {
           "zohoOAuth2Api": {
             "id": "R5WqgTreF3p3gViM",
@@ -117,14 +112,6 @@
         "onError": "continueErrorOutput"
       },
       {
-        "id": "e5083c97-33f9-4e4a-b1ae-5048ad43bebd",
-        "name": "FB 5. Reply (comments endpoint)",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          1120,
-          0
-        ],
         "parameters": {
           "method": "POST",
           "url": "=https://graph.facebook.com/v19.0/{{ $(\"FB 3. Canonical (NAT-97)\").first().json.externalId }}/comments",
@@ -141,6 +128,14 @@
           },
           "options": {}
         },
+        "id": "e5083c97-33f9-4e4a-b1ae-5048ad43bebd",
+        "name": "FB 7. Reply (comments endpoint)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1568,
+          0
+        ],
         "credentials": {
           "httpHeaderAuth": {
             "id": "jw9ITGUd1gNoMiMe",
@@ -184,22 +179,22 @@
           ]
         ]
       },
-      "FB 3. Canonical (NAT-97)": {
+      "FB 6. Zoho Lead": {
         "main": [
           [
             {
-              "node": "FB 4. Zoho Lead",
+              "node": "FB 7. Reply (comments endpoint)",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "FB 4. Zoho Lead": {
+      "FB 3. Canonical (NAT-97)": {
         "main": [
           [
             {
-              "node": "FB 5. Reply (comments endpoint)",
+              "node": "FB 6. Zoho Lead",
               "type": "main",
               "index": 0
             }
@@ -209,13 +204,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated FB 1. Parse + Guard",
-    "description": "Updated nodes: FB 1. Parse + Guard",
+    "name": "Use router-level dedupe",
+    "description": "Removed the Facebook-local dedupe gate. The router now performs the single 24-hour dedupe before routing, and Facebook canonical connects directly to Zoho.",
     "autosaved": false,
-    "createdAt": "2026-09-24T01:44:08.054Z",
-    "updatedAt": "2026-09-24T01:44:08.054Z"
+    "createdAt": "2026-09-25T02:56:47.702Z",
+    "updatedAt": "2026-09-25T02:56:47.702Z"
   },
-  "activeVersionId": "6bc5b6b6-ec1c-4e67-8c82-2365a42916c0",
+  "activeVersionId": "80ab6e6d-696f-4f3e-860c-8c10762dfbb1",
   "connections": {
     "From router": {
       "main": [
@@ -250,22 +245,22 @@
         ]
       ]
     },
-    "FB 3. Canonical (NAT-97)": {
+    "FB 6. Zoho Lead": {
       "main": [
         [
           {
-            "node": "FB 4. Zoho Lead",
+            "node": "FB 7. Reply (comments endpoint)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "FB 4. Zoho Lead": {
+    "FB 3. Canonical (NAT-97)": {
       "main": [
         [
           {
-            "node": "FB 5. Reply (comments endpoint)",
+            "node": "FB 6. Zoho Lead",
             "type": "main",
             "index": 0
           }
@@ -284,16 +279,7 @@
   "nodeGroups": [],
   "nodes": [
     {
-      "id": "18cb4844-b6b9-426d-b926-99365a63461a",
-      "name": "From router",
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        0,
-        0
-      ],
       "parameters": {
-        "inputSource": "workflowInputs",
         "workflowInputs": {
           "values": [
             {
@@ -302,9 +288,20 @@
             }
           ]
         }
-      }
+      },
+      "id": "18cb4844-b6b9-426d-b926-99365a63461a",
+      "name": "From router",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const PAGE_ID = '1348081288382156';\nlet out = { route:'skip', reason:'', commentId:'', authorId:'', authorName:'', text:'', postId:'', permalink:'', source:'facebook' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'feed') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const authorId = String(from.id || '');\n      const text = String(v.message || '').slice(0, 2000);\n      const low = text.toLowerCase();\n      if (authorId === PAGE_ID) { out.route='skip'; out.reason='self-page'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.authorId = authorId;\n      out.authorName = from.name || 'facebook-lead';\n      out.text = text;\n      out.postId = String(v.post_id || (v.post && v.post.id) || '');\n      out.permalink = String((v.post && v.post.permalink_url) || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+      },
       "id": "62a29eb7-9824-4d52-a3bc-6010c3c2bb04",
       "name": "FB 1. Parse + Guard",
       "type": "n8n-nodes-base.code",
@@ -313,22 +310,9 @@
         224,
         0
       ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const PAGE_ID = '1348081288382156';\nlet out = { route:'skip', reason:'', commentId:'', authorId:'', authorName:'', text:'', postId:'', permalink:'', source:'facebook' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'feed') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const authorId = String(from.id || '');\n      const text = String(v.message || '').slice(0, 2000);\n      const low = text.toLowerCase();\n      if (authorId === PAGE_ID) { out.route='skip'; out.reason='self-page'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.authorId = authorId;\n      out.authorName = from.name || 'facebook-lead';\n      out.text = text;\n      out.postId = String(v.post_id || (v.post && v.post.id) || '');\n      out.permalink = String((v.post && v.post.permalink_url) || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
-      },
       "alwaysOutputData": true
     },
     {
-      "id": "73dcc48b-30de-4ac0-a548-45da86f3ad1f",
-      "name": "FB 2. Is actionable?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        448,
-        0
-      ],
       "parameters": {
         "conditions": {
           "combinator": "and",
@@ -351,9 +335,20 @@
           }
         },
         "options": {}
-      }
+      },
+      "id": "73dcc48b-30de-4ac0-a548-45da86f3ad1f",
+      "name": "FB 2. Is actionable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst n = d.authorName || 'facebook-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.authorId, name:n, message:d.text||'', postId:d.postId||'', permalink:d.permalink||'', source:'facebook', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+      },
       "id": "4ea77de8-e819-4bde-8255-e9f190135205",
       "name": "FB 3. Canonical (NAT-97)",
       "type": "n8n-nodes-base.code",
@@ -361,32 +356,27 @@
       "position": [
         672,
         0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst n = d.authorName || 'facebook-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.authorId, name:n, message:d.text||'', postId:d.postId||'', permalink:d.permalink||'', source:'facebook', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
-      }
+      ]
     },
     {
-      "id": "8aacc097-ccc5-434d-9ab1-54c64a8c0755",
-      "name": "FB 4. Zoho Lead",
-      "type": "n8n-nodes-base.zohoCrm",
-      "typeVersion": 1,
-      "position": [
-        896,
-        0
-      ],
       "parameters": {
         "resource": "lead",
         "Company": "Individual",
         "lastName": "={{ $json.name || \"Unknown\" }}",
         "additionalFields": {
+          "Description": "={{ \"FB comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nLink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nauthorId: \" + ($json.userId || \"n/a\") + \"\\nchannel: \" + $json.source }}",
           "Lead_Source": "Social - Facebook",
-          "Lead_Status": "Attempted to Contact",
-          "Description": "={{ \"FB comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nLink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nauthorId: \" + ($json.userId || \"n/a\") + \"\\nchannel: \" + $json.source }}"
+          "Lead_Status": "Attempted to Contact"
         }
       },
+      "id": "8aacc097-ccc5-434d-9ab1-54c64a8c0755",
+      "name": "FB 6. Zoho Lead",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        0
+      ],
       "credentials": {
         "zohoOAuth2Api": {
           "id": "R5WqgTreF3p3gViM",
@@ -396,14 +386,6 @@
       "onError": "continueErrorOutput"
     },
     {
-      "id": "e5083c97-33f9-4e4a-b1ae-5048ad43bebd",
-      "name": "FB 5. Reply (comments endpoint)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1120,
-        0
-      ],
       "parameters": {
         "method": "POST",
         "url": "=https://graph.facebook.com/v19.0/{{ $(\"FB 3. Canonical (NAT-97)\").first().json.externalId }}/comments",
@@ -420,6 +402,14 @@
         },
         "options": {}
       },
+      "id": "e5083c97-33f9-4e4a-b1ae-5048ad43bebd",
+      "name": "FB 7. Reply (comments endpoint)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        0
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "jw9ITGUd1gNoMiMe",
@@ -430,14 +420,15 @@
     }
   ],
   "origin": "n8n",
-  "pinData": null,
+  "pinData": {},
   "repo": {
     "owner": "Ember96",
     "name": "n8n_workflows_backup"
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "binaryMode": "separate"
   },
   "shared": [
     {
@@ -448,9 +439,18 @@
       "updatedAt": "2026-09-24T01:40:28.217Z"
     }
   ],
-  "staticData": null,
+  "staticData": {
+    "global": {
+      "social_dedupe": {
+        "39059075233690726|1348081288382156_122113323153465895|2026-09-25": 1790294810120,
+        "999888777666|1348081288382156_122113323153465895|2026-09-25": 1790294965435,
+        "111222333444|1348081288382156_122113323153465895|2026-09-25": 1790295045067,
+        "555666777|1348081288382156_122113323153465895|2026-09-25": 1790295357515
+      }
+    }
+  },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-24T01:44:08.050Z",
-  "versionId": "6bc5b6b6-ec1c-4e67-8c82-2365a42916c0"
+  "updatedAt": "2026-09-25T02:56:47.700Z",
+  "versionId": "80ab6e6d-696f-4f3e-860c-8c10762dfbb1"
 }
