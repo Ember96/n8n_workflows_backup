@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "0edff64c-5e43-4575-bf8b-51f86acb11d1",
+    "versionId": "5d270c29-579c-4765-bfe1-c0979e699e79",
     "workflowId": "LeY0jKR3FJbSZVkx",
     "nodes": [
       {
@@ -71,7 +71,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nlet data = p.body || p;\nif (typeof data === 'string') { data = JSON.parse(data); }\nif (!data || typeof data !== 'object') { data = {}; }\nconst obj = String(data.object || '');\nconst entries = Array.isArray(data.entry) ? data.entry : [];\nlet field = '';\nfor (const en of entries) { if (en.changes && en.changes[0]) { field = String(en.changes[0].field || ''); break; } }\nconst channel = (obj === 'instagram' || field === 'comments') ? 'instagram' : 'facebook';\nreturn [{ json: { channel: channel, payload: data } }];"
+          "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nlet data = p.body || p;\nif (typeof data === 'string') { data = JSON.parse(data); }\nif (!data || typeof data !== 'object') { data = {}; }\nconst obj = String(data.object || '');\nconst channel = obj === 'instagram' ? 'instagram' : 'facebook';\nreturn [{ json: { channel: channel, payload: data } }];"
         },
         "alwaysOutputData": true
       },
@@ -81,7 +81,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          448,
+          1120,
           320
         ],
         "parameters": {
@@ -114,7 +114,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          672,
+          1344,
           224
         ],
         "parameters": {
@@ -142,7 +142,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          672,
+          1344,
           416
         ],
         "parameters": {
@@ -163,6 +163,68 @@
             "convertFieldsToString": true
           }
         }
+      },
+      {
+        "id": "4cd84451-a9c4-44cc-9723-3f774fbd6267",
+        "name": "Router 3. Dedupe 24h by user + platform + post",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          320
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const d = $input.first().json;\nconst payload = d.payload || d;\nconst store = $getWorkflowStaticData('global');\nconst ttlMs = 24 * 60 * 60 * 1000;\nconst now = Date.now();\n\nif (!store.socialDedupe24h || typeof store.socialDedupe24h !== 'object') {\n  store.socialDedupe24h = {};\n}\nconst map = store.socialDedupe24h;\nfor (const [key, timestamp] of Object.entries(map)) {\n  if (typeof timestamp !== 'number' || now - timestamp >= ttlMs) delete map[key];\n}\n\nconst data = typeof payload === 'string' ? JSON.parse(payload) : (payload || {});\nconst object = String(data.object || d.channel || 'unknown');\nconst entries = Array.isArray(data.entry) ? data.entry : [];\nlet field = '';\nlet value = {};\nfor (const entry of entries) {\n  for (const change of (Array.isArray(entry && entry.changes) ? entry.changes : [])) {\n    const currentField = String(change.field || '');\n    const currentValue = change.value || {};\n    const commentLike = currentField === 'comments' ||\n      (currentField === 'feed' && (currentValue.item === 'comment' || currentValue.comment_id));\n    if (commentLike) {\n      field = currentField;\n      value = currentValue;\n      break;\n    }\n  }\n  if (field) break;\n}\n\nconst commentLike = Boolean(field);\nconst text = String(value.text ?? value.message ?? '').slice(0, 2000);\nconst low = text.toLowerCase();\nconst hasKeyword = low.includes('link') || low.includes('enlace');\nconst from = value.from || {};\nconst userId = String(from.id || '');\nconst postId = object === 'instagram'\n  ? String((value.media && value.media.id) || value.media_id || '')\n  : String(value.post_id || (value.post && value.post.id) || '');\nconst eventId = String(value.comment_id || value.id || '');\nconst selfIds = new Set(['17841431723301731', '1348081288382156']);\n\nif (!commentLike || !hasKeyword) {\n  return [{ json: { ...d, duplicate: false, dedupe: 'skip', dedupeKey: '', eventId, dedupeReason: commentLike ? 'no-keyword' : 'not-a-comment-event' } }];\n}\nif (selfIds.has(userId)) {\n  return [{ json: { ...d, duplicate: false, dedupe: 'skip', dedupeKey: '', eventId, dedupeReason: 'self-account' } }];\n}\nif (!userId || !postId) {\n  return [{ json: { ...d, duplicate: true, dedupe: 'blocked', dedupeKey: '', eventId, dedupeReason: 'missing-user-or-post-id' } }];\n}\n\nconst key = object + ':' + userId + ':' + postId;\nconst previous = map[key];\nconst duplicate = typeof previous === 'number' && now - previous < ttlMs;\nif (!duplicate) map[key] = now;\n\nreturn [{ json: {\n  ...d,\n  eventId,\n  duplicate,\n  dedupe: duplicate ? 'duplicate' : 'new',\n  dedupeKey: key,\n  dedupeReason: duplicate ? 'seen-within-24h' : 'not-seen-in-24h'\n} }];"
+        },
+        "notes": "Single 24-hour dedupe gate for Meta webhook events before routing to Instagram or Facebook."
+      },
+      {
+        "id": "44eaa28b-f01c-4a2f-bf51-dbc3a2a26457",
+        "name": "Router 4. Proceed new event?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          896,
+          320
+        ],
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "newEvent",
+                "leftValue": "={{ $json.dedupe }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "new"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            }
+          },
+          "options": {}
+        },
+        "notes": "Only new comment events proceed to channel routing; duplicates and missing externalId stop here."
+      },
+      {
+        "id": "2ff94c36-c51e-4ef8-b392-d0dc63dd7d70",
+        "name": "Router 5. Drop duplicate",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          896,
+          480
+        ],
+        "parameters": {},
+        "notes": "Intentional terminal path for duplicate or malformed comment events."
       }
     ],
     "connections": {
@@ -188,17 +250,6 @@
           ]
         ]
       },
-      "Detect channel": {
-        "main": [
-          [
-            {
-              "node": "Is Instagram?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Is Instagram?": {
         "main": [
           [
@@ -216,17 +267,57 @@
             }
           ]
         ]
+      },
+      "Detect channel": {
+        "main": [
+          [
+            {
+              "node": "Router 3. Dedupe 24h by user + platform + post",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Router 4. Proceed new event?": {
+        "main": [
+          [
+            {
+              "node": "Is Instagram?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Router 5. Drop duplicate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Router 3. Dedupe 24h by user + platform + post": {
+        "main": [
+          [
+            {
+              "node": "Router 4. Proceed new event?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Initial version",
-    "description": "Created with 7 nodes: Verify GET, Echo challenge, Receive POST, Detect channel, Is Instagram? and 2 more",
+    "name": "Dedupe actionable user-post comments",
+    "description": "Changed the central Meta gate to key actionable LINK/ENLACE comments by platform:userId:postId for 24 hours. Repeated comments from the same user on the same Instagram post or Facebook Page post now stop before either sub-workflow; non-keyword comments and self replies do not consume the key.",
     "autosaved": false,
-    "createdAt": "2026-09-24T01:45:47.525Z",
-    "updatedAt": "2026-09-24T01:45:47.525Z"
+    "createdAt": "2026-09-25T03:12:36.789Z",
+    "updatedAt": "2026-09-25T03:12:36.789Z"
   },
-  "activeVersionId": "0edff64c-5e43-4575-bf8b-51f86acb11d1",
+  "activeVersionId": "5d270c29-579c-4765-bfe1-c0979e699e79",
   "connections": {
     "Verify GET": {
       "main": [
@@ -250,17 +341,6 @@
         ]
       ]
     },
-    "Detect channel": {
-      "main": [
-        [
-          {
-            "node": "Is Instagram?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Is Instagram?": {
       "main": [
         [
@@ -273,6 +353,46 @@
         [
           {
             "node": "Call Facebook sub-workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect channel": {
+      "main": [
+        [
+          {
+            "node": "Router 3. Dedupe 24h by user + platform + post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router 4. Proceed new event?": {
+      "main": [
+        [
+          {
+            "node": "Is Instagram?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Router 5. Drop duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router 3. Dedupe 24h by user + platform + post": {
+      "main": [
+        [
+          {
+            "node": "Router 4. Proceed new event?",
             "type": "main",
             "index": 0
           }
@@ -357,7 +477,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nlet data = p.body || p;\nif (typeof data === 'string') { data = JSON.parse(data); }\nif (!data || typeof data !== 'object') { data = {}; }\nconst obj = String(data.object || '');\nconst entries = Array.isArray(data.entry) ? data.entry : [];\nlet field = '';\nfor (const en of entries) { if (en.changes && en.changes[0]) { field = String(en.changes[0].field || ''); break; } }\nconst channel = (obj === 'instagram' || field === 'comments') ? 'instagram' : 'facebook';\nreturn [{ json: { channel: channel, payload: data } }];"
+        "jsCode": "const items = $input.all();\nconst p = (items && items[0] && items[0].json) ? items[0].json : {};\nlet data = p.body || p;\nif (typeof data === 'string') { data = JSON.parse(data); }\nif (!data || typeof data !== 'object') { data = {}; }\nconst obj = String(data.object || '');\nconst channel = obj === 'instagram' ? 'instagram' : 'facebook';\nreturn [{ json: { channel: channel, payload: data } }];"
       },
       "alwaysOutputData": true
     },
@@ -367,7 +487,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        448,
+        1120,
         320
       ],
       "parameters": {
@@ -400,7 +520,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        672,
+        1344,
         224
       ],
       "parameters": {
@@ -428,7 +548,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        672,
+        1344,
         416
       ],
       "parameters": {
@@ -449,6 +569,68 @@
           "convertFieldsToString": true
         }
       }
+    },
+    {
+      "id": "4cd84451-a9c4-44cc-9723-3f774fbd6267",
+      "name": "Router 3. Dedupe 24h by user + platform + post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        320
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst payload = d.payload || d;\nconst store = $getWorkflowStaticData('global');\nconst ttlMs = 24 * 60 * 60 * 1000;\nconst now = Date.now();\n\nif (!store.socialDedupe24h || typeof store.socialDedupe24h !== 'object') {\n  store.socialDedupe24h = {};\n}\nconst map = store.socialDedupe24h;\nfor (const [key, timestamp] of Object.entries(map)) {\n  if (typeof timestamp !== 'number' || now - timestamp >= ttlMs) delete map[key];\n}\n\nconst data = typeof payload === 'string' ? JSON.parse(payload) : (payload || {});\nconst object = String(data.object || d.channel || 'unknown');\nconst entries = Array.isArray(data.entry) ? data.entry : [];\nlet field = '';\nlet value = {};\nfor (const entry of entries) {\n  for (const change of (Array.isArray(entry && entry.changes) ? entry.changes : [])) {\n    const currentField = String(change.field || '');\n    const currentValue = change.value || {};\n    const commentLike = currentField === 'comments' ||\n      (currentField === 'feed' && (currentValue.item === 'comment' || currentValue.comment_id));\n    if (commentLike) {\n      field = currentField;\n      value = currentValue;\n      break;\n    }\n  }\n  if (field) break;\n}\n\nconst commentLike = Boolean(field);\nconst text = String(value.text ?? value.message ?? '').slice(0, 2000);\nconst low = text.toLowerCase();\nconst hasKeyword = low.includes('link') || low.includes('enlace');\nconst from = value.from || {};\nconst userId = String(from.id || '');\nconst postId = object === 'instagram'\n  ? String((value.media && value.media.id) || value.media_id || '')\n  : String(value.post_id || (value.post && value.post.id) || '');\nconst eventId = String(value.comment_id || value.id || '');\nconst selfIds = new Set(['17841431723301731', '1348081288382156']);\n\nif (!commentLike || !hasKeyword) {\n  return [{ json: { ...d, duplicate: false, dedupe: 'skip', dedupeKey: '', eventId, dedupeReason: commentLike ? 'no-keyword' : 'not-a-comment-event' } }];\n}\nif (selfIds.has(userId)) {\n  return [{ json: { ...d, duplicate: false, dedupe: 'skip', dedupeKey: '', eventId, dedupeReason: 'self-account' } }];\n}\nif (!userId || !postId) {\n  return [{ json: { ...d, duplicate: true, dedupe: 'blocked', dedupeKey: '', eventId, dedupeReason: 'missing-user-or-post-id' } }];\n}\n\nconst key = object + ':' + userId + ':' + postId;\nconst previous = map[key];\nconst duplicate = typeof previous === 'number' && now - previous < ttlMs;\nif (!duplicate) map[key] = now;\n\nreturn [{ json: {\n  ...d,\n  eventId,\n  duplicate,\n  dedupe: duplicate ? 'duplicate' : 'new',\n  dedupeKey: key,\n  dedupeReason: duplicate ? 'seen-within-24h' : 'not-seen-in-24h'\n} }];"
+      },
+      "notes": "Single 24-hour dedupe gate for Meta webhook events before routing to Instagram or Facebook."
+    },
+    {
+      "id": "44eaa28b-f01c-4a2f-bf51-dbc3a2a26457",
+      "name": "Router 4. Proceed new event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        320
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "newEvent",
+              "leftValue": "={{ $json.dedupe }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "new"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      },
+      "notes": "Only new comment events proceed to channel routing; duplicates and missing externalId stop here."
+    },
+    {
+      "id": "2ff94c36-c51e-4ef8-b392-d0dc63dd7d70",
+      "name": "Router 5. Drop duplicate",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        896,
+        480
+      ],
+      "parameters": {},
+      "notes": "Intentional terminal path for duplicate or malformed comment events."
     }
   ],
   "origin": "n8n",
@@ -470,9 +652,18 @@
       "updatedAt": "2026-09-24T01:45:47.523Z"
     }
   ],
-  "staticData": null,
+  "staticData": {
+    "global": {
+      "socialDedupe24h": {
+        "instagram:18091022222447087": 1790305159374,
+        "instagram:18113106659161200": 1790305269838,
+        "instagram:1981504552544462:18139857373608823": 1790306059200,
+        "page:39059075233690726:1348081288382156_122113323153465895": 1790308017380
+      }
+    }
+  },
   "tags": [],
   "triggerCount": 2,
-  "updatedAt": "2026-09-24T01:45:47.519Z",
-  "versionId": "0edff64c-5e43-4575-bf8b-51f86acb11d1"
+  "updatedAt": "2026-09-25T03:12:36.787Z",
+  "versionId": "5d270c29-579c-4765-bfe1-c0979e699e79"
 }
