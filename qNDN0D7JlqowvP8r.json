@@ -1,0 +1,584 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "be445325-2167-4122-bb28-1ff8a79eb786",
+    "workflowId": "qNDN0D7JlqowvP8r",
+    "nodes": [
+      {
+        "id": "b6fa0ffb-73bc-4af7-96e8-25b7a9eb4370",
+        "name": "W",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          192
+        ],
+        "parameters": {
+          "path": "chain-probe",
+          "httpMethod": [
+            "POST"
+          ],
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "webhookId": "acff348a-fe25-4d3f-b489-f36cf0d8cc33"
+      },
+      {
+        "id": "76930676-4d43-4507-a955-5bb0a8addb7d",
+        "name": "P1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          192
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const PAGE_ID = '1348081288382156';\nlet out = { route:'skip', reason:'', commentId:'', authorId:'', authorName:'', text:'', postId:'', permalink:'', source:'facebook' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'feed') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const authorId = String(from.id || '');\n      const text = String(v.message || '').slice(0, 2000);\n      const low = text.toLowerCase();\n      if (authorId === PAGE_ID) { out.route='skip'; out.reason='self-page'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.authorId = authorId;\n      out.authorName = from.name || 'facebook-lead';\n      out.text = text;\n      out.postId = String(v.post_id || (v.post && v.post.id) || '');\n      out.permalink = String((v.post && v.post.permalink_url) || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+        }
+      },
+      {
+        "id": "a93ad6fb-f0aa-4092-9160-4b7bff8d432a",
+        "name": "F1",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          448,
+          192
+        ],
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "route",
+                "leftValue": "={{ $json.route }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "lead"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "d1b5d7b0-b8ff-497e-914f-9a2cefc8e8cc",
+        "name": "PC",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          96
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst n = d.authorName || 'facebook-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.authorId, name:n, message:d.text||'', postId:d.postId||'', permalink:d.permalink||'', source:'facebook', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+        }
+      },
+      {
+        "id": "181b3347-39bc-409b-aefe-2453f34e7984",
+        "name": "R-skip1",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          672,
+          288
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ \"STOP1 route=\" + $json.route }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "298cda32-2401-452c-80be-2a68f3268187",
+        "name": "PD",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          896,
+          96
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const d = $input.first().json;\nconst store = $getWorkflowStaticData('global');\nif (!store.social_dedupe || typeof store.social_dedupe !== 'object') store.social_dedupe = {};\nconst map = store.social_dedupe;\nconst now = Date.now();\nfor (const k of Object.keys(map)) { if (now - map[k] > 48*3600*1000) delete map[k]; }\nconst day = new Date().toISOString().slice(0,10);\nconst uid = d.userId || '';\nconst pid = d.postId || d.mediaId || '';\nlet duplicate = false;\nlet key = '';\nif (uid && pid) {\n  key = uid + '|' + pid + '|' + day;\n  if (map[key]) { duplicate = true; } else { map[key] = now; }\n}\nreturn [{ json: Object.assign({}, d, { duplicate: duplicate, dedupeKey: key, dedupe: duplicate ? 'duplicate' : 'new' }) }];"
+        }
+      },
+      {
+        "id": "a6325441-ce2e-4f5a-a57c-e54697962b21",
+        "name": "F2",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1120,
+          96
+        ],
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "notdup",
+                "leftValue": "={{ $json.dedupe }}",
+                "operator": {
+                  "operation": "equal",
+                  "type": "string"
+                },
+                "rightValue": "new"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "67c7a923-055a-4a05-b7d6-c82f10b172a7",
+        "name": "R-lead",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          1344,
+          0
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ \"LEAD dedupe=\" + $json.dedupe }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      },
+      {
+        "id": "3866ca34-f392-4bc4-9796-1087fba3dc89",
+        "name": "R-dup",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          1344,
+          192
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ \"DUP dedupe=\" + $json.dedupe }}",
+          "options": {
+            "responseCode": 200
+          }
+        }
+      }
+    ],
+    "connections": {
+      "W": {
+        "main": [
+          [
+            {
+              "node": "P1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "P1": {
+        "main": [
+          [
+            {
+              "node": "F1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "F1": {
+        "main": [
+          [
+            {
+              "node": "PC",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "R-skip1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PC": {
+        "main": [
+          [
+            {
+              "node": "PD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PD": {
+        "main": [
+          [
+            {
+              "node": "F2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "F2": {
+        "main": [
+          [
+            {
+              "node": "R-lead",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "R-dup",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Initial version",
+    "description": "Created with 9 nodes: W, P1, F1, PC, R-skip1 and 4 more",
+    "autosaved": false,
+    "createdAt": "2026-09-25T00:20:31.676Z",
+    "updatedAt": "2026-09-25T00:20:31.676Z"
+  },
+  "activeVersionId": "be445325-2167-4122-bb28-1ff8a79eb786",
+  "connections": {
+    "W": {
+      "main": [
+        [
+          {
+            "node": "P1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "P1": {
+      "main": [
+        [
+          {
+            "node": "F1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "F1": {
+      "main": [
+        [
+          {
+            "node": "PC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "R-skip1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC": {
+      "main": [
+        [
+          {
+            "node": "PD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PD": {
+      "main": [
+        [
+          {
+            "node": "F2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "F2": {
+      "main": [
+        [
+          {
+            "node": "R-lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "R-dup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-25T00:20:31.672Z",
+  "id": "qNDN0D7JlqowvP8r",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "chain probe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "b6fa0ffb-73bc-4af7-96e8-25b7a9eb4370",
+      "name": "W",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ],
+      "parameters": {
+        "path": "chain-probe",
+        "httpMethod": [
+          "POST"
+        ],
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "acff348a-fe25-4d3f-b489-f36cf0d8cc33"
+    },
+    {
+      "id": "76930676-4d43-4507-a955-5bb0a8addb7d",
+      "name": "P1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        192
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const PAGE_ID = '1348081288382156';\nlet out = { route:'skip', reason:'', commentId:'', authorId:'', authorName:'', text:'', postId:'', permalink:'', source:'facebook' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'feed') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const authorId = String(from.id || '');\n      const text = String(v.message || '').slice(0, 2000);\n      const low = text.toLowerCase();\n      if (authorId === PAGE_ID) { out.route='skip'; out.reason='self-page'; continue; }\n      if (v.item !== 'comment' || v.verb !== 'add') { out.route='skip'; out.reason='not-new-comment'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.authorId = authorId;\n      out.authorName = from.name || 'facebook-lead';\n      out.text = text;\n      out.postId = String(v.post_id || (v.post && v.post.id) || '');\n      out.permalink = String((v.post && v.post.permalink_url) || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "a93ad6fb-f0aa-4092-9160-4b7bff8d432a",
+      "name": "F1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        192
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "route",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "lead"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "d1b5d7b0-b8ff-497e-914f-9a2cefc8e8cc",
+      "name": "PC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst n = d.authorName || 'facebook-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.authorId, name:n, message:d.text||'', postId:d.postId||'', permalink:d.permalink||'', source:'facebook', sourceCrm:'zoho', sourceClient:'growbusy-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+      }
+    },
+    {
+      "id": "181b3347-39bc-409b-aefe-2453f34e7984",
+      "name": "R-skip1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        672,
+        288
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ \"STOP1 route=\" + $json.route }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "298cda32-2401-452c-80be-2a68f3268187",
+      "name": "PD",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const d = $input.first().json;\nconst store = $getWorkflowStaticData('global');\nif (!store.social_dedupe || typeof store.social_dedupe !== 'object') store.social_dedupe = {};\nconst map = store.social_dedupe;\nconst now = Date.now();\nfor (const k of Object.keys(map)) { if (now - map[k] > 48*3600*1000) delete map[k]; }\nconst day = new Date().toISOString().slice(0,10);\nconst uid = d.userId || '';\nconst pid = d.postId || d.mediaId || '';\nlet duplicate = false;\nlet key = '';\nif (uid && pid) {\n  key = uid + '|' + pid + '|' + day;\n  if (map[key]) { duplicate = true; } else { map[key] = now; }\n}\nreturn [{ json: Object.assign({}, d, { duplicate: duplicate, dedupeKey: key, dedupe: duplicate ? 'duplicate' : 'new' }) }];"
+      }
+    },
+    {
+      "id": "a6325441-ce2e-4f5a-a57c-e54697962b21",
+      "name": "F2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "notdup",
+              "leftValue": "={{ $json.dedupe }}",
+              "operator": {
+                "operation": "equal",
+                "type": "string"
+              },
+              "rightValue": "new"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "67c7a923-055a-4a05-b7d6-c82f10b172a7",
+      "name": "R-lead",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ \"LEAD dedupe=\" + $json.dedupe }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "3866ca34-f392-4bc4-9796-1087fba3dc89",
+      "name": "R-dup",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1344,
+        192
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ \"DUP dedupe=\" + $json.dedupe }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "qNDN0D7JlqowvP8r",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-25T00:20:31.674Z",
+      "updatedAt": "2026-09-25T00:20:31.674Z"
+    }
+  ],
+  "staticData": {
+    "global": {
+      "social_dedupe": {
+        "777888999|1348081288382156_122113323153465895|2026-09-25": 1790295639625
+      }
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-25T00:20:31.672Z",
+  "versionId": "be445325-2167-4122-bb28-1ff8a79eb786"
+}
