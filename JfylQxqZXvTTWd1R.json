@@ -1,0 +1,88 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "W": {
+      "main": [
+        [
+          {
+            "node": "dump",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-25T00:11:44.426Z",
+  "id": "JfylQxqZXvTTWd1R",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "dedupe inspect",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "6caa335a-9b3f-4092-b96b-4d2debcd07b9",
+      "name": "W",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "dedupe-inspect",
+        "httpMethod": [
+          "POST"
+        ],
+        "responseMode": "lastNode",
+        "responseData": "firstEntryJson",
+        "options": {}
+      },
+      "webhookId": "ae86cdbf-988c-42d4-8ff8-95637107bef0"
+    },
+    {
+      "id": "7630bf86-f725-44a4-9184-cf5e3cc75525",
+      "name": "dump",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const s = $getWorkflowStaticData('global');\nreturn [{ json: { keys: Object.keys(s.social_dedupe || {}), map: s.social_dedupe || {} } }];"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "JfylQxqZXvTTWd1R",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-25T00:11:44.430Z",
+      "updatedAt": "2026-09-25T00:11:44.430Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-09-25T00:16:40.000Z",
+  "versionId": "67c509b4-e608-408a-98bc-7cac39784ed0"
+}
