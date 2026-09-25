@@ -1,0 +1,93 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "W": {
+      "main": [
+        [
+          {
+            "node": "Recent leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-25T00:18:51.852Z",
+  "id": "pUn9v76wqwEB699X",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "zoho recent",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "e5eca304-2468-4e5b-a1d5-134849d4f090",
+      "name": "W",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "zoho-recent",
+        "httpMethod": [
+          "POST"
+        ],
+        "responseMode": "lastNode",
+        "responseData": "firstEntryJson",
+        "options": {}
+      },
+      "webhookId": "f7f0c2eb-c619-469c-b155-7f1b17246ab6"
+    },
+    {
+      "id": "7c50f79e-d18a-4788-a69d-e9de60cd7924",
+      "name": "Recent leads",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "limit": 8
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "pUn9v76wqwEB699X",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-25T00:18:51.854Z",
+      "updatedAt": "2026-09-25T00:18:51.854Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-25T00:18:51.852Z",
+  "versionId": "3cad3cb6-40ae-4fa9-96e0-2628deead6b3"
+}
