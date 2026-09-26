@@ -1,0 +1,180 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Make params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make params": {
+      "main": [
+        [
+          {
+            "node": "Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert": {
+      "main": [
+        [
+          {
+            "node": "Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check": {
+      "main": [
+        [
+          {
+            "node": "Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:33:06.079Z",
+  "id": "6jadFxokXhkA9l7B",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - array params",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "432ea42c-28d7-4831-aaf3-06b80ac34f97",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "aed6f9b5-7b65-4047-8b0c-4448cc705b18",
+      "name": "Make params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const msg = 'hola, con coma y \\'comilla\\' aqui';\nreturn [{ json: { params: ['instagram','ARRAYPARAM1','growbusy-main','tester','ext-9','post-9',msg,'v1'] } }];"
+      }
+    },
+    {
+      "id": "dadb5b51-4d25-4876-bdd1-be4d7138433d",
+      "name": "Insert",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO nat130.social_identity\n    (platform, social_id, source_client, display_name, last_external_id, last_post_id, last_message, consent_version)\nVALUES ($1,$2,$3,$4,$5,$6,$7,$8)\nON CONFLICT (platform, social_id) DO UPDATE SET\n    last_message = EXCLUDED.last_message,\n    touches = nat130.social_identity.touches + 1,\n    last_seen_at = now(), updated_at = now()\nRETURNING id, person_key, touches",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ $json.params }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "7e2d8b9c-b09e-461a-8d94-c219ee18c2a8",
+      "name": "Check",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT last_message, length(last_message) AS len FROM nat130.social_identity WHERE social_id = 'ARRAYPARAM1'",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "a3f8fec1-703f-42ec-b864-145efb6c8b14",
+      "name": "Clean",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM nat130.social_identity WHERE social_id = 'ARRAYPARAM1' RETURNING id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "6jadFxokXhkA9l7B",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:33:06.083Z",
+      "updatedAt": "2026-09-26T02:33:06.083Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:24.000Z",
+  "versionId": "91ffb7e3-5ac0-4ee8-9853-f9a4a26979dd"
+}
