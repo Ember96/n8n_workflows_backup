@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "8c106304-d1e4-409e-b804-82a643c84cde",
+    "versionId": "5313a1ad-9567-460c-af36-7285a0e9d016",
     "workflowId": "ntX5efjAdbG2HAL1",
     "nodes": [
       {
@@ -86,33 +86,6 @@
       },
       {
         "parameters": {
-          "resource": "lead",
-          "Company": "Individual",
-          "lastName": "={{ $json.name || \"Unknown\" }}",
-          "additionalFields": {
-            "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nchannel: \" + $json.source }}",
-            "Lead_Source": "Social - Instagram",
-            "Lead_Status": "Attempted to Contact"
-          }
-        },
-        "id": "73a6a02a-0561-4c00-97f4-cd3ff5eb7512",
-        "name": "IG 6. Zoho Lead",
-        "type": "n8n-nodes-base.zohoCrm",
-        "typeVersion": 1,
-        "position": [
-          1344,
-          0
-        ],
-        "credentials": {
-          "zohoOAuth2Api": {
-            "id": "R5WqgTreF3p3gViM",
-            "name": "Zoho account"
-          }
-        },
-        "onError": "continueErrorOutput"
-      },
-      {
-        "parameters": {
           "method": "POST",
           "url": "=https://graph.facebook.com/v19.0/{{ $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }}/replies",
           "authentication": "genericCredentialType",
@@ -180,6 +153,35 @@
           }
         },
         "onError": "continueErrorOutput"
+      },
+      {
+        "id": "b47a93fa-8103-4790-a3d0-ab3d56405292",
+        "name": "IG 6. CRM adapter (NAT-130)",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          1344,
+          0
+        ],
+        "parameters": {
+          "mode": "each",
+          "source": "database",
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "YKfyZFBekaN2yCxx"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "payload": "={{ $json }}"
+            },
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          }
+        },
+        "onError": "continueRegularOutput"
       }
     ],
     "connections": {
@@ -216,17 +218,6 @@
           ]
         ]
       },
-      "IG 6. Zoho Lead": {
-        "main": [
-          [
-            {
-              "node": "IG 7. Reply (replies endpoint)",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "IG 7. Reply (replies endpoint)": {
         "main": [
           [
@@ -242,7 +233,18 @@
         "main": [
           [
             {
-              "node": "IG 6. Zoho Lead",
+              "node": "IG 6. CRM adapter (NAT-130)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "IG 6. CRM adapter (NAT-130)": {
+        "main": [
+          [
+            {
+              "node": "IG 7. Reply (replies endpoint)",
               "type": "main",
               "index": 0
             }
@@ -252,13 +254,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Use router-level dedupe",
-    "description": "Removed the Instagram-local dedupe gate. The router now performs the single 24-hour dedupe before routing, and Instagram canonical connects directly to Zoho.",
+    "name": "Updated IG 6. CRM adapter (NAT-130)",
+    "description": "Updated nodes: IG 6. CRM adapter (NAT-130)",
     "autosaved": false,
-    "createdAt": "2026-09-25T02:56:47.704Z",
-    "updatedAt": "2026-09-25T02:56:47.704Z"
+    "createdAt": "2026-09-26T02:59:42.605Z",
+    "updatedAt": "2026-09-26T02:59:42.605Z"
   },
-  "activeVersionId": "8c106304-d1e4-409e-b804-82a643c84cde",
+  "activeVersionId": "5313a1ad-9567-460c-af36-7285a0e9d016",
   "connections": {
     "From router": {
       "main": [
@@ -293,17 +295,6 @@
         ]
       ]
     },
-    "IG 6. Zoho Lead": {
-      "main": [
-        [
-          {
-            "node": "IG 7. Reply (replies endpoint)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "IG 7. Reply (replies endpoint)": {
       "main": [
         [
@@ -319,7 +310,18 @@
       "main": [
         [
           {
-            "node": "IG 6. Zoho Lead",
+            "node": "IG 6. CRM adapter (NAT-130)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 6. CRM adapter (NAT-130)": {
+      "main": [
+        [
+          {
+            "node": "IG 7. Reply (replies endpoint)",
             "type": "main",
             "index": 0
           }
@@ -419,33 +421,6 @@
     },
     {
       "parameters": {
-        "resource": "lead",
-        "Company": "Individual",
-        "lastName": "={{ $json.name || \"Unknown\" }}",
-        "additionalFields": {
-          "Description": "={{ \"IG comment: \" + $json.message + \"\\nMedia: \" + ($json.mediaId || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nPSID: \" + ($json.userId || \"n/a\") + \"\\nhandle: \" + ($json.handle || \"n/a\") + \"\\nchannel: \" + $json.source }}",
-          "Lead_Source": "Social - Instagram",
-          "Lead_Status": "Attempted to Contact"
-        }
-      },
-      "id": "73a6a02a-0561-4c00-97f4-cd3ff5eb7512",
-      "name": "IG 6. Zoho Lead",
-      "type": "n8n-nodes-base.zohoCrm",
-      "typeVersion": 1,
-      "position": [
-        1344,
-        0
-      ],
-      "credentials": {
-        "zohoOAuth2Api": {
-          "id": "R5WqgTreF3p3gViM",
-          "name": "Zoho account"
-        }
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "=https://graph.facebook.com/v19.0/{{ $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }}/replies",
         "authentication": "genericCredentialType",
@@ -513,6 +488,35 @@
         }
       },
       "onError": "continueErrorOutput"
+    },
+    {
+      "id": "b47a93fa-8103-4790-a3d0-ab3d56405292",
+      "name": "IG 6. CRM adapter (NAT-130)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YKfyZFBekaN2yCxx"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json }}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "onError": "continueRegularOutput"
     }
   ],
   "origin": "n8n",
@@ -547,6 +551,6 @@
   },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-25T02:56:47.701Z",
-  "versionId": "8c106304-d1e4-409e-b804-82a643c84cde"
+  "updatedAt": "2026-09-26T03:39:47.079Z",
+  "versionId": "5313a1ad-9567-460c-af36-7285a0e9d016"
 }
