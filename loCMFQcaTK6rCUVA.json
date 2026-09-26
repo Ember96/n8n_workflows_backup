@@ -1,0 +1,163 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Make",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make": {
+      "main": [
+        [
+          {
+            "node": "B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B": {
+      "main": [
+        [
+          {
+            "node": "TRUEPATH",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FALSEPATH",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:36:32.358Z",
+  "id": "loCMFQcaTK6rCUVA",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - if probe B",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "251da6d8-99b1-4dd2-9c61-dcb38e552cf6",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        96
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "5e355a77-611a-4682-a2af-a19cdfb9fbd4",
+      "name": "Make",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { action: 'created' } }];"
+      }
+    },
+    {
+      "id": "953306db-63ec-4147-827d-aa26da85b5ad",
+      "name": "B",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "b1",
+              "leftValue": "={{ $json.action }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "value": "created"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "57d415d8-dd92-4ebb-8fed-9efb7dd35ad1",
+      "name": "TRUEPATH",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { hit: true } }];"
+      }
+    },
+    {
+      "id": "dbd909e2-fa65-40ee-887d-7715613236b8",
+      "name": "FALSEPATH",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        192
+      ],
+      "parameters": {
+        "jsCode": "return [{ json: { hit: false } }];"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "loCMFQcaTK6rCUVA",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:36:32.360Z",
+      "updatedAt": "2026-09-26T02:36:32.360Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:24.000Z",
+  "versionId": "961c7d50-e40f-4296-9f46-9309cba82a18"
+}
