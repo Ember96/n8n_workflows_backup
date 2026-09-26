@@ -1,0 +1,77 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Probe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:34:43.967Z",
+  "id": "D1jTiOGUflWH1zFE",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - env probe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "1f49ce27-2ea5-487c-a0d8-5b1c9fac0266",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d8f7ca19-988d-407b-a1f6-5ff8da4ed908",
+      "name": "Probe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "jsCode": "\nlet envOk = null, varsOk = null, jinja = null;\ntry { envOk = (typeof $env === 'object') ? Object.keys($env).length : 'notobject'; } catch (e) { envOk = 'BLOCKED: ' + e.message; }\ntry { varsOk = (typeof $vars === 'object') ? Object.keys($vars) : 'notobject'; } catch (e2) { varsOk = 'BLOCKED: ' + e2.message; }\ntry { jinja = $vars ? 'vars-ok' : 'vars-null'; } catch (e3) { jinja = 'BLOCKED'; }\nreturn [{ json: { envOk, varsOk, jinja } }];\n"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "D1jTiOGUflWH1zFE",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:34:43.969Z",
+      "updatedAt": "2026-09-26T02:34:43.969Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:24.000Z",
+  "versionId": "0835e76e-44bf-4809-ab5d-20a0280de04c"
+}
