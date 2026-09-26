@@ -1,0 +1,157 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "1. Config and normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Config and normalize": {
+      "main": [
+        [
+          {
+            "node": "2. Lookup identity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Lookup identity": {
+      "main": [
+        [
+          {
+            "node": "4. Read lead from Zoho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Read lead from Zoho": {
+      "main": [
+        [
+          {
+            "node": "5. Decide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:40:33.499Z",
+  "id": "uwOijaRHHnktofgb",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "nat130 test r3",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "b9e59669-96d1-4e53-b06f-561afc3d60f3",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "5cc26477-2cfc-4b04-96bb-6568f295c794",
+      "name": "1. Config and normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: {\"crm\":\"zoho\",\"sourceClient\":\"growbusy-main\",\"reactivationDays\":30,\"consentVersion\":\"v1\",\"platform\":\"instagram\",\"socialId\":\"999\",\"personKey\":\"instagram:999\",\"email\":\"\",\"displayName\":\"t\",\"handle\":\"t\",\"postId\":\"p1\",\"permalink\":null,\"message\":\"LINK\",\"canonical\":{\"externalId\":\"e1\"}} }];"
+      }
+    },
+    {
+      "id": "9a7c600c-3d0d-469b-af0d-f69919a9e150",
+      "name": "2. Lookup identity",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: {\"id\":1,\"zoho_lead_id\":\"L1\",\"last_seen_at\":\"2026-09-24T02:40:33.320Z\",\"matched_person_key\":true} }];"
+      }
+    },
+    {
+      "id": "05b4c83f-55c8-4d11-a3c1-da029047547e",
+      "name": "4. Read lead from Zoho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: {\"data\":[{\"id\":\"L1\",\"Converted__s\":true,\"Description\":\"old\",\"Lead_Status\":\"Converted\"}]} }];"
+      }
+    },
+    {
+      "id": "4f3b07d5-c2b7-4f0e-8445-47bedba90031",
+      "name": "5. Decide",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "function safeGet(name) { try { return $(name).first().json; } catch (e) { return null; } }\n\nconst cfg = safeGet('1. Config and normalize');\nif (!cfg) throw new Error('config node output unavailable');\n\nconst row = safeGet('2. Lookup identity') || {};\nconst raw = safeGet('4. Read lead from Zoho');\n// the Zoho node returns the API envelope: { data: [ record ] }\nconst zlead = (raw && Array.isArray(raw.data) && raw.data[0]) ? raw.data[0] : (raw && raw.id ? raw : null);\nconst leadLookupErrored = !!raw && !zlead;\n\nconst found = row.id !== undefined && row.id !== null;\nconst leadId = found ? (row.zoho_lead_id || null) : null;\n\nconst converted = !!(zlead && (\n  zlead.Converted__s === true || zlead.Converted__s === 'true' ||\n  (zlead.Converted_Contact && zlead.Converted_Contact.id) ||\n  zlead.$converted === true\n));\n\nlet reactivated = false;\nif (found && row.last_seen_at) {\n  const days = (Date.now() - new Date(row.last_seen_at).getTime()) / 86400000;\n  reactivated = days > cfg.reactivationDays;\n}\n\nlet action, reason;\nconst matchedOn = !found ? 'none' : (row.matched_person_key ? 'socialId' : 'email');\n\nif (!found) {\n  action = 'created';\n  reason = 'new person';\n} else if (leadId && leadLookupErrored) {\n  action = 'created';\n  reason = 'linked zoho lead no longer exists, recreating';\n} else if (converted) {\n  action = 'ignored';\n  reason = 'already a customer, comment dropped';\n} else {\n  action = 'updated';\n  reason = reactivated ? ('returning after ' + cfg.reactivationDays + ' days or more') : 'repeat interest';\n}\n\nconst zohoEmail = (zlead && zlead.Email) ? String(zlead.Email).trim().toLowerCase() : '';\nconst email = cfg.email || zohoEmail || (row.email || '');\n\nreturn [{ json: {\n  ...cfg,\n  email,\n  action, reason, matchedOn, reactivated, converted,\n  found,\n  existingLeadId: leadId,\n  lookupError: leadLookupErrored,\n  existingDescription: (zlead && zlead.Description) ? String(zlead.Description) : '',\n  existingStatus: (zlead && zlead.Lead_Status) ? String(zlead.Lead_Status) : null\n} }];"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "uwOijaRHHnktofgb",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:40:33.500Z",
+      "updatedAt": "2026-09-26T02:40:33.500Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:18.000Z",
+  "versionId": "c408105b-d2d4-4dee-a6f3-e4c35a6424ab"
+}
