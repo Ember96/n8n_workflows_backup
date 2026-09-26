@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Run DDL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:24:14.375Z",
+  "id": "mWUUcsEcvthv6srJ",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat130 ddl",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "f995aa25-598c-4622-9d95-260ae6f9355d",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "340ed8fd-09b9-4a84-855b-aae0c75c119f",
+      "name": "Run DDL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE SCHEMA IF NOT EXISTS nat130;\n\nCREATE TABLE IF NOT EXISTS nat130.social_identity (\n    id               bigint      GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n    platform         text        NOT NULL,\n    social_id        text        NOT NULL,\n    person_key       text        GENERATED ALWAYS AS (platform || ':' || social_id) STORED,\n    source_client    text        NOT NULL,\n    display_name     text,\n    email            text,\n    sms_phone        text,\n    zoho_lead_id     text,\n    zoho_contact_id  text,\n    touches          integer     NOT NULL DEFAULT 1,\n    reactivated      boolean     NOT NULL DEFAULT false,\n    first_seen_at    timestamptz NOT NULL DEFAULT now(),\n    last_seen_at     timestamptz NOT NULL DEFAULT now(),\n    last_external_id text,\n    last_post_id     text,\n    last_message     text,\n    consent_version  text,\n    updated_at       timestamptz NOT NULL DEFAULT now(),\n    CONSTRAINT social_identity_person_uniq UNIQUE (platform, social_id),\n    CONSTRAINT social_identity_platform_chk CHECK (platform IN ('instagram', 'facebook'))\n);\n\nCREATE INDEX IF NOT EXISTS social_identity_lead_idx\n    ON nat130.social_identity (zoho_lead_id) WHERE zoho_lead_id IS NOT NULL;\nCREATE INDEX IF NOT EXISTS social_identity_email_idx\n    ON nat130.social_identity (lower(email)) WHERE email IS NOT NULL;\nCREATE INDEX IF NOT EXISTS social_identity_seen_idx\n    ON nat130.social_identity (last_seen_at DESC);\n",
+        "options": {
+          "queryBatching": "transaction"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "mWUUcsEcvthv6srJ",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:24:14.382Z",
+      "updatedAt": "2026-09-26T02:24:14.382Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:25:08.000Z",
+  "versionId": "dea3afc9-1597-4e77-a46d-a3559776860c"
+}
