@@ -1,0 +1,92 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Call IG sub-workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:58:54.616Z",
+  "id": "tI3pMxzaSVw5HiDc",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - ig wiring test",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "7e8bd2c6-fbcf-45df-9e03-6c2042b8a659",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "5f80a516-3716-4d7d-bc19-724e7826ffff",
+      "name": "Call IG sub-workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ntX5efjAdbG2HAL1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "{\"object\":\"instagram\",\"entry\":[{\"changes\":[{\"field\":\"comments\",\"value\":{\"id\":\"nat130-wiring-comment-1\",\"text\":\"LINK por favor\",\"from\":{\"id\":\"8888888888888888\",\"username\":\"nat130_wiring_test\"},\"media\":{\"id\":\"18139857373608823\"}}}]}]}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "tI3pMxzaSVw5HiDc",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:58:54.618Z",
+      "updatedAt": "2026-09-26T02:58:54.618Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:59:48.000Z",
+  "versionId": "ef668747-2479-48a2-87ef-61d447b5960c"
+}
