@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:38:54.769Z",
+  "id": "HDGfa0pamySbR4t3",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - count rows",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "aa810756-e954-41a6-9497-319c0e918126",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "22204e67-35f0-417e-acd6-5fd7338e5295",
+      "name": "Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT count(*)::int AS n, coalesce(string_agg(person_key, ','), '(none)') AS keys FROM nat130.social_identity",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "HDGfa0pamySbR4t3",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:38:54.772Z",
+      "updatedAt": "2026-09-26T02:38:54.772Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:19.000Z",
+  "versionId": "ba7359b9-75f8-4dd2-804c-97db43686dff"
+}
