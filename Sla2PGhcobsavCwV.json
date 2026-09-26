@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:25:05.861Z",
+  "id": "Sla2PGhcobsavCwV",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - Cleanup",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "df611034-491f-4aa5-a813-c33f44127217",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d41beed9-e16b-40f6-9081-7c8b0af8d8b4",
+      "name": "Cleanup",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM nat130.social_identity WHERE platform = 'instagram' AND social_id = 'TESTDUPE123' RETURNING id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Sla2PGhcobsavCwV",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:25:05.863Z",
+      "updatedAt": "2026-09-26T02:25:05.863Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:25:09.000Z",
+  "versionId": "45562d01-25b4-45fd-9c00-ce574e8bbc3c"
+}
