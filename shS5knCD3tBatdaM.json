@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Check columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:24:23.951Z",
+  "id": "shS5knCD3tBatdaM",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat130 verify cols",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "68cd2a06-dfd8-4732-b4ed-c4ef0e4eb759",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "9b32044d-1a0e-4442-ad5d-20f948cb410c",
+      "name": "Check columns",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.name, c.data_type, c.is_nullable, c.is_generated, c.generation_expression\nFROM information_schema.columns c\nWHERE c.table_schema = 'nat130' AND c.table_name = 'social_identity'\nORDER BY c.ordinal_position;",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "shS5knCD3tBatdaM",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:24:23.953Z",
+      "updatedAt": "2026-09-26T02:24:23.953Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:25:08.000Z",
+  "versionId": "d9ebbfb7-9d70-4de1-9b7f-02ce4634406b"
+}
