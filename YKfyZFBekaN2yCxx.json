@@ -1,0 +1,980 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "101a9e84-6f7b-41dd-bf49-e1f26351aca3",
+    "workflowId": "YKfyZFBekaN2yCxx",
+    "nodes": [
+      {
+        "id": "380fdd2a-d234-4a87-8a7f-7c9af9e008a2",
+        "name": "From channel",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          176
+        ],
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "payload",
+                "type": "any"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "dd77b5e2-95da-4b5a-87e0-76e05cede300",
+        "name": "1. Config and normalize",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          176
+        ],
+        "parameters": {
+          "jsCode": "// NAT-130 adapter configuration — the single SOURCE_CRM switch.\n// n8n blocks property access on $env on this instance, so the switch is read\n// from n8n Variables first and falls back to the literal defaults below.\n// Set a project Variable named SOURCE_CRM / SOURCE_CLIENT to change it.\nfunction readVar(name) {\n  try {\n    const v = $vars;\n    if (v && typeof v === 'object') {\n      const val = v[name];\n      if (val !== undefined && val !== null && String(val).trim() !== '') return String(val).trim();\n    }\n  } catch (e) { /* variable not defined, fall through */ }\n  return null;\n}\n\nconst rawCrm = (readVar('SOURCE_CRM') || 'zoho').toLowerCase();\nconst ENABLED = ['zoho'];\nif (!ENABLED.includes(rawCrm)) {\n  throw new Error('SOURCE_CRM=' + rawCrm + ' is not enabled in this adapter. Enabled: ' + ENABLED.join(', '));\n}\nconst sourceClient = readVar('SOURCE_CLIENT') || 'growbusy-main';\nif (!sourceClient) throw new Error('SOURCE_CLIENT resolved to empty');\n\nconst first = $input.first().json;\nconst c = first.payload ?? first;\nif (!c || typeof c !== 'object') throw new Error('empty canonical payload');\n\nconst platform = String(c.source || '').trim().toLowerCase();\nif (platform !== 'instagram' && platform !== 'facebook') {\n  throw new Error('unsupported canonical.source: ' + JSON.stringify(c.source));\n}\nconst socialId = String(c.userId || '').trim();\nif (!socialId) throw new Error('canonical.userId (PSID) is required for identity');\n\nreturn [{ json: {\n  crm: rawCrm,\n  sourceClient,\n  reactivationDays: 30,\n  consentVersion: String((c.consent && c.consent.version) || 'v1'),\n  platform,\n  socialId,\n  personKey: platform + ':' + socialId,\n  email: c.email ? String(c.email).trim().toLowerCase() : '',\n  displayName: String(c.name || c.handle || 'Social lead').slice(0, 120),\n  handle: c.handle ? String(c.handle) : null,\n  postId: String(c.postId || c.mediaId || ''),\n  permalink: c.permalink ? String(c.permalink) : null,\n  message: c.message ? String(c.message).slice(0, 2000) : '',\n  canonical: c\n} }];",
+          "mode": "runOnceForAllItems",
+          "language": "javaScript"
+        }
+      },
+      {
+        "id": "1ef0304e-d2f6-4980-975f-74f2ea1ac623",
+        "name": "2. Lookup identity",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          448,
+          176
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH p AS (SELECT $1::jsonb AS j)\nSELECT si.id, si.person_key, si.platform, si.social_id, si.display_name, si.email,\n       si.zoho_lead_id, si.zoho_contact_id, si.touches, si.reactivated,\n       si.first_seen_at, si.last_seen_at,\n       (si.platform = p.j->>'platform' AND si.social_id = p.j->>'social_id') AS matched_person_key\nFROM nat130.social_identity si, p\nWHERE (si.platform = p.j->>'platform' AND si.social_id = p.j->>'social_id')\n   OR (COALESCE(p.j->>'email', '') <> '' AND lower(si.email) = lower(p.j->>'email'))\nORDER BY (si.platform = p.j->>'platform' AND si.social_id = p.j->>'social_id') DESC, si.last_seen_at DESC\nLIMIT 1",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ JSON.stringify({ platform: $json.platform, social_id: $json.socialId, email: $json.email || '' }) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "8b5093fc-6664-4ff2-a0ea-7b27645b9495",
+        "name": "3. Knows a lead?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          672,
+          176
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 3,
+              "leftValue": ""
+            },
+            "conditions": [
+              {
+                "id": "hl",
+                "leftValue": "={{ $json.zoho_lead_id }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "type": "string",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "3a880143-8a80-4fbd-b853-78912e4a3538",
+        "name": "4. Read lead from Zoho",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          896,
+          96
+        ],
+        "parameters": {
+          "resource": "lead",
+          "operation": "get",
+          "leadId": "={{ $json.zoho_lead_id }}",
+          "options": {}
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "b30b6912-76cb-4f01-b076-970a59c667fb",
+        "name": "5. Decide",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1120,
+          176
+        ],
+        "parameters": {
+          "jsCode": "function safeGet(name) { try { return $(name).first().json; } catch (e) { return null; } }\nfunction unwrapLead(raw) {\n  if (!raw || typeof raw !== 'object') return null;\n  if (Array.isArray(raw.data) && raw.data[0] && typeof raw.data[0] === 'object') return raw.data[0];\n  return raw.id ? raw : null;\n}\nfunction contextDescription(c) {\n  return [\n    (c.platform === 'instagram' ? 'IG' : 'FB') + ' comment: ' + c.message,\n    'Media: ' + (c.postId || 'n/a'),\n    'externalId: ' + ((c.canonical && c.canonical.externalId) || 'n/a'),\n    'PSID: ' + (c.socialId || 'n/a'),\n    c.handle ? 'handle: ' + c.handle : null,\n    'channel: ' + c.platform\n  ].filter(Boolean).join('\\n').slice(0, 2000);\n}\n\nconst cfg = safeGet('1. Config and normalize');\nif (!cfg) throw new Error('config node output unavailable');\n\nconst row = safeGet('2. Lookup identity') || {};\nconst raw = safeGet('4. Read lead from Zoho');\nconst zlead = unwrapLead(raw);\nconst leadLookupErrored = !!raw && !zlead;\n\nconst found = row.id !== undefined && row.id !== null;\nconst leadId = found ? (row.zoho_lead_id || null) : null;\n\nconst converted = !!(zlead && (\n  zlead.Converted__s === true || zlead.Converted__s === 'true' ||\n  (zlead.Converted_Contact && zlead.Converted_Contact.id) ||\n  zlead['$converted'] === true\n));\n\nlet reactivated = false;\nif (found && row.last_seen_at) {\n  const days = (Date.now() - new Date(row.last_seen_at).getTime()) / 86400000;\n  reactivated = days > cfg.reactivationDays;\n}\n\nconst matchedOn = !found ? 'none' : (row.matched_person_key ? 'socialId' : 'email');\n\nlet action, reason;\nif (!found) { action = 'created'; reason = 'new person'; }\nelse if (leadId && leadLookupErrored) { action = 'created'; reason = 'linked zoho lead no longer exists, recreating'; }\nelse if (converted) { action = 'ignored'; reason = 'already a customer, comment dropped'; }\nelse { action = 'updated'; reason = reactivated ? ('returning after ' + cfg.reactivationDays + ' days or more') : 'repeat interest'; }\n\n// Description guard: never write less than we read.\nlet descriptionToWrite = null;\nif (action === 'updated') {\n  if (!zlead) {\n    descriptionToWrite = null;   // unreadable lead -> never write\n  } else if (zlead.Description) {\n    const line = '\\u2014 ' + new Date().toISOString() + ' repeat interest via ' + cfg.platform + (cfg.postId ? (' post ' + cfg.postId) : '');\n    descriptionToWrite = (String(zlead.Description) + '\\n' + line).slice(0, 2000);\n  } else {\n    descriptionToWrite = contextDescription(cfg);   // genuinely empty -> write context, not a blank\n  }\n}\n\nconst zohoEmail = (zlead && zlead.Email) ? String(zlead.Email).trim().toLowerCase() : '';\n\nreturn [{ json: {\n  ...cfg,\n  email: cfg.email || zohoEmail || (row.email || ''),\n  action, reason, matchedOn, reactivated, converted,\n  found,\n  existingLeadId: leadId,\n  lookupError: leadLookupErrored,\n  leadWasRead: !!zlead,\n  descriptionToWrite,\n  contextDescription: contextDescription(cfg),\n  existingDescription: (zlead && zlead.Description) ? String(zlead.Description) : '',\n  existingStatus: (zlead && zlead.Lead_Status) ? String(zlead.Lead_Status) : null\n} }];",
+          "mode": "runOnceForAllItems",
+          "language": "javaScript"
+        }
+      },
+      {
+        "id": "d4819cd4-4805-4ebb-88b1-d074b95a9c48",
+        "name": "6. Needs Zoho write?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1344,
+          176
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 3,
+              "leftValue": ""
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.action }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "created"
+              },
+              {
+                "id": "c2",
+                "leftValue": "={{ $json.action }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "updated"
+              }
+            ],
+            "combinator": "or"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "b2c14ccc-587d-403c-b993-e467cbedd113",
+        "name": "7. Update or create?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1568,
+          96
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 3,
+              "leftValue": ""
+            },
+            "conditions": [
+              {
+                "id": "iu",
+                "leftValue": "={{ $json.action }}",
+                "operator": {
+                  "operation": "equals",
+                  "type": "string"
+                },
+                "rightValue": "updated"
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "c564cf4d-ea5d-4fce-941b-e5d4f8c3f120",
+        "name": "8b. Update Zoho lead",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          1792,
+          0
+        ],
+        "parameters": {
+          "resource": "lead",
+          "operation": "update",
+          "leadId": "={{ $json.existingLeadId }}",
+          "updateFields": {
+            "Description": "={{ $json.descriptionToWrite }}"
+          }
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      },
+      {
+        "id": "36751200-f762-476f-98f7-7c36d1493fcd",
+        "name": "8a. Create Zoho lead",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          1792,
+          192
+        ],
+        "parameters": {
+          "resource": "lead",
+          "operation": "create",
+          "Company": "Individual",
+          "lastName": "={{ $json.displayName || \"Unknown\" }}",
+          "additionalFields": {
+            "Description": "={{ $json.contextDescription }}",
+            "Lead_Source": "={{ $json.platform === 'instagram' ? 'Social - Instagram' : 'Social - Facebook' }}",
+            "Lead_Status": "Attempted to Contact"
+          }
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        }
+      },
+      {
+        "id": "a91a4473-4c55-413a-a742-44d2fe3bbc3b",
+        "name": "10. Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2464,
+          176
+        ],
+        "parameters": {
+          "jsCode": "const pick = (n) => { try { return $(n).first().json; } catch (e) { return null; } };\nconst row = $input.first().json || {};\nconst d = pick('8c. Attach lead id') || pick('5. Decide') || {};\nreturn [{ json: {\n  crm: d.crm || null,\n  action: d.action || null,\n  reason: d.reason || null,\n  crmRecordId: d.zohoLeadId || d.existingLeadId || null,\n  matchedOn: d.matchedOn || null,\n  converted: d.converted === true,\n  reactivated: d.reactivated === true,\n  touches: (row && row.touches !== undefined && row.touches !== null) ? row.touches : null,\n  personKey: d.personKey || null,\n  platform: d.platform || null,\n  canonical: d.canonical || null\n} }];",
+          "mode": "runOnceForAllItems",
+          "language": "javaScript"
+        }
+      },
+      {
+        "id": "0db2e5a1-71e1-4ec2-aed6-7d84f0212719",
+        "name": "8c. Attach lead id",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2016,
+          96
+        ],
+        "parameters": {
+          "jsCode": "\nconst pick = (n) => { try { return $(n).first().json; } catch (e) { return null; } };\nconst d = pick('5. Decide');\nif (!d) throw new Error('decide output unavailable');\nconst created = pick('8a. Create Zoho lead');\nconst updated = pick('8b. Update Zoho lead');\nconst lead = created || updated;\nconst id = lead && lead.id ? String(lead.id) : (d.existingLeadId || null);\nreturn [{ json: { ...d, zohoLeadId: id, leadWasCreated: !!created } }];\n"
+        }
+      },
+      {
+        "id": "54f16719-c831-48f6-810e-91a3affcb297",
+        "name": "9. Remember identity",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          2240,
+          96
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO nat130.social_identity\n    (platform, social_id, source_client, display_name, email, zoho_lead_id, last_external_id, last_post_id, last_message, consent_version)\nSELECT j->>'platform', j->>'social_id', j->>'source_client', j->>'display_name',\n       NULLIF(j->>'email', ''), NULLIF(j->>'zoho_lead_id', ''), NULLIF(j->>'last_external_id', ''),\n       NULLIF(j->>'last_post_id', ''), NULLIF(j->>'last_message', ''), j->>'consent_version'\nFROM (SELECT $1::jsonb AS j) p\nON CONFLICT (platform, social_id) DO UPDATE SET\n    display_name     = COALESCE(EXCLUDED.display_name, nat130.social_identity.display_name),\n    email            = COALESCE(nat130.social_identity.email, EXCLUDED.email),\n    zoho_lead_id     = COALESCE(EXCLUDED.zoho_lead_id, nat130.social_identity.zoho_lead_id),\n    last_external_id = EXCLUDED.last_external_id,\n    last_post_id     = EXCLUDED.last_post_id,\n    last_message     = EXCLUDED.last_message,\n    consent_version  = EXCLUDED.consent_version,\n    touches          = nat130.social_identity.touches + 1,\n    reactivated      = (nat130.social_identity.last_seen_at < now() - interval '30 days'),\n    last_seen_at     = now(),\n    updated_at       = now()\nRETURNING id, person_key, zoho_lead_id, touches, reactivated, first_seen_at, last_seen_at",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ JSON.stringify({ platform: $json.platform, social_id: $json.socialId, source_client: $json.sourceClient, display_name: $json.displayName, email: $json.email || '', zoho_lead_id: $json.zohoLeadId || '', last_external_id: $json.canonical.externalId || '', last_post_id: $json.postId || '', last_message: $json.message || '', consent_version: $json.consentVersion }) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "From channel": {
+        "main": [
+          [
+            {
+              "node": "1. Config and normalize",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "1. Config and normalize": {
+        "main": [
+          [
+            {
+              "node": "2. Lookup identity",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "2. Lookup identity": {
+        "main": [
+          [
+            {
+              "node": "3. Knows a lead?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3. Knows a lead?": {
+        "main": [
+          [
+            {
+              "node": "4. Read lead from Zoho",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "5. Decide",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "4. Read lead from Zoho": {
+        "main": [
+          [
+            {
+              "node": "5. Decide",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "5. Decide": {
+        "main": [
+          [
+            {
+              "node": "6. Needs Zoho write?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "6. Needs Zoho write?": {
+        "main": [
+          [
+            {
+              "node": "7. Update or create?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "10. Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "7. Update or create?": {
+        "main": [
+          [
+            {
+              "node": "8b. Update Zoho lead",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "8a. Create Zoho lead",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8b. Update Zoho lead": {
+        "main": [
+          [
+            {
+              "node": "8c. Attach lead id",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8a. Create Zoho lead": {
+        "main": [
+          [
+            {
+              "node": "8c. Attach lead id",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "8c. Attach lead id": {
+        "main": [
+          [
+            {
+              "node": "9. Remember identity",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "9. Remember identity": {
+        "main": [
+          [
+            {
+              "node": "10. Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated 5. Decide, 8b. Update Zoho lead, 8a. Create Zoho lead",
+    "description": "Updated nodes: 5. Decide, 8b. Update Zoho lead, 8a. Create Zoho lead",
+    "autosaved": false,
+    "createdAt": "2026-09-26T02:57:14.776Z",
+    "updatedAt": "2026-09-26T02:57:14.776Z"
+  },
+  "activeVersionId": "101a9e84-6f7b-41dd-bf49-e1f26351aca3",
+  "connections": {
+    "From channel": {
+      "main": [
+        [
+          {
+            "node": "1. Config and normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Config and normalize": {
+      "main": [
+        [
+          {
+            "node": "2. Lookup identity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Lookup identity": {
+      "main": [
+        [
+          {
+            "node": "3. Knows a lead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Knows a lead?": {
+      "main": [
+        [
+          {
+            "node": "4. Read lead from Zoho",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "5. Decide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Read lead from Zoho": {
+      "main": [
+        [
+          {
+            "node": "5. Decide",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Decide": {
+      "main": [
+        [
+          {
+            "node": "6. Needs Zoho write?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Needs Zoho write?": {
+      "main": [
+        [
+          {
+            "node": "7. Update or create?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "10. Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "7. Update or create?": {
+      "main": [
+        [
+          {
+            "node": "8b. Update Zoho lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "8a. Create Zoho lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8b. Update Zoho lead": {
+      "main": [
+        [
+          {
+            "node": "8c. Attach lead id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8a. Create Zoho lead": {
+      "main": [
+        [
+          {
+            "node": "8c. Attach lead id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "8c. Attach lead id": {
+      "main": [
+        [
+          {
+            "node": "9. Remember identity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "9. Remember identity": {
+      "main": [
+        [
+          {
+            "node": "10. Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:34:14.736Z",
+  "id": "YKfyZFBekaN2yCxx",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "NAT-130 - CRM adapter (identity dedupe)",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "380fdd2a-d234-4a87-8a7f-7c9af9e008a2",
+      "name": "From channel",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        176
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "payload",
+              "type": "any"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dd77b5e2-95da-4b5a-87e0-76e05cede300",
+      "name": "1. Config and normalize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        176
+      ],
+      "parameters": {
+        "jsCode": "// NAT-130 adapter configuration — the single SOURCE_CRM switch.\n// n8n blocks property access on $env on this instance, so the switch is read\n// from n8n Variables first and falls back to the literal defaults below.\n// Set a project Variable named SOURCE_CRM / SOURCE_CLIENT to change it.\nfunction readVar(name) {\n  try {\n    const v = $vars;\n    if (v && typeof v === 'object') {\n      const val = v[name];\n      if (val !== undefined && val !== null && String(val).trim() !== '') return String(val).trim();\n    }\n  } catch (e) { /* variable not defined, fall through */ }\n  return null;\n}\n\nconst rawCrm = (readVar('SOURCE_CRM') || 'zoho').toLowerCase();\nconst ENABLED = ['zoho'];\nif (!ENABLED.includes(rawCrm)) {\n  throw new Error('SOURCE_CRM=' + rawCrm + ' is not enabled in this adapter. Enabled: ' + ENABLED.join(', '));\n}\nconst sourceClient = readVar('SOURCE_CLIENT') || 'growbusy-main';\nif (!sourceClient) throw new Error('SOURCE_CLIENT resolved to empty');\n\nconst first = $input.first().json;\nconst c = first.payload ?? first;\nif (!c || typeof c !== 'object') throw new Error('empty canonical payload');\n\nconst platform = String(c.source || '').trim().toLowerCase();\nif (platform !== 'instagram' && platform !== 'facebook') {\n  throw new Error('unsupported canonical.source: ' + JSON.stringify(c.source));\n}\nconst socialId = String(c.userId || '').trim();\nif (!socialId) throw new Error('canonical.userId (PSID) is required for identity');\n\nreturn [{ json: {\n  crm: rawCrm,\n  sourceClient,\n  reactivationDays: 30,\n  consentVersion: String((c.consent && c.consent.version) || 'v1'),\n  platform,\n  socialId,\n  personKey: platform + ':' + socialId,\n  email: c.email ? String(c.email).trim().toLowerCase() : '',\n  displayName: String(c.name || c.handle || 'Social lead').slice(0, 120),\n  handle: c.handle ? String(c.handle) : null,\n  postId: String(c.postId || c.mediaId || ''),\n  permalink: c.permalink ? String(c.permalink) : null,\n  message: c.message ? String(c.message).slice(0, 2000) : '',\n  canonical: c\n} }];",
+        "mode": "runOnceForAllItems",
+        "language": "javaScript"
+      }
+    },
+    {
+      "id": "1ef0304e-d2f6-4980-975f-74f2ea1ac623",
+      "name": "2. Lookup identity",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        176
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH p AS (SELECT $1::jsonb AS j)\nSELECT si.id, si.person_key, si.platform, si.social_id, si.display_name, si.email,\n       si.zoho_lead_id, si.zoho_contact_id, si.touches, si.reactivated,\n       si.first_seen_at, si.last_seen_at,\n       (si.platform = p.j->>'platform' AND si.social_id = p.j->>'social_id') AS matched_person_key\nFROM nat130.social_identity si, p\nWHERE (si.platform = p.j->>'platform' AND si.social_id = p.j->>'social_id')\n   OR (COALESCE(p.j->>'email', '') <> '' AND lower(si.email) = lower(p.j->>'email'))\nORDER BY (si.platform = p.j->>'platform' AND si.social_id = p.j->>'social_id') DESC, si.last_seen_at DESC\nLIMIT 1",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ JSON.stringify({ platform: $json.platform, social_id: $json.socialId, email: $json.email || '' }) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "8b5093fc-6664-4ff2-a0ea-7b27645b9495",
+      "name": "3. Knows a lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        176
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 3,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "hl",
+              "leftValue": "={{ $json.zoho_lead_id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "type": "string",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "3a880143-8a80-4fbd-b853-78912e4a3538",
+      "name": "4. Read lead from Zoho",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        896,
+        96
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "get",
+        "leadId": "={{ $json.zoho_lead_id }}",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "b30b6912-76cb-4f01-b076-970a59c667fb",
+      "name": "5. Decide",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        176
+      ],
+      "parameters": {
+        "jsCode": "function safeGet(name) { try { return $(name).first().json; } catch (e) { return null; } }\nfunction unwrapLead(raw) {\n  if (!raw || typeof raw !== 'object') return null;\n  if (Array.isArray(raw.data) && raw.data[0] && typeof raw.data[0] === 'object') return raw.data[0];\n  return raw.id ? raw : null;\n}\nfunction contextDescription(c) {\n  return [\n    (c.platform === 'instagram' ? 'IG' : 'FB') + ' comment: ' + c.message,\n    'Media: ' + (c.postId || 'n/a'),\n    'externalId: ' + ((c.canonical && c.canonical.externalId) || 'n/a'),\n    'PSID: ' + (c.socialId || 'n/a'),\n    c.handle ? 'handle: ' + c.handle : null,\n    'channel: ' + c.platform\n  ].filter(Boolean).join('\\n').slice(0, 2000);\n}\n\nconst cfg = safeGet('1. Config and normalize');\nif (!cfg) throw new Error('config node output unavailable');\n\nconst row = safeGet('2. Lookup identity') || {};\nconst raw = safeGet('4. Read lead from Zoho');\nconst zlead = unwrapLead(raw);\nconst leadLookupErrored = !!raw && !zlead;\n\nconst found = row.id !== undefined && row.id !== null;\nconst leadId = found ? (row.zoho_lead_id || null) : null;\n\nconst converted = !!(zlead && (\n  zlead.Converted__s === true || zlead.Converted__s === 'true' ||\n  (zlead.Converted_Contact && zlead.Converted_Contact.id) ||\n  zlead['$converted'] === true\n));\n\nlet reactivated = false;\nif (found && row.last_seen_at) {\n  const days = (Date.now() - new Date(row.last_seen_at).getTime()) / 86400000;\n  reactivated = days > cfg.reactivationDays;\n}\n\nconst matchedOn = !found ? 'none' : (row.matched_person_key ? 'socialId' : 'email');\n\nlet action, reason;\nif (!found) { action = 'created'; reason = 'new person'; }\nelse if (leadId && leadLookupErrored) { action = 'created'; reason = 'linked zoho lead no longer exists, recreating'; }\nelse if (converted) { action = 'ignored'; reason = 'already a customer, comment dropped'; }\nelse { action = 'updated'; reason = reactivated ? ('returning after ' + cfg.reactivationDays + ' days or more') : 'repeat interest'; }\n\n// Description guard: never write less than we read.\nlet descriptionToWrite = null;\nif (action === 'updated') {\n  if (!zlead) {\n    descriptionToWrite = null;   // unreadable lead -> never write\n  } else if (zlead.Description) {\n    const line = '\\u2014 ' + new Date().toISOString() + ' repeat interest via ' + cfg.platform + (cfg.postId ? (' post ' + cfg.postId) : '');\n    descriptionToWrite = (String(zlead.Description) + '\\n' + line).slice(0, 2000);\n  } else {\n    descriptionToWrite = contextDescription(cfg);   // genuinely empty -> write context, not a blank\n  }\n}\n\nconst zohoEmail = (zlead && zlead.Email) ? String(zlead.Email).trim().toLowerCase() : '';\n\nreturn [{ json: {\n  ...cfg,\n  email: cfg.email || zohoEmail || (row.email || ''),\n  action, reason, matchedOn, reactivated, converted,\n  found,\n  existingLeadId: leadId,\n  lookupError: leadLookupErrored,\n  leadWasRead: !!zlead,\n  descriptionToWrite,\n  contextDescription: contextDescription(cfg),\n  existingDescription: (zlead && zlead.Description) ? String(zlead.Description) : '',\n  existingStatus: (zlead && zlead.Lead_Status) ? String(zlead.Lead_Status) : null\n} }];",
+        "mode": "runOnceForAllItems",
+        "language": "javaScript"
+      }
+    },
+    {
+      "id": "d4819cd4-4805-4ebb-88b1-d074b95a9c48",
+      "name": "6. Needs Zoho write?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1344,
+        176
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 3,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.action }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "created"
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.action }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "updated"
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b2c14ccc-587d-403c-b993-e467cbedd113",
+      "name": "7. Update or create?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1568,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 3,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "iu",
+              "leftValue": "={{ $json.action }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "updated"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "c564cf4d-ea5d-4fce-941b-e5d4f8c3f120",
+      "name": "8b. Update Zoho lead",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "update",
+        "leadId": "={{ $json.existingLeadId }}",
+        "updateFields": {
+          "Description": "={{ $json.descriptionToWrite }}"
+        }
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "36751200-f762-476f-98f7-7c36d1493fcd",
+      "name": "8a. Create Zoho lead",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        1792,
+        192
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "create",
+        "Company": "Individual",
+        "lastName": "={{ $json.displayName || \"Unknown\" }}",
+        "additionalFields": {
+          "Description": "={{ $json.contextDescription }}",
+          "Lead_Source": "={{ $json.platform === 'instagram' ? 'Social - Instagram' : 'Social - Facebook' }}",
+          "Lead_Status": "Attempted to Contact"
+        }
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "a91a4473-4c55-413a-a742-44d2fe3bbc3b",
+      "name": "10. Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        176
+      ],
+      "parameters": {
+        "jsCode": "const pick = (n) => { try { return $(n).first().json; } catch (e) { return null; } };\nconst row = $input.first().json || {};\nconst d = pick('8c. Attach lead id') || pick('5. Decide') || {};\nreturn [{ json: {\n  crm: d.crm || null,\n  action: d.action || null,\n  reason: d.reason || null,\n  crmRecordId: d.zohoLeadId || d.existingLeadId || null,\n  matchedOn: d.matchedOn || null,\n  converted: d.converted === true,\n  reactivated: d.reactivated === true,\n  touches: (row && row.touches !== undefined && row.touches !== null) ? row.touches : null,\n  personKey: d.personKey || null,\n  platform: d.platform || null,\n  canonical: d.canonical || null\n} }];",
+        "mode": "runOnceForAllItems",
+        "language": "javaScript"
+      }
+    },
+    {
+      "id": "0db2e5a1-71e1-4ec2-aed6-7d84f0212719",
+      "name": "8c. Attach lead id",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        96
+      ],
+      "parameters": {
+        "jsCode": "\nconst pick = (n) => { try { return $(n).first().json; } catch (e) { return null; } };\nconst d = pick('5. Decide');\nif (!d) throw new Error('decide output unavailable');\nconst created = pick('8a. Create Zoho lead');\nconst updated = pick('8b. Update Zoho lead');\nconst lead = created || updated;\nconst id = lead && lead.id ? String(lead.id) : (d.existingLeadId || null);\nreturn [{ json: { ...d, zohoLeadId: id, leadWasCreated: !!created } }];\n"
+      }
+    },
+    {
+      "id": "54f16719-c831-48f6-810e-91a3affcb297",
+      "name": "9. Remember identity",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2240,
+        96
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO nat130.social_identity\n    (platform, social_id, source_client, display_name, email, zoho_lead_id, last_external_id, last_post_id, last_message, consent_version)\nSELECT j->>'platform', j->>'social_id', j->>'source_client', j->>'display_name',\n       NULLIF(j->>'email', ''), NULLIF(j->>'zoho_lead_id', ''), NULLIF(j->>'last_external_id', ''),\n       NULLIF(j->>'last_post_id', ''), NULLIF(j->>'last_message', ''), j->>'consent_version'\nFROM (SELECT $1::jsonb AS j) p\nON CONFLICT (platform, social_id) DO UPDATE SET\n    display_name     = COALESCE(EXCLUDED.display_name, nat130.social_identity.display_name),\n    email            = COALESCE(nat130.social_identity.email, EXCLUDED.email),\n    zoho_lead_id     = COALESCE(EXCLUDED.zoho_lead_id, nat130.social_identity.zoho_lead_id),\n    last_external_id = EXCLUDED.last_external_id,\n    last_post_id     = EXCLUDED.last_post_id,\n    last_message     = EXCLUDED.last_message,\n    consent_version  = EXCLUDED.consent_version,\n    touches          = nat130.social_identity.touches + 1,\n    reactivated      = (nat130.social_identity.last_seen_at < now() - interval '30 days'),\n    last_seen_at     = now(),\n    updated_at       = now()\nRETURNING id, person_key, zoho_lead_id, touches, reactivated, first_seen_at, last_seen_at",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ JSON.stringify({ platform: $json.platform, social_id: $json.socialId, source_client: $json.sourceClient, display_name: $json.displayName, email: $json.email || '', zoho_lead_id: $json.zohoLeadId || '', last_external_id: $json.canonical.externalId || '', last_post_id: $json.postId || '', last_message: $json.message || '', consent_version: $json.consentVersion }) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "YKfyZFBekaN2yCxx",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:34:14.739Z",
+      "updatedAt": "2026-09-26T02:34:14.739Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T03:39:55.498Z",
+  "versionId": "101a9e84-6f7b-41dd-bf49-e1f26351aca3"
+}
