@@ -1,0 +1,88 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Upsert test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:24:43.237Z",
+  "id": "zi9l998OEQp0AC3e",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat130 test upsert",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "f93a91cd-340b-4dde-898f-2a4907f13196",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "3f700448-f6f2-4a78-8af8-d2f56c6066a1",
+      "name": "Upsert test",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO nat130.social_identity\n    (platform, social_id, source_client, display_name, last_external_id, last_post_id, last_message, consent_version)\nVALUES ($1, $2, $3, $4, $5, $6, $7, $8)\nON CONFLICT (platform, social_id) DO UPDATE SET\n    display_name     = COALESCE(EXCLUDED.display_name, nat130.social_identity.display_name),\n    last_external_id = EXCLUDED.last_external_id,\n    last_post_id     = EXCLUDED.last_post_id,\n    last_message     = EXCLUDED.last_message,\n    touches          = nat130.social_identity.touches + 1,\n    reactivated      = (nat130.social_identity.last_seen_at < now() - interval '30 days'),\n    last_seen_at     = now(),\n    updated_at       = now()\nRETURNING id, person_key, zoho_lead_id, touches, reactivated, first_seen_at, last_seen_at, (xmax = 0) AS inserted",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "instagram,TESTDUPE123,growbusy-main,tester,ext-1,post-1,hello,v1"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "zi9l998OEQp0AC3e",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:24:43.238Z",
+      "updatedAt": "2026-09-26T02:24:43.238Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:25:08.000Z",
+  "versionId": "fd1e698f-10f6-4974-973b-0de5ec2a25b6"
+}
