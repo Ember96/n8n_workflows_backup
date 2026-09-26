@@ -1,0 +1,154 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "DelLead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DelLead": {
+      "main": [
+        [
+          {
+            "node": "DelRow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DelRow": {
+      "main": [
+        [
+          {
+            "node": "Show",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T03:24:41.533Z",
+  "id": "sPLSzlUr4dQ5Vlyb",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - clean 5",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "faed36e3-69d8-4411-9db2-b55edef0f907",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "41caca23-37d0-4e33-a9c8-e451c0de8ffe",
+      "name": "DelLead",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000900003",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "74040ec9-77ba-4808-ba63-7d1dddaba5d0",
+      "name": "DelRow",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM nat130.social_identity WHERE social_id = '7777777777777777' RETURNING person_key",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "5e0c2bfe-627f-4de4-914c-8efadf8f1f52",
+      "name": "Show",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT person_key, zoho_lead_id, touches FROM nat130.social_identity ORDER BY id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "sPLSzlUr4dQ5Vlyb",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T03:24:41.534Z",
+      "updatedAt": "2026-09-26T03:24:41.534Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T03:24:41.000Z",
+  "versionId": "58a9853a-c6f5-47c9-8472-aa4e19aff82c"
+}
