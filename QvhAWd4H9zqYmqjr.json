@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "CleanRows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:38:42.136Z",
+  "id": "QvhAWd4H9zqYmqjr",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - clean rows",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "81979caa-a70c-4054-b53f-8c43fc91a803",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "85b72836-ad54-4de2-9c68-c2ee2991b409",
+      "name": "CleanRows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM nat130.social_identity WHERE social_id IN ('9999999999999999','ARRAYPARAM1','TESTDUPE123') RETURNING id, person_key",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "QvhAWd4H9zqYmqjr",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:38:42.138Z",
+      "updatedAt": "2026-09-26T02:38:42.138Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:21.000Z",
+  "versionId": "c1fb1d3c-6072-4029-b668-8e5df1959a07"
+}
