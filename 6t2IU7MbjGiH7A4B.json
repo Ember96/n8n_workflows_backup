@@ -1,0 +1,187 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Del1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Del1": {
+      "main": [
+        [
+          {
+            "node": "Del2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Del2": {
+      "main": [
+        [
+          {
+            "node": "Del3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Del3": {
+      "main": [
+        [
+          {
+            "node": "CleanRows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:38:35.602Z",
+  "id": "6t2IU7MbjGiH7A4B",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - cleanup leads",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "cb5e2d47-e113-480a-87ac-d154e99a1ba8",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "f5dfcdb5-e329-43f2-9d8e-d731dd6203ba",
+      "name": "Del1",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000888001",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "7bb0e057-4228-4a5c-a253-68b5172de015",
+      "name": "Del2",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000887001",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "eee94239-52cc-4746-b1c1-150da30638ae",
+      "name": "Del3",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000886001",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "8508b289-a817-4fd2-bb71-945597c43b46",
+      "name": "CleanRows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM nat130.social_identity WHERE social_id IN ('9999999999999999','ARRAYPARAM1','TESTDUPE123') RETURNING id",
+        "options": {
+          "queryBatching": "single",
+          "onError": "continueRegularOutput"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "6t2IU7MbjGiH7A4B",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:38:35.606Z",
+      "updatedAt": "2026-09-26T02:38:35.606Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:44:21.000Z",
+  "versionId": "9f7b38e8-527b-4811-8876-520fdc1a5826"
+}
