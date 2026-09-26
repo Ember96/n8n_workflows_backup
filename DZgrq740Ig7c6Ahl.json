@@ -1,0 +1,109 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Call adapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T02:34:24.234Z",
+  "id": "DZgrq740Ig7c6Ahl",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat130 adapter harness",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "c6231e4e-7ebf-47c2-801f-3510423a4aff",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "042c4b6e-a6fb-4d32-8b93-7c9ceeb34dea",
+      "name": "Call adapter",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YKfyZFBekaN2yCxx"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": {
+              "externalId": "nat130-test-comment-0001",
+              "userId": "9999999999999999",
+              "name": "nat130-test-lead",
+              "handle": "nat130_test",
+              "message": "LINK please",
+              "mediaId": "18139857373608823",
+              "source": "instagram",
+              "sourceCrm": "zoho",
+              "sourceClient": "growbusy-main",
+              "consent": {
+                "emailMarketing": false,
+                "smsMarketing": false,
+                "version": "v1",
+                "capturedAt": "2026-09-26T00:00:00.000Z"
+              },
+              "capturedAt": "2026-09-26T00:00:00.000Z"
+            }
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "DZgrq740Ig7c6Ahl",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T02:34:24.236Z",
+      "updatedAt": "2026-09-26T02:34:24.236Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T02:34:24.234Z",
+  "versionId": "e4ac15b3-464e-4478-b3c4-c9cc1d271a50"
+}
