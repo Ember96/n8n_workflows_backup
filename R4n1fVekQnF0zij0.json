@@ -1,0 +1,92 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Call IG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-26T03:24:28.036Z",
+  "id": "R4n1fVekQnF0zij0",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - publish check",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "ea0f3d96-57eb-41d3-b2ad-d131486d2d3b",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "1bfda3f1-84d8-424a-b548-faa93233b189",
+      "name": "Call IG",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ntX5efjAdbG2HAL1"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "{\"object\":\"instagram\",\"entry\":[{\"changes\":[{\"field\":\"comments\",\"value\":{\"id\":\"nat130-publish-check-1\",\"text\":\"ENLACE por favor\",\"from\":{\"id\":\"7777777777777777\",\"username\":\"nat130_publish_check\"},\"media\":{\"id\":\"18139857373608823\"}}}]}]}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "R4n1fVekQnF0zij0",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-26T03:24:28.038Z",
+      "updatedAt": "2026-09-26T03:24:28.038Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-26T03:24:41.000Z",
+  "versionId": "7fbfd597-45df-4d5c-9462-d514e28c4c00"
+}
