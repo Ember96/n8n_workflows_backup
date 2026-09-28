@@ -1,0 +1,119 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Del1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Del1": {
+      "main": [
+        [
+          {
+            "node": "Del2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-28T00:51:34.767Z",
+  "id": "j4ZpDePTIrJJdBWI",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - clean 8",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "df4d520b-957c-4597-a874-1c09ab974634",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "0f923db9-8f6f-4cca-a733-f802410f12c2",
+      "name": "Del1",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000900010",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "8aa5b5ce-bab3-44dc-8e63-d87f9565253e",
+      "name": "Del2",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000892005",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "j4ZpDePTIrJJdBWI",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-28T00:51:34.769Z",
+      "updatedAt": "2026-09-28T00:51:34.769Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-28T00:51:35.000Z",
+  "versionId": "c304510d-5f9e-4acb-a9cf-9cfb26b3d884"
+}
