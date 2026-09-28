@@ -1,0 +1,92 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Call FB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-27T23:20:17.854Z",
+  "id": "cEQfcj9bMdgLxsWh",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - fb dedupe test",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "d8fddf4d-6c1c-4467-a036-2d157ccc2861",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "435ae768-58c3-4579-93f9-c12b5aea4e43",
+      "name": "Call FB",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "4S4QobrFX3omdY87"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "{\"object\":\"page\",\"entry\":[{\"changes\":[{\"field\":\"feed\",\"value\":{\"item\":\"comment\",\"verb\":\"add\",\"comment_id\":\"nat130-fb-comment-1\",\"post_id\":\"nat130-fb-post-1\",\"message\":\"LINK por favor\",\"from\":{\"id\":\"6666666666666666\",\"name\":\"nat130 fb test\"},\"post\":{\"id\":\"nat130-fb-post-1\",\"permalink_url\":\"https://facebook.com/x\"}}}]}]}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "cEQfcj9bMdgLxsWh",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-27T23:20:17.856Z",
+      "updatedAt": "2026-09-27T23:20:17.856Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-27T23:20:57.000Z",
+  "versionId": "3bc43042-7d85-448d-9104-2031ac4c3bce"
+}
