@@ -1,0 +1,105 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Make",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make": {
+      "main": [
+        [
+          {
+            "node": "Assert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-28T00:50:49.680Z",
+  "id": "P2TaxLy7dwk8mHHR",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - assert msg",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "d103410f-15e3-4dbf-9fa5-581fd3a1c26a",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "9632868a-f9ff-4052-8c98-b32f98f798a5",
+      "name": "Make",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: { id: 'x', error: 'boom' } }];"
+      }
+    },
+    {
+      "id": "fd56b0fc-c118-42f1-a130-32ce39da73bf",
+      "name": "Assert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply to the social comment failed; downstream delivery was still attempted: ' + detail);\n}\nreturn items;"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "P2TaxLy7dwk8mHHR",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-28T00:50:49.682Z",
+      "updatedAt": "2026-09-28T00:50:49.682Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-28T00:50:50.000Z",
+  "versionId": "3896067d-20fd-40ba-9de8-640c23d67019"
+}
