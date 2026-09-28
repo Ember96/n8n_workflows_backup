@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "80ab6e6d-696f-4f3e-860c-8c10762dfbb1",
+    "versionId": "02dce0f7-a35a-4fe3-9c58-6bac323235de",
     "workflowId": "4S4QobrFX3omdY87",
     "nodes": [
       {
@@ -86,33 +86,6 @@
       },
       {
         "parameters": {
-          "resource": "lead",
-          "Company": "Individual",
-          "lastName": "={{ $json.name || \"Unknown\" }}",
-          "additionalFields": {
-            "Description": "={{ \"FB comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nLink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nauthorId: \" + ($json.userId || \"n/a\") + \"\\nchannel: \" + $json.source }}",
-            "Lead_Source": "Social - Facebook",
-            "Lead_Status": "Attempted to Contact"
-          }
-        },
-        "id": "8aacc097-ccc5-434d-9ab1-54c64a8c0755",
-        "name": "FB 6. Zoho Lead",
-        "type": "n8n-nodes-base.zohoCrm",
-        "typeVersion": 1,
-        "position": [
-          1344,
-          0
-        ],
-        "credentials": {
-          "zohoOAuth2Api": {
-            "id": "R5WqgTreF3p3gViM",
-            "name": "Zoho account"
-          }
-        },
-        "onError": "continueErrorOutput"
-      },
-      {
-        "parameters": {
           "method": "POST",
           "url": "=https://graph.facebook.com/v19.0/{{ $(\"FB 3. Canonical (NAT-97)\").first().json.externalId }}/comments",
           "authentication": "genericCredentialType",
@@ -142,7 +115,51 @@
             "name": "Meta Graph Growbusy Social Token"
           }
         },
-        "onError": "continueErrorOutput"
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "6af03a7f-9702-421e-89f8-46974b470d25",
+        "name": "FB 6. CRM adapter (NAT-130)",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          1344,
+          0
+        ],
+        "parameters": {
+          "mode": "each",
+          "source": "database",
+          "workflowId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "YKfyZFBekaN2yCxx"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "payload": "={{ $json }}"
+            },
+            "matchingColumns": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "5ce9f8d3-8ef3-4114-b07a-a7cec2e79f64",
+        "name": "FB 8. Assert reply delivered",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1792,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply to the social comment failed; downstream delivery was still attempted: ' + detail);\n}\nreturn items;"
+        }
       }
     ],
     "connections": {
@@ -179,7 +196,18 @@
           ]
         ]
       },
-      "FB 6. Zoho Lead": {
+      "FB 3. Canonical (NAT-97)": {
+        "main": [
+          [
+            {
+              "node": "FB 6. CRM adapter (NAT-130)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FB 6. CRM adapter (NAT-130)": {
         "main": [
           [
             {
@@ -190,11 +218,11 @@
           ]
         ]
       },
-      "FB 3. Canonical (NAT-97)": {
+      "FB 7. Reply (comments endpoint)": {
         "main": [
           [
             {
-              "node": "FB 6. Zoho Lead",
+              "node": "FB 8. Assert reply delivered",
               "type": "main",
               "index": 0
             }
@@ -204,13 +232,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Use router-level dedupe",
-    "description": "Removed the Facebook-local dedupe gate. The router now performs the single 24-hour dedupe before routing, and Facebook canonical connects directly to Zoho.",
+    "name": "Updated FB 8. Assert reply delivered",
+    "description": "Updated nodes: FB 8. Assert reply delivered",
     "autosaved": false,
-    "createdAt": "2026-09-25T02:56:47.702Z",
-    "updatedAt": "2026-09-25T02:56:47.702Z"
+    "createdAt": "2026-09-28T00:50:36.645Z",
+    "updatedAt": "2026-09-28T00:50:36.645Z"
   },
-  "activeVersionId": "80ab6e6d-696f-4f3e-860c-8c10762dfbb1",
+  "activeVersionId": "02dce0f7-a35a-4fe3-9c58-6bac323235de",
   "connections": {
     "From router": {
       "main": [
@@ -245,7 +273,18 @@
         ]
       ]
     },
-    "FB 6. Zoho Lead": {
+    "FB 3. Canonical (NAT-97)": {
+      "main": [
+        [
+          {
+            "node": "FB 6. CRM adapter (NAT-130)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FB 6. CRM adapter (NAT-130)": {
       "main": [
         [
           {
@@ -256,11 +295,11 @@
         ]
       ]
     },
-    "FB 3. Canonical (NAT-97)": {
+    "FB 7. Reply (comments endpoint)": {
       "main": [
         [
           {
-            "node": "FB 6. Zoho Lead",
+            "node": "FB 8. Assert reply delivered",
             "type": "main",
             "index": 0
           }
@@ -360,33 +399,6 @@
     },
     {
       "parameters": {
-        "resource": "lead",
-        "Company": "Individual",
-        "lastName": "={{ $json.name || \"Unknown\" }}",
-        "additionalFields": {
-          "Description": "={{ \"FB comment: \" + $json.message + \"\\nPost: \" + ($json.postId || \"n/a\") + \"\\nLink: \" + ($json.permalink || \"n/a\") + \"\\nexternalId: \" + $json.externalId + \"\\nauthorId: \" + ($json.userId || \"n/a\") + \"\\nchannel: \" + $json.source }}",
-          "Lead_Source": "Social - Facebook",
-          "Lead_Status": "Attempted to Contact"
-        }
-      },
-      "id": "8aacc097-ccc5-434d-9ab1-54c64a8c0755",
-      "name": "FB 6. Zoho Lead",
-      "type": "n8n-nodes-base.zohoCrm",
-      "typeVersion": 1,
-      "position": [
-        1344,
-        0
-      ],
-      "credentials": {
-        "zohoOAuth2Api": {
-          "id": "R5WqgTreF3p3gViM",
-          "name": "Zoho account"
-        }
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "=https://graph.facebook.com/v19.0/{{ $(\"FB 3. Canonical (NAT-97)\").first().json.externalId }}/comments",
         "authentication": "genericCredentialType",
@@ -416,7 +428,51 @@
           "name": "Meta Graph Growbusy Social Token"
         }
       },
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "6af03a7f-9702-421e-89f8-46974b470d25",
+      "name": "FB 6. CRM adapter (NAT-130)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YKfyZFBekaN2yCxx"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json }}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "5ce9f8d3-8ef3-4114-b07a-a7cec2e79f64",
+      "name": "FB 8. Assert reply delivered",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply to the social comment failed; downstream delivery was still attempted: ' + detail);\n}\nreturn items;"
+      }
     }
   ],
   "origin": "n8n",
@@ -451,6 +507,6 @@
   },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-26T03:40:04.266Z",
-  "versionId": "80ab6e6d-696f-4f3e-860c-8c10762dfbb1"
+  "updatedAt": "2026-09-28T00:50:36.643Z",
+  "versionId": "02dce0f7-a35a-4fe3-9c58-6bac323235de"
 }
