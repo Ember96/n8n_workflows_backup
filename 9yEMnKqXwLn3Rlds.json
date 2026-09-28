@@ -1,0 +1,105 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Make",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make": {
+      "main": [
+        [
+          {
+            "node": "Assert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-28T00:50:02.569Z",
+  "id": "9yEMnKqXwLn3Rlds",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - assert clean",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "fad5dad9-ec1a-49ae-bc85-d984d0db31f8",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "3e23050c-c9cd-48e1-bbb5-64fb3f647d0a",
+      "name": "Make",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\"return [{ json: { id: '1799999999999999' } }];\""
+      }
+    },
+    {
+      "id": "192b8c0a-6e57-4f6b-8931-56bc5bed5681",
+      "name": "Assert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply failed but the DM was still attempted: ' + detail);\n}\nreturn items;"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "9yEMnKqXwLn3Rlds",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-28T00:50:02.571Z",
+      "updatedAt": "2026-09-28T00:50:02.571Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-28T00:50:57.000Z",
+  "versionId": "93ceee6e-4815-41e5-be80-59457eb593a1"
+}
