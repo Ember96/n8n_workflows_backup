@@ -1,0 +1,92 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Call FB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-28T00:50:28.753Z",
+  "id": "3i2XpEymJcSoI9eB",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - fb assert test",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "b7feaa64-274b-4ca9-88a1-3b767ee0e973",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "7f119532-5f31-46d8-b4e2-a698f562569d",
+      "name": "Call FB",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "4S4QobrFX3omdY87"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "{\"object\":\"page\",\"entry\":[{\"changes\":[{\"field\":\"feed\",\"value\":{\"item\":\"comment\",\"verb\":\"add\",\"comment_id\":\"nat130-fb-assert-1\",\"post_id\":\"nat130-fb-post-2\",\"message\":\"ENLACE por favor\",\"from\":{\"id\":\"4444444444444444\",\"name\":\"nat130 fb assert\"},\"post\":{\"id\":\"nat130-fb-post-2\",\"permalink_url\":\"https://facebook.com/y\"}}}]}]}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "3i2XpEymJcSoI9eB",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-28T00:50:28.756Z",
+      "updatedAt": "2026-09-28T00:50:28.756Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-28T00:50:57.000Z",
+  "versionId": "c7e58594-fcec-491d-962a-ba5d9f7f9ba1"
+}
