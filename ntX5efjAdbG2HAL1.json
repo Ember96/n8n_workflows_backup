@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "5313a1ad-9567-460c-af36-7285a0e9d016",
+    "versionId": "f74b69dd-d422-4cc8-8a5a-9fb266a6e537",
     "workflowId": "ntX5efjAdbG2HAL1",
     "nodes": [
       {
@@ -115,7 +115,7 @@
             "name": "Meta Graph Growbusy Social Token"
           }
         },
-        "onError": "continueErrorOutput"
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -152,7 +152,7 @@
             "name": "Meta Graph Growbusy Social Token"
           }
         },
-        "onError": "continueErrorOutput"
+        "onError": "continueRegularOutput"
       },
       {
         "id": "b47a93fa-8103-4790-a3d0-ab3d56405292",
@@ -182,6 +182,21 @@
           }
         },
         "onError": "continueRegularOutput"
+      },
+      {
+        "id": "3992c8e6-e9c8-47f0-ab45-00a3c04c7a82",
+        "name": "IG 9. Assert reply delivered",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1904,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply to the social comment failed; downstream delivery was still attempted: ' + detail);\n}\nreturn items;"
+        }
       }
     ],
     "connections": {
@@ -250,17 +265,28 @@
             }
           ]
         ]
+      },
+      "IG 8. DM with link": {
+        "main": [
+          [
+            {
+              "node": "IG 9. Assert reply delivered",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated IG 6. CRM adapter (NAT-130)",
-    "description": "Updated nodes: IG 6. CRM adapter (NAT-130)",
+    "name": "Updated IG 9. Assert reply delivered",
+    "description": "Updated nodes: IG 9. Assert reply delivered",
     "autosaved": false,
-    "createdAt": "2026-09-26T02:59:42.605Z",
-    "updatedAt": "2026-09-26T02:59:42.605Z"
+    "createdAt": "2026-09-28T00:50:36.357Z",
+    "updatedAt": "2026-09-28T00:50:36.357Z"
   },
-  "activeVersionId": "5313a1ad-9567-460c-af36-7285a0e9d016",
+  "activeVersionId": "f74b69dd-d422-4cc8-8a5a-9fb266a6e537",
   "connections": {
     "From router": {
       "main": [
@@ -322,6 +348,17 @@
         [
           {
             "node": "IG 7. Reply (replies endpoint)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 8. DM with link": {
+      "main": [
+        [
+          {
+            "node": "IG 9. Assert reply delivered",
             "type": "main",
             "index": 0
           }
@@ -450,7 +487,7 @@
           "name": "Meta Graph Growbusy Social Token"
         }
       },
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -487,7 +524,7 @@
           "name": "Meta Graph Growbusy Social Token"
         }
       },
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
     },
     {
       "id": "b47a93fa-8103-4790-a3d0-ab3d56405292",
@@ -517,6 +554,21 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "id": "3992c8e6-e9c8-47f0-ab45-00a3c04c7a82",
+      "name": "IG 9. Assert reply delivered",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply to the social comment failed; downstream delivery was still attempted: ' + detail);\n}\nreturn items;"
+      }
     }
   ],
   "origin": "n8n",
@@ -551,6 +603,6 @@
   },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-26T03:39:47.079Z",
-  "versionId": "5313a1ad-9567-460c-af36-7285a0e9d016"
+  "updatedAt": "2026-09-28T00:50:36.355Z",
+  "versionId": "f74b69dd-d422-4cc8-8a5a-9fb266a6e537"
 }
