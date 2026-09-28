@@ -1,0 +1,86 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "ReDel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-28T00:55:50.165Z",
+  "id": "hUH1Ulm1jdldKS3l",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - redel3",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "e6101f9b-fa0b-4979-94c6-a4af1d9a85cb",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "336fd019-3179-4ff6-9d1c-0d41feef3e26",
+      "name": "ReDel",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "7558657000000900010",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "hUH1Ulm1jdldKS3l",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-28T00:55:50.167Z",
+      "updatedAt": "2026-09-28T00:55:50.167Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-28T00:55:56.000Z",
+  "versionId": "d0b00207-5d2f-4682-b273-852a8a016a0b"
+}
