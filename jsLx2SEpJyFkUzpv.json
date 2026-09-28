@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Show",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-27T23:21:03.370Z",
+  "id": "jsLx2SEpJyFkUzpv",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - rows",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "59705a38-f5a8-4228-9308-a7f4655ac3e1",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "2f367c18-c3cc-4352-91ab-8afd3e9d5eae",
+      "name": "Show",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT person_key, zoho_lead_id, touches, display_name FROM nat130.social_identity ORDER BY id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "jsLx2SEpJyFkUzpv",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-27T23:21:03.372Z",
+      "updatedAt": "2026-09-27T23:21:03.372Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-27T23:21:03.000Z",
+  "versionId": "427f7d56-b216-4490-b96b-73531c3fad0a"
+}
