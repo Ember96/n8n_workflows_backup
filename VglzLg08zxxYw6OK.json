@@ -1,0 +1,120 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read": {
+      "main": [
+        [
+          {
+            "node": "Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-27T23:19:37.592Z",
+  "id": "VglzLg08zxxYw6OK",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - verify real dedupe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "40539b81-751f-4cd4-8ed2-0603c350c618",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "9be65cc0-7e04-40a6-82a6-124c2fbacf41",
+      "name": "Read",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "get",
+        "leadId": "7558657000000900001",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "3aecb823-2f0b-4048-89b9-02561f4a5cd4",
+      "name": "Row",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT person_key, zoho_lead_id, touches, reactivated, first_seen_at, last_seen_at FROM nat130.social_identity",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "VglzLg08zxxYw6OK",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-27T23:19:37.609Z",
+      "updatedAt": "2026-09-27T23:19:37.609Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-27T23:19:52.000Z",
+  "versionId": "aa10f7e1-64f7-46f4-9fad-e3dc1b4b3313"
+}
