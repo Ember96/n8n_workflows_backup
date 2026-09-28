@@ -1,0 +1,121 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "DelRows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DelRows": {
+      "main": [
+        [
+          {
+            "node": "Show",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-09-28T00:50:56.735Z",
+  "id": "O8IQMk8BirLznqSq",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - clean 7",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "24aa65b1-7d9c-430c-9f84-3743131fd4f6",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "656c0863-08bb-4014-b6c4-b1e2b1f48f22",
+      "name": "DelRows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM nat130.social_identity WHERE social_id IN ('5555555555555555','4444444444444444') RETURNING person_key",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "bc50c942-285a-4e42-8186-edccc916e4e5",
+      "name": "Show",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT person_key, zoho_lead_id, touches FROM nat130.social_identity ORDER BY id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "O8IQMk8BirLznqSq",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-09-28T00:50:56.737Z",
+      "updatedAt": "2026-09-28T00:50:56.737Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-09-28T00:50:57.000Z",
+  "versionId": "8db519fa-3be1-4ff7-83a6-53928798e7fb"
+}
