@@ -371,8 +371,11 @@
   "createdAt": "2026-09-22T02:42:20.471Z",
   "id": "R8yPcFnUir5uLgDA",
   "isArchived": false,
-  "meta": null,
-  "name": "img.segment.route — NAT Cold to Warm",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.segment.route — NAT Cold to Warm",
   "nodeGroups": [],
   "nodes": [
     {
@@ -551,7 +554,8 @@
     "name": "n8n_workflows_backup"
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -565,6 +569,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T03:02:28.790Z",
+  "updatedAt": "2026-10-02T23:59:13.092Z",
   "versionId": "5eff8f5b-0b0d-4c50-bfe4-a47a97e48ff5"
 }
