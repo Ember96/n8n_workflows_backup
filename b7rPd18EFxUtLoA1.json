@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "DDL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-02T22:29:29.267Z",
+  "id": "b7rPd18EFxUtLoA1",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat117 ddl",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "2e7ca24e-155d-4511-8c17-b584af0a065e",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "669c4ef3-2c41-4659-8065-27480860d0ea",
+      "name": "DDL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE SCHEMA IF NOT EXISTS reportes;\nCREATE TABLE IF NOT EXISTS reportes.client_tokens (\n    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n    client text NOT NULL UNIQUE,\n    token_hash text NOT NULL,\n    active boolean NOT NULL DEFAULT true,\n    created_at timestamptz NOT NULL DEFAULT now(),\n    rotated_at timestamptz,\n    notes text\n);\nCREATE TABLE IF NOT EXISTS reportes.snapshots (\n    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n    client text NOT NULL,\n    week text NOT NULL,\n    r2_key text NOT NULL,\n    content_hash text,\n    created_at timestamptz NOT NULL DEFAULT now(),\n    CONSTRAINT snapshots_client_week_uniq UNIQUE (client, week)\n);\nCREATE INDEX IF NOT EXISTS snapshots_client_idx ON reportes.snapshots (client, week DESC);\nCOMMENT ON SCHEMA reportes IS 'NAT-116/117 client reports. Isolated from public by design.';",
+        "options": {
+          "queryBatching": "transaction"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "b7rPd18EFxUtLoA1",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-02T22:29:29.269Z",
+      "updatedAt": "2026-10-02T22:29:29.269Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-02T22:29:39.000Z",
+  "versionId": "ac530c56-2647-4db3-af78-7b402a177f05"
+}
