@@ -110,8 +110,11 @@
   "createdAt": "2026-09-20T07:19:31.199Z",
   "id": "Yi2MS5lwRCA7CkO2",
   "isArchived": false,
-  "meta": null,
-  "name": "img.deliverability — pre-envio SMS NAT-106",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.deliverability — pre-envio SMS NAT-106",
   "nodeGroups": [],
   "nodes": [
     {
@@ -167,7 +170,8 @@
     "name": "n8n_workflows_backup"
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -201,6 +205,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T00:12:15.852Z",
+  "updatedAt": "2026-10-02T23:52:33.142Z",
   "versionId": "357ed2a3-9b2f-4b56-a03a-c9cd693b89b9"
 }
