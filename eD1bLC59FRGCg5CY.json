@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Rotate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-02T22:44:48.015Z",
+  "id": "eD1bLC59FRGCg5CY",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat117 rotate",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "e02b9d42-67e2-472c-8185-fe2066be0239",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "af561e35-8e3d-44d8-beb9-a16fa3184ff5",
+      "name": "Rotate",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE reportes.client_tokens SET token_hash = 'c535868547ce1188a2343d2676664ee21d1ecd9fa33d57d017b28abb9ac3ab5d', rotated_at = now(), notes = 'Rotado 2026-10-02: el QA anterior quedó invalidado' WHERE client = 'growbusy' AND active = true RETURNING client, active, rotated_at",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "eD1bLC59FRGCg5CY",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-02T22:44:48.020Z",
+      "updatedAt": "2026-10-02T22:44:48.020Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-02T22:44:50.000Z",
+  "versionId": "3e8ea555-c308-4782-860c-3bb2a2e01d58"
+}
