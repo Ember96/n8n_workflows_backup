@@ -314,7 +314,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "name": "NAT-120 - Facebook comments sub-workflow",
+  "name": "gb.social.facebook",
   "nodeGroups": [],
   "nodes": [
     {
@@ -507,6 +507,6 @@
   },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-28T00:50:36.643Z",
+  "updatedAt": "2026-10-02T23:52:33.548Z",
   "versionId": "02dce0f7-a35a-4fe3-9c58-6bac323235de"
 }
