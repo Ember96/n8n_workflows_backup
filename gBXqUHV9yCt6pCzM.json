@@ -1,10 +1,15 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c",
+    "versionId": "0220b393-af5c-4c65-ae61-165fd9fa3f56",
     "workflowId": "gBXqUHV9yCt6pCzM",
     "nodes": [
       {
+        "parameters": {
+          "path": "img.reporte.cliente",
+          "responseMode": "lastNode",
+          "options": {}
+        },
         "id": "r1",
         "name": "Webhook — reporte",
         "webhookId": "55bcb4e3-039e-42ef-8d24-0a736009b424",
@@ -13,44 +18,38 @@
         "position": [
           0,
           0
-        ],
-        "parameters": {
-          "path": "img.reporte.cliente",
-          "httpMethod": "GET",
-          "responseMode": "lastNode",
-          "options": {}
-        }
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "// El token manda: el cliente sale de la tabla, no del query.\n// (Antes se aceptaba ?client= arbitrario junto a un token válido.)\nconst rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client, authorized: true } }];",
+          "mode": "runOnceForAllItems",
+          "language": "javaScript"
+        },
         "id": "r2",
         "name": "Code — validar token",
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          220,
+          224,
           0
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "jsCode": "const q=$input.first().json.query||{}; const TOKENS={\"0ca422535d27d5c6c3bbaef922d61fd600e524311d3019b7b073aca7b3443d5b\":\"growbusy\"}; const tok=(q.token||null); const client=TOKENS[tok]; if(!client) throw new Error(\"forbidden: token invalido\"); return [{json:{client:((q.client||client)),authorized:true}}];"
-        }
+        ]
       },
       {
-        "id": "r3",
-        "name": "Brevo — campañas",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          440,
-          0
-        ],
         "parameters": {
-          "method": "GET",
           "url": "https://api.brevo.com/v3/emailCampaigns?limit=20",
           "authentication": "genericCredentialType",
           "genericAuthType": "httpHeaderAuth",
           "options": {}
         },
+        "id": "r3",
+        "name": "Brevo — campañas",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          448,
+          0
+        ],
         "credentials": {
           "httpHeaderAuth": {
             "id": "6vAwCJCUoOYI0Mnz",
@@ -59,19 +58,20 @@
         }
       },
       {
+        "parameters": {
+          "resource": "deal",
+          "operation": "getAll",
+          "options": {}
+        },
         "id": "r4",
         "name": "Zoho — deals",
         "type": "n8n-nodes-base.zohoCrm",
         "typeVersion": 1,
         "alwaysOutputData": true,
         "position": [
-          440,
-          220
+          672,
+          0
         ],
-        "parameters": {
-          "resource": "deal",
-          "operation": "getAll"
-        },
         "credentials": {
           "zohoOAuth2Api": {
             "id": "R5WqgTreF3p3gViM",
@@ -80,47 +80,74 @@
         }
       },
       {
+        "parameters": {
+          "jsCode": "const bitems=$(\"Brevo — campañas\").all(); const zitems=$(\"Zoho — deals\").all(); const camps=((bitems[0]||{}).json||{}).campaigns||[]; let deals=[]; for(const it of zitems){const j=(it||{}).json||{}; if(Array.isArray(j.data)){deals=j.data;} else if(j.id&&j.Deal_Name){deals.push(j);}} let won=0,revenue=0; for(const d of deals){const st=String(d.Stage||\"\").toLowerCase(); if(/closed won|ganado/.test(st)){won++; revenue+=Number(d.Amount||0);}} const html=\"<html><head><meta charset=utf-8><title>Reporte GrowBusy</title></head><body><h1>Reporte GrowBusy</h1><p>Campañas: \"+camps.length+\"</p><p>Deals ganados: \"+won+\"</p><p>Revenue atribuido (last-touch 30d): $\"+revenue+\"</p><ul>\"+camps.map(c=>\"<li>\"+c.name+\" — \"+c.status+\"</li>\").join(\"\")+\"</ul></body></html>\"; return [{json:{html:html}}];"
+        },
         "id": "r5",
         "name": "Code — unir y HTML",
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          660,
-          110
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "jsCode": "const bitems=$(\"Brevo — campañas\").all(); const zitems=$(\"Zoho — deals\").all(); const camps=((bitems[0]||{}).json||{}).campaigns||[]; let deals=[]; for(const it of zitems){const j=(it||{}).json||{}; if(Array.isArray(j.data)){deals=j.data;} else if(j.id&&j.Deal_Name){deals.push(j);}} let won=0,revenue=0; for(const d of deals){const st=String(d.Stage||\"\").toLowerCase(); if(/closed won|ganado/.test(st)){won++; revenue+=Number(d.Amount||0);}} const html=\"<html><head><meta charset=utf-8><title>Reporte GrowBusy</title></head><body><h1>Reporte GrowBusy</h1><p>Campañas: \"+camps.length+\"</p><p>Deals ganados: \"+won+\"</p><p>Revenue atribuido (last-touch 30d): $\"+revenue+\"</p><ul>\"+camps.map(c=>\"<li>\"+c.name+\" — \"+c.status+\"</li>\").join(\"\")+\"</ul></body></html>\"; return [{json:{html:html}}];"
-        }
+          896,
+          0
+        ]
       },
       {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ $json.html }}",
+          "options": {}
+        },
         "id": "r6",
         "name": "Responder — HTML",
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1.1,
         "position": [
-          880,
-          110
+          1120,
+          0
+        ]
+      },
+      {
+        "id": "52a3b2d3-57c0-4ac1-9b64-c25c6448f6ca",
+        "name": "Code — extraer token",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          0
         ],
         "parameters": {
-          "respondWith": "text",
-          "responseBody": "={{ $json.html }}",
-          "options": {}
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Solo extrae el token; el hash se compara del lado de Postgres (pgcrypto).\nconst q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+        }
+      },
+      {
+        "id": "e00574eb-61f5-4294-88bf-c9a0f599b86d",
+        "name": "Supabase — buscar token",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          464,
+          0
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT client FROM reportes.client_tokens WHERE token_hash = encode(digest($1, 'sha256'), 'hex') AND active = true LIMIT 1",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ $json.token }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
         }
       }
     ],
     "connections": {
-      "Webhook — reporte": {
-        "main": [
-          [
-            {
-              "node": "Code — validar token",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Code — validar token": {
         "main": [
           [
@@ -164,29 +191,51 @@
             }
           ]
         ]
+      },
+      "Webhook — reporte": {
+        "main": [
+          [
+            {
+              "node": "Code — extraer token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — extraer token": {
+        "main": [
+          [
+            {
+              "node": "Supabase — buscar token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase — buscar token": {
+        "main": [
+          [
+            {
+              "node": "Code — validar token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
-    "authors": "Jose Ricardo Cedeno Garcia",
-    "name": null,
-    "description": null,
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated Code — extraer token, Supabase — buscar token",
+    "description": "Updated nodes: Code — extraer token, Supabase — buscar token",
     "autosaved": false,
-    "createdAt": "2026-09-20T03:42:04.450Z",
-    "updatedAt": "2026-09-20T03:42:04.450Z"
+    "createdAt": "2026-10-02T22:30:34.517Z",
+    "updatedAt": "2026-10-02T22:30:34.517Z"
   },
-  "activeVersionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c",
+  "activeVersionId": "0220b393-af5c-4c65-ae61-165fd9fa3f56",
   "connections": {
-    "Webhook — reporte": {
-      "main": [
-        [
-          {
-            "node": "Code — validar token",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Code — validar token": {
       "main": [
         [
@@ -230,16 +279,57 @@
           }
         ]
       ]
+    },
+    "Webhook — reporte": {
+      "main": [
+        [
+          {
+            "node": "Code — extraer token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — extraer token": {
+      "main": [
+        [
+          {
+            "node": "Supabase — buscar token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase — buscar token": {
+      "main": [
+        [
+          {
+            "node": "Code — validar token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "createdAt": "2026-09-20T03:00:13.440Z",
   "id": "gBXqUHV9yCt6pCzM",
   "isArchived": false,
-  "meta": null,
-  "name": "img.reporte.cliente — reporte vivo NAT-116",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.reporte.cliente — reporte vivo NAT-116",
   "nodeGroups": [],
   "nodes": [
     {
+      "parameters": {
+        "path": "img.reporte.cliente",
+        "responseMode": "lastNode",
+        "options": {}
+      },
       "id": "r1",
       "name": "Webhook — reporte",
       "webhookId": "55bcb4e3-039e-42ef-8d24-0a736009b424",
@@ -248,44 +338,38 @@
       "position": [
         0,
         0
-      ],
-      "parameters": {
-        "path": "img.reporte.cliente",
-        "httpMethod": "GET",
-        "responseMode": "lastNode",
-        "options": {}
-      }
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "// El token manda: el cliente sale de la tabla, no del query.\n// (Antes se aceptaba ?client= arbitrario junto a un token válido.)\nconst rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client, authorized: true } }];",
+        "mode": "runOnceForAllItems",
+        "language": "javaScript"
+      },
       "id": "r2",
       "name": "Code — validar token",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        220,
+        224,
         0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const q=$input.first().json.query||{}; const TOKENS={\"0ca422535d27d5c6c3bbaef922d61fd600e524311d3019b7b073aca7b3443d5b\":\"growbusy\"}; const tok=(q.token||null); const client=TOKENS[tok]; if(!client) throw new Error(\"forbidden: token invalido\"); return [{json:{client:((q.client||client)),authorized:true}}];"
-      }
+      ]
     },
     {
-      "id": "r3",
-      "name": "Brevo — campañas",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        440,
-        0
-      ],
       "parameters": {
-        "method": "GET",
         "url": "https://api.brevo.com/v3/emailCampaigns?limit=20",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "options": {}
       },
+      "id": "r3",
+      "name": "Brevo — campañas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "6vAwCJCUoOYI0Mnz",
@@ -294,19 +378,20 @@
       }
     },
     {
+      "parameters": {
+        "resource": "deal",
+        "operation": "getAll",
+        "options": {}
+      },
       "id": "r4",
       "name": "Zoho — deals",
       "type": "n8n-nodes-base.zohoCrm",
       "typeVersion": 1,
       "alwaysOutputData": true,
       "position": [
-        440,
-        220
+        672,
+        0
       ],
-      "parameters": {
-        "resource": "deal",
-        "operation": "getAll"
-      },
       "credentials": {
         "zohoOAuth2Api": {
           "id": "R5WqgTreF3p3gViM",
@@ -315,43 +400,83 @@
       }
     },
     {
+      "parameters": {
+        "jsCode": "const bitems=$(\"Brevo — campañas\").all(); const zitems=$(\"Zoho — deals\").all(); const camps=((bitems[0]||{}).json||{}).campaigns||[]; let deals=[]; for(const it of zitems){const j=(it||{}).json||{}; if(Array.isArray(j.data)){deals=j.data;} else if(j.id&&j.Deal_Name){deals.push(j);}} let won=0,revenue=0; for(const d of deals){const st=String(d.Stage||\"\").toLowerCase(); if(/closed won|ganado/.test(st)){won++; revenue+=Number(d.Amount||0);}} const html=\"<html><head><meta charset=utf-8><title>Reporte GrowBusy</title></head><body><h1>Reporte GrowBusy</h1><p>Campañas: \"+camps.length+\"</p><p>Deals ganados: \"+won+\"</p><p>Revenue atribuido (last-touch 30d): $\"+revenue+\"</p><ul>\"+camps.map(c=>\"<li>\"+c.name+\" — \"+c.status+\"</li>\").join(\"\")+\"</ul></body></html>\"; return [{json:{html:html}}];"
+      },
       "id": "r5",
       "name": "Code — unir y HTML",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        660,
-        110
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const bitems=$(\"Brevo — campañas\").all(); const zitems=$(\"Zoho — deals\").all(); const camps=((bitems[0]||{}).json||{}).campaigns||[]; let deals=[]; for(const it of zitems){const j=(it||{}).json||{}; if(Array.isArray(j.data)){deals=j.data;} else if(j.id&&j.Deal_Name){deals.push(j);}} let won=0,revenue=0; for(const d of deals){const st=String(d.Stage||\"\").toLowerCase(); if(/closed won|ganado/.test(st)){won++; revenue+=Number(d.Amount||0);}} const html=\"<html><head><meta charset=utf-8><title>Reporte GrowBusy</title></head><body><h1>Reporte GrowBusy</h1><p>Campañas: \"+camps.length+\"</p><p>Deals ganados: \"+won+\"</p><p>Revenue atribuido (last-touch 30d): $\"+revenue+\"</p><ul>\"+camps.map(c=>\"<li>\"+c.name+\" — \"+c.status+\"</li>\").join(\"\")+\"</ul></body></html>\"; return [{json:{html:html}}];"
-      }
+        896,
+        0
+      ]
     },
     {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {}
+      },
       "id": "r6",
       "name": "Responder — HTML",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        880,
-        110
+        1120,
+        0
+      ]
+    },
+    {
+      "id": "52a3b2d3-57c0-4ac1-9b64-c25c6448f6ca",
+      "name": "Code — extraer token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
       ],
       "parameters": {
-        "respondWith": "text",
-        "responseBody": "={{ $json.html }}",
-        "options": {}
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Solo extrae el token; el hash se compara del lado de Postgres (pgcrypto).\nconst q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+      }
+    },
+    {
+      "id": "e00574eb-61f5-4294-88bf-c9a0f599b86d",
+      "name": "Supabase — buscar token",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        464,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT client FROM reportes.client_tokens WHERE token_hash = encode(digest($1, 'sha256'), 'hex') AND active = true LIMIT 1",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ $json.token }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
       }
     }
   ],
   "origin": "n8n",
-  "pinData": null,
+  "pinData": {},
   "repo": {
     "owner": "Ember96",
     "name": "n8n_workflows_backup"
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -365,6 +490,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T00:13:09.143Z",
-  "versionId": "23852d9d-ac48-4641-af9a-1d9ca0b84e3c"
+  "updatedAt": "2026-10-02T23:52:33.258Z",
+  "versionId": "0220b393-af5c-4c65-ae61-165fd9fa3f56"
 }
