@@ -279,9 +279,11 @@
   "id": "e5xGO0kpruzegxDk",
   "isArchived": false,
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
   },
-  "name": "img.contact.upsert — canonico NAT-108",
+  "name": "gb.contact.upsert — canonico NAT-108",
   "nodeGroups": [],
   "nodes": [
     {
@@ -426,7 +428,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -440,6 +443,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T00:12:42.154Z",
+  "updatedAt": "2026-10-02T23:52:33.055Z",
   "versionId": "ff4fe6fe-cc0a-4102-9c09-6910afb65517"
 }
