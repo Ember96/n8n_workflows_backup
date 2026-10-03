@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Seed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T04:32:29.050Z",
+  "id": "LEAjwrNUqgoayjRX",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat133 seed",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "3a054758-acf0-46bb-93a1-50b42d743042",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "263a6720-addb-4b29-b879-db4c19a2d813",
+      "name": "Seed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reportes.recipients (client, email, name, notes) VALUES ('growbusy', 'gnomeaddict96@gmail.com', 'QA', 'Destinatario manual aportado por el cliente (NAT-133)') ON CONFLICT (client) DO UPDATE SET email = EXCLUDED.email, name = EXCLUDED.name, active = true RETURNING client, email, active",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "LEAjwrNUqgoayjRX",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T04:32:29.052Z",
+      "updatedAt": "2026-10-03T04:32:29.052Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-03T04:32:33.000Z",
+  "versionId": "e917227b-b9ca-45f9-bf1c-d86f75eb3139"
+}
