@@ -1,0 +1,86 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Zoho probe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T00:28:08.428Z",
+  "id": "SrS0qC2nhHjQZFa7",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - zoho probe",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "c400a2e8-37cf-4bfe-8cac-5895ed8fff28",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "9d048624-6136-4387-aa49-8fd1212f66d0",
+      "name": "Zoho probe",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "deal",
+        "operation": "getAll",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "alwaysOutputData": true
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "SrS0qC2nhHjQZFa7",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T00:28:08.431Z",
+      "updatedAt": "2026-10-03T00:28:08.431Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-03T00:28:12.000Z",
+  "versionId": "538be725-3bc2-4e6f-bfe9-e179d9faa5d2"
+}
