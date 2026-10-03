@@ -1,0 +1,801 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "6a797a92-a2ad-45e5-9aa3-282154f29f65",
+    "workflowId": "FDHWIVU3Uj0sRgRP",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "e22b5f13-c906-467c-aa21-9dcf4eb05ed9",
+        "name": "Start",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT client FROM reportes.client_tokens WHERE active = true ORDER BY client",
+          "options": {
+            "queryBatching": "single"
+          }
+        },
+        "id": "5a701590-2a89-44f4-9d4c-b09a623a6019",
+        "name": "List clients",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          224,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Una fila por cliente activo; semana ISO + sufijo aleatorio (clave imposible de adivinar).\nconst c = $input.first().json;\nconst now = new Date();\nconst d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));\nconst day = (d.getUTCDay() + 6) % 7;\nd.setUTCDate(d.getUTCDate() - day + 3);\nconst firstThu = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));\nconst week = 1 + Math.round(((d.getTime() - firstThu.getTime()) / 86400000 - 3 + ((firstThu.getUTCDay() + 6) % 7)) / 7);\nconst weekStr = d.getUTCFullYear() + '-W' + String(week).padStart(2, '0');\nconst rand = Math.random().toString(36).slice(2, 10);\nconst r2key = 'reportes/' + c.client + '/' + weekStr + '-' + rand + '.html';\nreturn [{ json: { client: c.client, week: weekStr, r2key: r2key, generatedAt: now.toISOString() } }];"
+        },
+        "id": "ec7dcfbf-75de-4779-ad51-8e6b4ce4a9dd",
+        "name": "Prep snapshot",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          448,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://api.brevo.com/v3/emailCampaigns?limit=20",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "id": "f6113bd1-7411-496c-9416-8217981e584e",
+        "name": "Brevo — campañas",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          672,
+          0
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "6vAwCJCUoOYI0Mnz",
+            "name": "Brevo API key (header)"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Render del snapshot — mantener sincronizado con src/reportes/builder.ts\n// (summarizeDeals + buildReportHtml). Lee SOLO $input: producción llega vía\n// 'Join data' y el test de integración vía 'Mock fixtures'.\nfunction esc(s) {\n  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\nconst d = $input.first().json;\nconst camps = Array.isArray(d.camps) ? d.camps : [];\nconst deals = Array.isArray(d.deals) ? d.deals : [];\nlet won = 0, revenue = 0;\nfor (const dl of deals) {\n  const st = String(dl.Stage == null ? '' : dl.Stage).toLowerCase();\n  if (/closed won|ganado/.test(st)) { won++; revenue += Number(dl.Amount || 0); }\n}\nconst rows = camps.map(function(c) { return '      <li>' + esc(c.name) + ' — ' + esc(c.status) + '</li>'; }).join('\\n');\nconst html = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"utf-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">',\n'<title>Reporte ' + esc(d.client) + ' — semana ' + esc(d.week) + '</title>',\n'<style>',\n'  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',\n'  .meta { color: #666; font-size: 0.85rem; }',\n'  .kpis { display: flex; gap: 1rem; margin: 1.5rem 0; }',\n'  .kpi { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1; }',\n'  .kpi strong { display: block; font-size: 1.5rem; }',\n'  #pdf-btn { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }',\n'  @media print {',\n'    #pdf-btn { display: none; }',\n'    body { margin: 0; max-width: none; }',\n'    .kpi { break-inside: avoid; }',\n'  }',\n'</style>', '</head>', '<body>',\n'<h1>Reporte ' + esc(d.client) + '</h1>',\n'<p class=\"meta\">Semana ' + esc(d.week) + ' · generado ' + esc(d.generatedAt) + '</p>',\n'<div class=\"kpis\">',\n'  <div class=\"kpi\"><strong>' + camps.length + '</strong>Campañas</div>',\n'  <div class=\"kpi\"><strong>' + won + '</strong>Deals ganados</div>',\n'  <div class=\"kpi\"><strong>$' + revenue + '</strong>Revenue atribuido (last-touch 30d)</div>',\n'</div>', '<h2>Campañas</h2>', '<ul>', rows, '</ul>',\n'<p><button id=\"pdf-btn\" onclick=\"window.print()\">Descargar PDF</button></p>',\n'</body>', '</html>'].join('\\n');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '', generatedAt: d.generatedAt || '', mock: d.mock || '', html: html, won: won, revenue: revenue, campaignCount: camps.length } }];",
+          "mode": "runOnceForAllItems",
+          "language": "javaScript"
+        },
+        "id": "12af9fe5-86e2-4ee7-8a23-a702d3f59641",
+        "name": "Build HTML",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1120,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "upload",
+          "bucketName": "growbusy-reportes",
+          "fileName": "={{ $json.r2key }}",
+          "binaryData": false,
+          "fileContent": "={{ $json.html }}",
+          "additionalFields": {}
+        },
+        "id": "60962df5-ea7c-4c52-9408-cd840382410d",
+        "name": "R2 — subir snapshot",
+        "type": "n8n-nodes-base.s3",
+        "typeVersion": 1,
+        "position": [
+          1344,
+          0
+        ],
+        "credentials": {
+          "s3": {
+            "id": "pdLnPosRNRR13Tvz",
+            "name": "R2 S3 Growbusy"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO reportes.snapshots (client, week, r2_key, content_hash)\nSELECT j->>'client', j->>'week', j->>'r2_key', encode(digest(j->>'html', 'sha256'), 'hex')\nFROM (SELECT $1::jsonb AS j) p\nWHERE (p.j->>'mock') IS DISTINCT FROM 'yes'\nON CONFLICT (client, week) DO UPDATE SET\n    r2_key = EXCLUDED.r2_key,\n    content_hash = EXCLUDED.content_hash,\n    created_at = now()\nRETURNING id, client, week, r2_key",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ JSON.stringify({ client: $json.client, week: $json.week, r2_key: $json.r2key, html: $json.html, mock: $json.mock || '' }) }}"
+          }
+        },
+        "id": "30285acd-4f24-4374-9d3e-a60d2fc233f8",
+        "name": "Record snapshot",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          1568,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "be5d18f5-5476-4fce-a502-220209f756b4",
+        "name": "Zoho — deals",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          896,
+          0
+        ],
+        "parameters": {
+          "resource": "deal",
+          "operation": "getAll",
+          "options": {}
+        },
+        "credentials": {
+          "zohoOAuth2Api": {
+            "id": "R5WqgTreF3p3gViM",
+            "name": "Zoho account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "41a618de-5355-4a39-a786-23c793176efd",
+        "name": "Attach result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1568,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Reune Build + subida: el nodo S3 devuelve solo {success} y Record necesita el contexto.\nconst idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst all = $('Build HTML').all();\nconst b = ((all[idx] || {}).json) || {};\nreturn [{ json: { ...b, uploaded: $input.first().json } }];"
+        }
+      },
+      {
+        "id": "399e6579-3e38-4e78-91eb-668bc5be1c17",
+        "name": "Join data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1088,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Junta cfg + Brevo + Zoho en un solo item: Build lee solo $input.\n// (Brevo/Zoho reemplazan el item; sin esto el contexto se pierde.)\nconst _idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst _prep = $('Prep snapshot').all();\nconst cfg = (((_prep[_idx] || {}).json) || {});\nconst bitems = $('Brevo — campañas').all();\nconst zitems = $('Zoho — deals').all();\nconst camps = (((bitems[0] || {}).json || {}).campaigns) || [];\nlet deals = [];\nfor (const it of zitems) {\n  const j = (it || {}).json || {};\n  if (Array.isArray(j.data)) { deals = j.data; }\n  else if (j.id && j.Deal_Name) { deals.push(j); }\n}\nreturn [{ json: { client: cfg.client || '', week: cfg.week || '', r2key: cfg.r2key || '', generatedAt: cfg.generatedAt || new Date().toISOString(), mock: '', camps: camps, deals: deals } }];"
+        }
+      },
+      {
+        "id": "59b005ac-b75f-4c8d-a4ae-39b8650b10b8",
+        "name": "Mock test",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          1088,
+          320
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "dfa57d13-0f42-4c9f-a1e6-32a00b6f92c7",
+        "name": "Mock fixtures",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1280,
+          320
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Fixtures del test de integración: números conocidos para afirmar el cálculo.\n// mock:'yes' desvía a 'Mock done' para no ensuciar reportes.snapshots.\n// El objeto SÍ sube a R2 bajo mock/ y se borra al final del test.\nreturn [{ json: {\n  client: 'growbusy',\n  week: '2999-W99',\n  r2key: 'mock/integration-' + Math.random().toString(36).slice(2, 10) + '.html',\n  generatedAt: new Date().toISOString(),\n  mock: 'yes',\n  camps: [\n    { name: 'Promo <Flash> & \"Sale\"', status: 'sent' },\n    { name: 'Winback', status: 'sent' },\n    { name: 'Dormida', status: 'draft' }\n  ],\n  deals: [\n    { Stage: 'Closed Won', Amount: 1000 },\n    { Stage: 'Ganado', Amount: 500 },\n    { Stage: 'Negotiation', Amount: 9999 },\n    { Stage: 'Closed Lost', Amount: 250 }\n  ]\n} }];"
+        }
+      },
+      {
+        "id": "f06c7884-7b03-444c-bcd3-0c2a8f442fcb",
+        "name": "Schedule — lunes 07:00 ET",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -208,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "weeksInterval": 1,
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 11,
+                "triggerAtMinute": 0
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "List clients",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "List clients": {
+        "main": [
+          [
+            {
+              "node": "Prep snapshot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prep snapshot": {
+        "main": [
+          [
+            {
+              "node": "Brevo — campañas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build HTML": {
+        "main": [
+          [
+            {
+              "node": "R2 — subir snapshot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Brevo — campañas": {
+        "main": [
+          [
+            {
+              "node": "Zoho — deals",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "R2 — subir snapshot": {
+        "main": [
+          [
+            {
+              "node": "Attach result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Zoho — deals": {
+        "main": [
+          [
+            {
+              "node": "Join data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Join data": {
+        "main": [
+          [
+            {
+              "node": "Build HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mock test": {
+        "main": [
+          [
+            {
+              "node": "Mock fixtures",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mock fixtures": {
+        "main": [
+          [
+            {
+              "node": "Build HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Attach result": {
+        "main": [
+          [
+            {
+              "node": "Record snapshot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule — lunes 07:00 ET": {
+        "main": [
+          [
+            {
+              "node": "List clients",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated Schedule — lunes 07:00 ET",
+    "description": "Updated nodes: Schedule — lunes 07:00 ET",
+    "autosaved": false,
+    "createdAt": "2026-10-03T07:55:47.937Z",
+    "updatedAt": "2026-10-03T07:55:47.937Z"
+  },
+  "activeVersionId": "6a797a92-a2ad-45e5-9aa3-282154f29f65",
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "List clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List clients": {
+      "main": [
+        [
+          {
+            "node": "Prep snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep snapshot": {
+      "main": [
+        [
+          {
+            "node": "Brevo — campañas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HTML": {
+      "main": [
+        [
+          {
+            "node": "R2 — subir snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brevo — campañas": {
+      "main": [
+        [
+          {
+            "node": "Zoho — deals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "R2 — subir snapshot": {
+      "main": [
+        [
+          {
+            "node": "Attach result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zoho — deals": {
+      "main": [
+        [
+          {
+            "node": "Join data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join data": {
+      "main": [
+        [
+          {
+            "node": "Build HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock test": {
+      "main": [
+        [
+          {
+            "node": "Mock fixtures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock fixtures": {
+      "main": [
+        [
+          {
+            "node": "Build HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach result": {
+      "main": [
+        [
+          {
+            "node": "Record snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule — lunes 07:00 ET": {
+      "main": [
+        [
+          {
+            "node": "List clients",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T00:09:35.679Z",
+  "id": "FDHWIVU3Uj0sRgRP",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.reporte.snapshot",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e22b5f13-c906-467c-aa21-9dcf4eb05ed9",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT client FROM reportes.client_tokens WHERE active = true ORDER BY client",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "id": "5a701590-2a89-44f4-9d4c-b09a623a6019",
+      "name": "List clients",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Una fila por cliente activo; semana ISO + sufijo aleatorio (clave imposible de adivinar).\nconst c = $input.first().json;\nconst now = new Date();\nconst d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));\nconst day = (d.getUTCDay() + 6) % 7;\nd.setUTCDate(d.getUTCDate() - day + 3);\nconst firstThu = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));\nconst week = 1 + Math.round(((d.getTime() - firstThu.getTime()) / 86400000 - 3 + ((firstThu.getUTCDay() + 6) % 7)) / 7);\nconst weekStr = d.getUTCFullYear() + '-W' + String(week).padStart(2, '0');\nconst rand = Math.random().toString(36).slice(2, 10);\nconst r2key = 'reportes/' + c.client + '/' + weekStr + '-' + rand + '.html';\nreturn [{ json: { client: c.client, week: weekStr, r2key: r2key, generatedAt: now.toISOString() } }];"
+      },
+      "id": "ec7dcfbf-75de-4779-ad51-8e6b4ce4a9dd",
+      "name": "Prep snapshot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.brevo.com/v3/emailCampaigns?limit=20",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "f6113bd1-7411-496c-9416-8217981e584e",
+      "name": "Brevo — campañas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6vAwCJCUoOYI0Mnz",
+          "name": "Brevo API key (header)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Render del snapshot — mantener sincronizado con src/reportes/builder.ts\n// (summarizeDeals + buildReportHtml). Lee SOLO $input: producción llega vía\n// 'Join data' y el test de integración vía 'Mock fixtures'.\nfunction esc(s) {\n  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\nconst d = $input.first().json;\nconst camps = Array.isArray(d.camps) ? d.camps : [];\nconst deals = Array.isArray(d.deals) ? d.deals : [];\nlet won = 0, revenue = 0;\nfor (const dl of deals) {\n  const st = String(dl.Stage == null ? '' : dl.Stage).toLowerCase();\n  if (/closed won|ganado/.test(st)) { won++; revenue += Number(dl.Amount || 0); }\n}\nconst rows = camps.map(function(c) { return '      <li>' + esc(c.name) + ' — ' + esc(c.status) + '</li>'; }).join('\\n');\nconst html = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"utf-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">',\n'<title>Reporte ' + esc(d.client) + ' — semana ' + esc(d.week) + '</title>',\n'<style>',\n'  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',\n'  .meta { color: #666; font-size: 0.85rem; }',\n'  .kpis { display: flex; gap: 1rem; margin: 1.5rem 0; }',\n'  .kpi { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1; }',\n'  .kpi strong { display: block; font-size: 1.5rem; }',\n'  #pdf-btn { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }',\n'  @media print {',\n'    #pdf-btn { display: none; }',\n'    body { margin: 0; max-width: none; }',\n'    .kpi { break-inside: avoid; }',\n'  }',\n'</style>', '</head>', '<body>',\n'<h1>Reporte ' + esc(d.client) + '</h1>',\n'<p class=\"meta\">Semana ' + esc(d.week) + ' · generado ' + esc(d.generatedAt) + '</p>',\n'<div class=\"kpis\">',\n'  <div class=\"kpi\"><strong>' + camps.length + '</strong>Campañas</div>',\n'  <div class=\"kpi\"><strong>' + won + '</strong>Deals ganados</div>',\n'  <div class=\"kpi\"><strong>$' + revenue + '</strong>Revenue atribuido (last-touch 30d)</div>',\n'</div>', '<h2>Campañas</h2>', '<ul>', rows, '</ul>',\n'<p><button id=\"pdf-btn\" onclick=\"window.print()\">Descargar PDF</button></p>',\n'</body>', '</html>'].join('\\n');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '', generatedAt: d.generatedAt || '', mock: d.mock || '', html: html, won: won, revenue: revenue, campaignCount: camps.length } }];",
+        "mode": "runOnceForAllItems",
+        "language": "javaScript"
+      },
+      "id": "12af9fe5-86e2-4ee7-8a23-a702d3f59641",
+      "name": "Build HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "growbusy-reportes",
+        "fileName": "={{ $json.r2key }}",
+        "binaryData": false,
+        "fileContent": "={{ $json.html }}",
+        "additionalFields": {}
+      },
+      "id": "60962df5-ea7c-4c52-9408-cd840382410d",
+      "name": "R2 — subir snapshot",
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        0
+      ],
+      "credentials": {
+        "s3": {
+          "id": "pdLnPosRNRR13Tvz",
+          "name": "R2 S3 Growbusy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reportes.snapshots (client, week, r2_key, content_hash)\nSELECT j->>'client', j->>'week', j->>'r2_key', encode(digest(j->>'html', 'sha256'), 'hex')\nFROM (SELECT $1::jsonb AS j) p\nWHERE (p.j->>'mock') IS DISTINCT FROM 'yes'\nON CONFLICT (client, week) DO UPDATE SET\n    r2_key = EXCLUDED.r2_key,\n    content_hash = EXCLUDED.content_hash,\n    created_at = now()\nRETURNING id, client, week, r2_key",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ JSON.stringify({ client: $json.client, week: $json.week, r2_key: $json.r2key, html: $json.html, mock: $json.mock || '' }) }}"
+        }
+      },
+      "id": "30285acd-4f24-4374-9d3e-a60d2fc233f8",
+      "name": "Record snapshot",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1568,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "be5d18f5-5476-4fce-a502-220209f756b4",
+      "name": "Zoho — deals",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "resource": "deal",
+        "operation": "getAll",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "41a618de-5355-4a39-a786-23c793176efd",
+      "name": "Attach result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Reune Build + subida: el nodo S3 devuelve solo {success} y Record necesita el contexto.\nconst idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst all = $('Build HTML').all();\nconst b = ((all[idx] || {}).json) || {};\nreturn [{ json: { ...b, uploaded: $input.first().json } }];"
+      }
+    },
+    {
+      "id": "399e6579-3e38-4e78-91eb-668bc5be1c17",
+      "name": "Join data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Junta cfg + Brevo + Zoho en un solo item: Build lee solo $input.\n// (Brevo/Zoho reemplazan el item; sin esto el contexto se pierde.)\nconst _idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst _prep = $('Prep snapshot').all();\nconst cfg = (((_prep[_idx] || {}).json) || {});\nconst bitems = $('Brevo — campañas').all();\nconst zitems = $('Zoho — deals').all();\nconst camps = (((bitems[0] || {}).json || {}).campaigns) || [];\nlet deals = [];\nfor (const it of zitems) {\n  const j = (it || {}).json || {};\n  if (Array.isArray(j.data)) { deals = j.data; }\n  else if (j.id && j.Deal_Name) { deals.push(j); }\n}\nreturn [{ json: { client: cfg.client || '', week: cfg.week || '', r2key: cfg.r2key || '', generatedAt: cfg.generatedAt || new Date().toISOString(), mock: '', camps: camps, deals: deals } }];"
+      }
+    },
+    {
+      "id": "59b005ac-b75f-4c8d-a4ae-39b8650b10b8",
+      "name": "Mock test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        320
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "dfa57d13-0f42-4c9f-a1e6-32a00b6f92c7",
+      "name": "Mock fixtures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        320
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Fixtures del test de integración: números conocidos para afirmar el cálculo.\n// mock:'yes' desvía a 'Mock done' para no ensuciar reportes.snapshots.\n// El objeto SÍ sube a R2 bajo mock/ y se borra al final del test.\nreturn [{ json: {\n  client: 'growbusy',\n  week: '2999-W99',\n  r2key: 'mock/integration-' + Math.random().toString(36).slice(2, 10) + '.html',\n  generatedAt: new Date().toISOString(),\n  mock: 'yes',\n  camps: [\n    { name: 'Promo <Flash> & \"Sale\"', status: 'sent' },\n    { name: 'Winback', status: 'sent' },\n    { name: 'Dormida', status: 'draft' }\n  ],\n  deals: [\n    { Stage: 'Closed Won', Amount: 1000 },\n    { Stage: 'Ganado', Amount: 500 },\n    { Stage: 'Negotiation', Amount: 9999 },\n    { Stage: 'Closed Lost', Amount: 250 }\n  ]\n} }];"
+      }
+    },
+    {
+      "id": "f06c7884-7b03-444c-bcd3-0c2a8f442fcb",
+      "name": "Schedule — lunes 07:00 ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 11,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": {},
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate",
+    "errorWorkflow": "E0qLhQbAVodxhObZ"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "FDHWIVU3Uj0sRgRP",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T00:09:35.684Z",
+      "updatedAt": "2026-10-03T00:09:35.684Z"
+    }
+  ],
+  "staticData": {
+    "node:Schedule — lunes 07:00 ET": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-10-03T07:55:47.936Z",
+  "versionId": "6a797a92-a2ad-45e5-9aa3-282154f29f65"
+}
