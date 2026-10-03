@@ -237,8 +237,11 @@
   "createdAt": "2026-09-19T07:12:17.630Z",
   "id": "2TD2yyKW512kGxx9",
   "isArchived": false,
-  "meta": null,
-  "name": "img.crm.poll — Zoho a canonico NAT-111",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.crm.poll — Zoho a canonico NAT-111",
   "nodeGroups": [],
   "nodes": [
     {
@@ -356,7 +359,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -379,6 +383,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T00:13:16.508Z",
+  "updatedAt": "2026-10-02T23:52:32.654Z",
   "versionId": "9d392195-7fa9-490f-b5a6-fa5705e4e3c9"
 }
