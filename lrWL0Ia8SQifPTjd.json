@@ -158,9 +158,11 @@
   "id": "lrWL0Ia8SQifPTjd",
   "isArchived": false,
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
   },
-  "name": "img.campaign.send — canonico NAT-108",
+  "name": "gb.campaign.send — canonico NAT-108",
   "nodeGroups": [],
   "nodes": [
     {
@@ -242,7 +244,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -256,6 +259,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T00:13:25.742Z",
+  "updatedAt": "2026-10-02T23:52:32.522Z",
   "versionId": "38f58448-521c-412e-9890-d993f09c37e9"
 }
