@@ -1,0 +1,437 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "072c5445-f45a-4130-99e6-0a5093e4a882",
+    "workflowId": "yErdo0iUXmgzx9oM",
+    "nodes": [
+      {
+        "id": "dc4d94ce-6f26-434d-8ce4-45ed48de4b67",
+        "name": "Webhook — ver reporte",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "path": "gb.reporte.ver",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "webhookId": "101ce7a4-7fd1-4a20-aff5-5428953798ff"
+      },
+      {
+        "id": "3a249273-e0d9-4591-80cf-1cb38ee2178d",
+        "name": "Code — extraer token",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          224,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+        }
+      },
+      {
+        "id": "2c831603-ee43-40a4-8894-5b9331ebfa5b",
+        "name": "Supabase — buscar token",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          448,
+          0
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT client FROM reportes.client_tokens WHERE token_hash = encode(digest($1, 'sha256'), 'hex') AND active = true LIMIT 1",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ $json.token }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "id": "fa79f90a-729c-486f-b13b-5762123bc2a1",
+        "name": "Code — validar token",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client } }];"
+        }
+      },
+      {
+        "id": "34662d22-a7eb-41b4-bd0e-22ac03db38ea",
+        "name": "Supabase — último snapshot",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          896,
+          0
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT r2_key FROM reportes.snapshots WHERE client = $1 ORDER BY week DESC LIMIT 1",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ $json.client }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "f2f230ee-7701-474d-9906-c9cb403c06d8",
+        "name": "Code — armar URL",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1120,
+          0
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// El cliente nunca ve la clave: solo recibe el redirect tras validar el token.\nconst rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.r2_key; });\nif (!hit) throw new Error('not found: aun no hay snapshot para este cliente');\nreturn [{ json: { url: 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + hit.r2_key } }];"
+        }
+      },
+      {
+        "id": "3322999c-ca4a-4769-9ac2-7b8e153b574c",
+        "name": "Responder — redirect",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1344,
+          0
+        ],
+        "parameters": {
+          "respondWith": "redirect",
+          "redirectURL": "={{ $json.url }}"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook — ver reporte": {
+        "main": [
+          [
+            {
+              "node": "Code — extraer token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — extraer token": {
+        "main": [
+          [
+            {
+              "node": "Supabase — buscar token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase — buscar token": {
+        "main": [
+          [
+            {
+              "node": "Code — validar token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — validar token": {
+        "main": [
+          [
+            {
+              "node": "Supabase — último snapshot",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Supabase — último snapshot": {
+        "main": [
+          [
+            {
+              "node": "Code — armar URL",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code — armar URL": {
+        "main": [
+          [
+            {
+              "node": "Responder — redirect",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated Supabase — buscar token",
+    "description": "Updated nodes: Supabase — buscar token",
+    "autosaved": false,
+    "createdAt": "2026-10-03T00:33:43.622Z",
+    "updatedAt": "2026-10-03T00:33:43.622Z"
+  },
+  "activeVersionId": "072c5445-f45a-4130-99e6-0a5093e4a882",
+  "connections": {
+    "Webhook — ver reporte": {
+      "main": [
+        [
+          {
+            "node": "Code — extraer token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — extraer token": {
+      "main": [
+        [
+          {
+            "node": "Supabase — buscar token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase — buscar token": {
+      "main": [
+        [
+          {
+            "node": "Code — validar token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — validar token": {
+      "main": [
+        [
+          {
+            "node": "Supabase — último snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase — último snapshot": {
+      "main": [
+        [
+          {
+            "node": "Code — armar URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code — armar URL": {
+      "main": [
+        [
+          {
+            "node": "Responder — redirect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T00:09:42.305Z",
+  "id": "yErdo0iUXmgzx9oM",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.reporte.ver",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "dc4d94ce-6f26-434d-8ce4-45ed48de4b67",
+      "name": "Webhook — ver reporte",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "path": "gb.reporte.ver",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "101ce7a4-7fd1-4a20-aff5-5428953798ff"
+    },
+    {
+      "id": "3a249273-e0d9-4591-80cf-1cb38ee2178d",
+      "name": "Code — extraer token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+      }
+    },
+    {
+      "id": "2c831603-ee43-40a4-8894-5b9331ebfa5b",
+      "name": "Supabase — buscar token",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT client FROM reportes.client_tokens WHERE token_hash = encode(digest($1, 'sha256'), 'hex') AND active = true LIMIT 1",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ $json.token }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "fa79f90a-729c-486f-b13b-5762123bc2a1",
+      "name": "Code — validar token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client } }];"
+      }
+    },
+    {
+      "id": "34662d22-a7eb-41b4-bd0e-22ac03db38ea",
+      "name": "Supabase — último snapshot",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT r2_key FROM reportes.snapshots WHERE client = $1 ORDER BY week DESC LIMIT 1",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ $json.client }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "f2f230ee-7701-474d-9906-c9cb403c06d8",
+      "name": "Code — armar URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// El cliente nunca ve la clave: solo recibe el redirect tras validar el token.\nconst rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.r2_key; });\nif (!hit) throw new Error('not found: aun no hay snapshot para este cliente');\nreturn [{ json: { url: 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + hit.r2_key } }];"
+      }
+    },
+    {
+      "id": "3322999c-ca4a-4769-9ac2-7b8e153b574c",
+      "name": "Responder — redirect",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "respondWith": "redirect",
+        "redirectURL": "={{ $json.url }}"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "E0qLhQbAVodxhObZ"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "yErdo0iUXmgzx9oM",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T00:09:42.307Z",
+      "updatedAt": "2026-10-03T00:09:42.307Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-10-03T02:45:35.637Z",
+  "versionId": "072c5445-f45a-4130-99e6-0a5093e4a882"
+}
