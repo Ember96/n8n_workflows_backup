@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T04:33:38.482Z",
+  "id": "D5t2TTkGVkq0ajCB",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat133 check",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "937ce870-64da-4053-ae0d-badd0d0c0084",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "cf7a4d28-0baa-4c42-888e-0234ee5e5d8e",
+      "name": "Check",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, client, week, to_email, sent_at FROM reportes.sends ORDER BY id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "D5t2TTkGVkq0ajCB",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T04:33:38.485Z",
+      "updatedAt": "2026-10-03T04:33:38.485Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-03T04:33:42.000Z",
+  "versionId": "665fe8a8-e253-4cf3-b1bc-8f70f61bdf1d"
+}
