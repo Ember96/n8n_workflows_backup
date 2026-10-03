@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Backfill",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T04:33:02.216Z",
+  "id": "vfcbiRDBFPeyHF5y",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat133 backfill",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "10a7f893-227f-41d2-88cf-6b68949b2a21",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ee55df46-8c80-455b-90cb-19bf1d64e196",
+      "name": "Backfill",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reportes.sends (client, week, to_email, r2_key) VALUES ('growbusy', '2026-W40', 'gnomeaddict96@gmail.com', 'reportes/growbusy/2026-W40-myazgbip.html') ON CONFLICT (client, week) DO NOTHING RETURNING id, client, week, to_email",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "vfcbiRDBFPeyHF5y",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T04:33:02.218Z",
+      "updatedAt": "2026-10-03T04:33:02.218Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-03T04:33:28.000Z",
+  "versionId": "33730976-a090-43ba-bc24-bac9d308a6ae"
+}
