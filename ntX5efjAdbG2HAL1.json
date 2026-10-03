@@ -373,7 +373,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "name": "NAT-120 - Instagram messages sub-workflow",
+  "name": "gb.social.instagram",
   "nodeGroups": [],
   "nodes": [
     {
@@ -603,6 +603,6 @@
   },
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-28T00:50:36.355Z",
+  "updatedAt": "2026-10-02T23:52:33.467Z",
   "versionId": "f74b69dd-d422-4cc8-8a5a-9fb266a6e537"
 }
