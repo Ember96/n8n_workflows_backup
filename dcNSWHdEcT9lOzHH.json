@@ -1,0 +1,726 @@
+{
+  "active": true,
+  "activeVersion": {
+    "versionId": "0463a32c-8166-4087-a108-7c9dc72965f1",
+    "workflowId": "dcNSWHdEcT9lOzHH",
+    "nodes": [
+      {
+        "id": "ee70b05f-8687-4cef-bd95-e6bd79006d04",
+        "name": "Start",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "c5578bb4-86ca-45bb-a524-95b552cdf1b6",
+        "name": "Due sends",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          224,
+          96
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT r.client, r.email, r.name, s.week, s.r2_key\nFROM reportes.recipients r\nJOIN reportes.client_tokens t ON t.client = r.client AND t.active\nJOIN LATERAL (SELECT week, r2_key FROM reportes.snapshots WHERE client = r.client ORDER BY week DESC LIMIT 1) s ON true\nLEFT JOIN reportes.sends d ON d.client = r.client AND d.week = s.week\nWHERE r.active = true AND d.id IS NULL\nORDER BY r.client",
+          "options": {
+            "queryBatching": "single"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "e17c0a12-4af6-49d1-95e3-afacec321555",
+        "name": "Fetch HTML",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          448,
+          96
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ \"https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/\" + $json.r2_key }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "5d440201-6b9c-4c10-978e-736a66f261ef",
+        "name": "Join send",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          96
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Junta destinatario + HTML: el Fetch reemplaza el item y el contexto se pierde.\nconst _inp = $input.first();\nconst _idx = (_inp.pairedItem && typeof _inp.pairedItem.item === 'number') ? _inp.pairedItem.item : 0;\nconst _due = $('Due sends').all();\nconst cfg = (((_due[_idx] || {}).json) || {});\nconst raw = _inp.json;\nconst html = (typeof raw === 'string') ? raw : (raw.data || raw.html || raw.body || '');\nreturn [{ json: { client: cfg.client || '', toEmail: cfg.email || '', toName: cfg.name || '', week: cfg.week || '', r2key: cfg.r2_key || '', html: html } }];"
+        }
+      },
+      {
+        "id": "e7728bc8-9d6e-45d4-9f7b-fc4658446dbd",
+        "name": "Build email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          896,
+          192
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + d.r2key;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
+        }
+      },
+      {
+        "id": "fb9b9958-3b66-4be7-a7fb-42382b6664ea",
+        "name": "Only real sends",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          1120,
+          192
+        ],
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "f1",
+                "leftValue": "={{ $json.mock }}",
+                "operator": {
+                  "operation": "notEquals",
+                  "type": "string"
+                },
+                "rightValue": "yes"
+              }
+            ],
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "2125d4b9-0581-4cae-bbda-40b9c565c4d5",
+        "name": "ZeptoMail — enviar",
+        "type": "n8n-nodes-zohozeptomail.zohoZeptomail",
+        "typeVersion": 1,
+        "position": [
+          1344,
+          192
+        ],
+        "parameters": {
+          "resource": "message",
+          "operation": "sendmail",
+          "mailagent": "55d0f985753fd715",
+          "fromaddress": {
+            "address": "support@growbusy.net",
+            "name": "Growbusy"
+          },
+          "toaddress": "={{ $json.to }}",
+          "subject": "={{ $json.subject }}",
+          "htmlbody": "={{ $json.htmlbody }}",
+          "attachment": {
+            "content": "={{ $json.attachContent }}",
+            "name": "={{ $json.attachName }}",
+            "mime_type": "text/html"
+          }
+        },
+        "credentials": {
+          "zohoZeptomailOAuth2Api": {
+            "id": "pcrI4y0M3biUMEzw",
+            "name": "Zoho ZeptoMail account"
+          }
+        }
+      },
+      {
+        "id": "0fa5ddd2-b34b-46f3-82c3-1a22a47e5831",
+        "name": "Log send",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.5,
+        "position": [
+          1568,
+          192
+        ],
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO reportes.sends (client, week, to_email, r2_key)\nSELECT j->>'client', j->>'week', j->>'to', j->>'r2key'\nFROM (SELECT $1::jsonb AS j) p\nON CONFLICT (client, week) DO NOTHING\nRETURNING id, client, week, to_email",
+          "options": {
+            "queryBatching": "single",
+            "queryReplacement": "={{ JSON.stringify({ client: $('Build email').first().json.client, week: $('Build email').first().json.week, to: $('Build email').first().json.to, r2key: $('Build email').first().json.r2key }) }}"
+          }
+        },
+        "credentials": {
+          "postgres": {
+            "id": "1gnIcgG4hDGKsy6f",
+            "name": "Postgres account"
+          }
+        }
+      },
+      {
+        "id": "26d29375-3d0c-45f4-a618-61beef6ff139",
+        "name": "Schedule — lunes 08:00 ET",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          192
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "weeksInterval": 1,
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 12,
+                "triggerAtMinute": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "150bb05c-c0d0-4eaa-ba5a-6e1463081167",
+        "name": "Mock test",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          448,
+          288
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "1cdc0060-ca24-412c-8921-89a92a28cfc2",
+        "name": "Mock fixtures",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          288
+        ],
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "language": "javaScript",
+          "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
+        }
+      }
+    ],
+    "connections": {
+      "Start": {
+        "main": [
+          [
+            {
+              "node": "Due sends",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Due sends": {
+        "main": [
+          [
+            {
+              "node": "Fetch HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch HTML": {
+        "main": [
+          [
+            {
+              "node": "Join send",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Join send": {
+        "main": [
+          [
+            {
+              "node": "Build email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build email": {
+        "main": [
+          [
+            {
+              "node": "Only real sends",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Only real sends": {
+        "main": [
+          [
+            {
+              "node": "ZeptoMail — enviar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "ZeptoMail — enviar": {
+        "main": [
+          [
+            {
+              "node": "Log send",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule — lunes 08:00 ET": {
+        "main": [
+          [
+            {
+              "node": "Due sends",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mock test": {
+        "main": [
+          [
+            {
+              "node": "Mock fixtures",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mock fixtures": {
+        "main": [
+          [
+            {
+              "node": "Build email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
+    "name": "Updated Log send",
+    "description": "Updated nodes: Log send",
+    "autosaved": false,
+    "createdAt": "2026-10-03T04:32:49.593Z",
+    "updatedAt": "2026-10-03T04:32:49.593Z"
+  },
+  "activeVersionId": "0463a32c-8166-4087-a108-7c9dc72965f1",
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Due sends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Due sends": {
+      "main": [
+        [
+          {
+            "node": "Fetch HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch HTML": {
+      "main": [
+        [
+          {
+            "node": "Join send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Join send": {
+      "main": [
+        [
+          {
+            "node": "Build email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build email": {
+      "main": [
+        [
+          {
+            "node": "Only real sends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only real sends": {
+      "main": [
+        [
+          {
+            "node": "ZeptoMail — enviar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ZeptoMail — enviar": {
+      "main": [
+        [
+          {
+            "node": "Log send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule — lunes 08:00 ET": {
+      "main": [
+        [
+          {
+            "node": "Due sends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock test": {
+      "main": [
+        [
+          {
+            "node": "Mock fixtures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock fixtures": {
+      "main": [
+        [
+          {
+            "node": "Build email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T03:10:48.690Z",
+  "id": "dcNSWHdEcT9lOzHH",
+  "isArchived": false,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.reporte.envio",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "ee70b05f-8687-4cef-bd95-e6bd79006d04",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c5578bb4-86ca-45bb-a524-95b552cdf1b6",
+      "name": "Due sends",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT r.client, r.email, r.name, s.week, s.r2_key\nFROM reportes.recipients r\nJOIN reportes.client_tokens t ON t.client = r.client AND t.active\nJOIN LATERAL (SELECT week, r2_key FROM reportes.snapshots WHERE client = r.client ORDER BY week DESC LIMIT 1) s ON true\nLEFT JOIN reportes.sends d ON d.client = r.client AND d.week = s.week\nWHERE r.active = true AND d.id IS NULL\nORDER BY r.client",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "e17c0a12-4af6-49d1-95e3-afacec321555",
+      "name": "Fetch HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        96
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ \"https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/\" + $json.r2_key }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "5d440201-6b9c-4c10-978e-736a66f261ef",
+      "name": "Join send",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Junta destinatario + HTML: el Fetch reemplaza el item y el contexto se pierde.\nconst _inp = $input.first();\nconst _idx = (_inp.pairedItem && typeof _inp.pairedItem.item === 'number') ? _inp.pairedItem.item : 0;\nconst _due = $('Due sends').all();\nconst cfg = (((_due[_idx] || {}).json) || {});\nconst raw = _inp.json;\nconst html = (typeof raw === 'string') ? raw : (raw.data || raw.html || raw.body || '');\nreturn [{ json: { client: cfg.client || '', toEmail: cfg.email || '', toName: cfg.name || '', week: cfg.week || '', r2key: cfg.r2_key || '', html: html } }];"
+      }
+    },
+    {
+      "id": "e7728bc8-9d6e-45d4-9f7b-fc4658446dbd",
+      "name": "Build email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        192
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + d.r2key;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
+      }
+    },
+    {
+      "id": "fb9b9958-3b66-4be7-a7fb-42382b6664ea",
+      "name": "Only real sends",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        192
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f1",
+              "leftValue": "={{ $json.mock }}",
+              "operator": {
+                "operation": "notEquals",
+                "type": "string"
+              },
+              "rightValue": "yes"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "2125d4b9-0581-4cae-bbda-40b9c565c4d5",
+      "name": "ZeptoMail — enviar",
+      "type": "n8n-nodes-zohozeptomail.zohoZeptomail",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        192
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendmail",
+        "mailagent": "55d0f985753fd715",
+        "fromaddress": {
+          "address": "support@growbusy.net",
+          "name": "Growbusy"
+        },
+        "toaddress": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "htmlbody": "={{ $json.htmlbody }}",
+        "attachment": {
+          "content": "={{ $json.attachContent }}",
+          "name": "={{ $json.attachName }}",
+          "mime_type": "text/html"
+        }
+      },
+      "credentials": {
+        "zohoZeptomailOAuth2Api": {
+          "id": "pcrI4y0M3biUMEzw",
+          "name": "Zoho ZeptoMail account"
+        }
+      }
+    },
+    {
+      "id": "0fa5ddd2-b34b-46f3-82c3-1a22a47e5831",
+      "name": "Log send",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1568,
+        192
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reportes.sends (client, week, to_email, r2_key)\nSELECT j->>'client', j->>'week', j->>'to', j->>'r2key'\nFROM (SELECT $1::jsonb AS j) p\nON CONFLICT (client, week) DO NOTHING\nRETURNING id, client, week, to_email",
+        "options": {
+          "queryBatching": "single",
+          "queryReplacement": "={{ JSON.stringify({ client: $('Build email').first().json.client, week: $('Build email').first().json.week, to: $('Build email').first().json.to, r2key: $('Build email').first().json.r2key }) }}"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "26d29375-3d0c-45f4-a618-61beef6ff139",
+      "name": "Schedule — lunes 08:00 ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        192
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 12,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "150bb05c-c0d0-4eaa-ba5a-6e1463081167",
+      "name": "Mock test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        448,
+        288
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "1cdc0060-ca24-412c-8921-89a92a28cfc2",
+      "name": "Mock fixtures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        288
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "E0qLhQbAVodxhObZ"
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "dcNSWHdEcT9lOzHH",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T03:10:48.693Z",
+      "updatedAt": "2026-10-03T03:10:48.693Z"
+    }
+  ],
+  "staticData": {
+    "node:Schedule — lunes 08:00 ET": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2026-10-03T04:32:49.591Z",
+  "versionId": "0463a32c-8166-4087-a108-7c9dc72965f1"
+}
