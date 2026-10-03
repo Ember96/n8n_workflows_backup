@@ -1,0 +1,121 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Seed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seed": {
+      "main": [
+        [
+          {
+            "node": "Show",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-02T22:29:36.363Z",
+  "id": "Udzpdmw5CCgMs8sY",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat117 seed",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "98759d23-b741-46a3-8219-0b3c36bb8627",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "14d1cbdb-3a74-4275-8dcb-121b28008613",
+      "name": "Seed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reportes.client_tokens (client, token_hash, notes) VALUES ('growbusy', 'cf1420324d68af2397a3739a3fb21a462254762a702d7d20ca7bf2b73f531409', 'QA token migrado desde el mapa hardcodeado (rotar antes de uso real)') ON CONFLICT (client) DO UPDATE SET token_hash = EXCLUDED.token_hash RETURNING id, client, active, created_at",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "0d9ed87a-7514-4d81-968f-c6b339ab6a5d",
+      "name": "Show",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT client, active, left(token_hash, 12) AS hash_prefix, created_at FROM reportes.client_tokens ORDER BY id",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "Udzpdmw5CCgMs8sY",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-02T22:29:36.366Z",
+      "updatedAt": "2026-10-02T22:29:36.366Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-02T22:29:39.000Z",
+  "versionId": "5817446c-8e5e-4b97-afef-1a0209a197cc"
+}
