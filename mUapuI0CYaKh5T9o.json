@@ -214,9 +214,11 @@
   "id": "mUapuI0CYaKh5T9o",
   "isArchived": false,
   "meta": {
-    "templateCredsSetupCompleted": true
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
   },
-  "name": "img.event.in — canonico NAT-108",
+  "name": "gb.event.in — canonico NAT-108",
   "nodeGroups": [],
   "nodes": [
     {
@@ -318,7 +320,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -360,6 +363,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-09-22T00:12:59.487Z",
+  "updatedAt": "2026-10-02T23:52:32.813Z",
   "versionId": "3dced210-4def-4d54-9c0e-2acb64b9c4fd"
 }
