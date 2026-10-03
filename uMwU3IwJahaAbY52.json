@@ -68,8 +68,11 @@
   "createdAt": "2026-09-19T06:52:49.109Z",
   "id": "uMwU3IwJahaAbY52",
   "isArchived": false,
-  "meta": null,
-  "name": "adapter.zoho — CRM a canonico NAT-108",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "gb.adapter.zoho — CRM a canonico NAT-108",
   "nodeGroups": [],
   "nodes": [
     {
@@ -105,7 +108,8 @@
     "name": "n8n_workflows_backup"
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "availableInMCP": true
   },
   "shared": [
     {
@@ -119,6 +123,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-22T00:12:50.490Z",
+  "updatedAt": "2026-10-02T23:59:13.207Z",
   "versionId": "36b265c7-90bd-462c-a9f0-a7774be77765"
 }
