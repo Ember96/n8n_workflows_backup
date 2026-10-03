@@ -313,7 +313,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "name": "ICP Compliance Calendar",
+  "name": "gb.compliance.calendar",
   "nodeGroups": [],
   "nodes": [
     {
@@ -525,7 +525,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": true
+    "availableInMCP": true,
+    "errorWorkflow": "E0qLhQbAVodxhObZ"
   },
   "shared": [
     {
@@ -572,6 +573,6 @@
   },
   "tags": [],
   "triggerCount": 4,
-  "updatedAt": "2026-08-26T02:22:17.855Z",
+  "updatedAt": "2026-10-03T00:05:02.498Z",
   "versionId": "d11684fa-e784-4b0a-a9b2-3bc034d8d3ab"
 }
