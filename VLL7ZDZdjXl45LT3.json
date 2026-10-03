@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "DDL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T03:09:19.586Z",
+  "id": "VLL7ZDZdjXl45LT3",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - nat133 ddl",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "b6310eb3-295d-4851-b035-f9b36ad8bfd8",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "11b2d380-0440-4ae9-adb3-84f9dfe38816",
+      "name": "DDL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS reportes.recipients (\n    client text PRIMARY KEY,\n    email  text NOT NULL,\n    name   text,\n    active boolean NOT NULL DEFAULT true,\n    notes  text,\n    created_at timestamptz NOT NULL DEFAULT now()\n);\nCREATE TABLE IF NOT EXISTS reportes.sends (\n    id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n    client text NOT NULL,\n    week text NOT NULL,\n    to_email text NOT NULL,\n    r2_key text NOT NULL,\n    sent_at timestamptz NOT NULL DEFAULT now(),\n    CONSTRAINT sends_client_week_uniq UNIQUE (client, week)\n);\nCOMMENT ON TABLE reportes.recipients IS 'Destinatario manual por cliente (lo aporta el cliente). NAT-133.';",
+        "options": {
+          "queryBatching": "transaction"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "VLL7ZDZdjXl45LT3",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T03:09:19.591Z",
+      "updatedAt": "2026-10-03T03:09:19.591Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-03T03:09:23.000Z",
+  "versionId": "9d1ad39e-2225-49da-995a-12d77f18bcdd"
+}
