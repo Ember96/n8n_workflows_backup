@@ -17,7 +17,7 @@
   },
   "createdAt": "2026-09-28T00:52:10.778Z",
   "id": "jiPR75WimAa19WpS",
-  "isArchived": false,
+  "isArchived": true,
   "meta": {
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
@@ -81,6 +81,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-28T00:52:10.778Z",
-  "versionId": "79e01819-5012-40d5-85b0-f782d8f0ea4d"
+  "updatedAt": "2026-10-02T23:49:15.000Z",
+  "versionId": "e225190b-7348-4e3a-82ce-37efaf7c7fcf"
 }
