@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Seed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T02:20:37.777Z",
+  "id": "AoUPbSJZDN03orSF",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - share seed3",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "34df5b30-eda7-484a-890c-de96dc1e5f4e",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "524802d7-de1c-4ab6-84a0-e8e4a388ca4b",
+      "name": "Seed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO reportes.share_links (id, client) SELECT encode(gen_random_bytes(12), 'hex'), 'growbusy' WHERE NOT EXISTS (SELECT 1 FROM reportes.share_links WHERE client = 'growbusy' AND revoked_at IS NULL) RETURNING id, client",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "AoUPbSJZDN03orSF",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T02:20:37.782Z",
+      "updatedAt": "2026-10-04T02:20:37.782Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T02:20:41.000Z",
+  "versionId": "4854f9d5-af14-462c-8453-5dbeac7d16b4"
+}
