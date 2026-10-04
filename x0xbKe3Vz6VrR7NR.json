@@ -1,0 +1,145 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Del",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T02:03:38.248Z",
+  "id": "x0xbKe3Vz6VrR7NR",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - fin2",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "70e2ca2f-9f17-4ae7-bba5-105c37c75fe1",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "3461a7d8-dbc5-4dfe-bd27-8e7dc0d2bd93",
+      "name": "All",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "de7af26e-098c-48d4-abfb-7cc68ffac7bf",
+      "name": "Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const out=[]; for (const it of $input.all()) { const j=it.json; const recs = Array.isArray(j.data)?j.data:[j]; for (const r of recs) { if (r && r.Email && String(r.Email).indexOf('verify-qa-final')>=0) out.push({json:{id:r.id}}); } } return out;"
+      }
+    },
+    {
+      "id": "2a00e6d2-36d5-41b7-84ea-96c90487ccfb",
+      "name": "Del",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "={{ $json.id }}",
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "x0xbKe3Vz6VrR7NR",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T02:03:38.253Z",
+      "updatedAt": "2026-10-04T02:03:38.253Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T02:03:41.000Z",
+  "versionId": "944f3fd8-ca29-4b8c-90e9-e9143aaee0d1"
+}
