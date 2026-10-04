@@ -1,0 +1,112 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T00:06:38.688Z",
+  "id": "fKMQha2BClXfYUT5",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - find2",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "8c9fb272-5d3b-41cc-a67b-5df784ff9104",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "37568a66-228e-4a3d-81ea-22f467068c63",
+      "name": "All",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "lead",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "R5WqgTreF3p3gViM",
+          "name": "Zoho account"
+        }
+      }
+    },
+    {
+      "id": "c98477f8-0e68-4fec-81bd-bf44a522910c",
+      "name": "Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const out=[]; for (const it of $input.all()) { const j=it.json; const recs = Array.isArray(j.data)?j.data:[j]; for (const r of recs) { if (r && r.Email && String(r.Email).indexOf('rotacion-qa')>=0) out.push({json:{id:r.id, email:r.Email}}); } } return out;"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "fKMQha2BClXfYUT5",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T00:06:38.690Z",
+      "updatedAt": "2026-10-04T00:06:38.690Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T00:06:41.000Z",
+  "versionId": "5e2bfcd3-a674-4702-a5a4-d494aaf9c5fd"
+}
