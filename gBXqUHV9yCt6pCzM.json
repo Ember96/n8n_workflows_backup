@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "0220b393-af5c-4c65-ae61-165fd9fa3f56",
+    "versionId": "0e791ece-1c6e-4247-82d1-fc3f26399d3d",
     "workflowId": "gBXqUHV9yCt6pCzM",
     "nodes": [
       {
@@ -119,7 +119,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "// Solo extrae el token; el hash se compara del lado de Postgres (pgcrypto).\nconst q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+          "jsCode": "const first = $input.first().json;\nconst q = first.query || {};\nconst h = first.headers || {};\nconst auth = String(h.authorization || h.Authorization || '');\nlet token = '';\nconst m = auth.match(/^Bearer\\s+(.+)$/i);\nif (m) token = m[1].trim();\nelse if (q.token) token = String(q.token);\nif (!token) throw new Error('forbidden: sin credencial');\nreturn [{ json: { token: token } }];"
         }
       },
       {
@@ -228,13 +228,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated Code — extraer token, Supabase — buscar token",
-    "description": "Updated nodes: Code — extraer token, Supabase — buscar token",
+    "name": "Updated Code — extraer token",
+    "description": "Updated nodes: Code — extraer token",
     "autosaved": false,
-    "createdAt": "2026-10-02T22:30:34.517Z",
-    "updatedAt": "2026-10-02T22:30:34.517Z"
+    "createdAt": "2026-10-04T02:21:21.117Z",
+    "updatedAt": "2026-10-04T02:21:21.117Z"
   },
-  "activeVersionId": "0220b393-af5c-4c65-ae61-165fd9fa3f56",
+  "activeVersionId": "0e791ece-1c6e-4247-82d1-fc3f26399d3d",
   "connections": {
     "Code — validar token": {
       "main": [
@@ -439,7 +439,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Solo extrae el token; el hash se compara del lado de Postgres (pgcrypto).\nconst q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+        "jsCode": "const first = $input.first().json;\nconst q = first.query || {};\nconst h = first.headers || {};\nconst auth = String(h.authorization || h.Authorization || '');\nlet token = '';\nconst m = auth.match(/^Bearer\\s+(.+)$/i);\nif (m) token = m[1].trim();\nelse if (q.token) token = String(q.token);\nif (!token) throw new Error('forbidden: sin credencial');\nreturn [{ json: { token: token } }];"
       }
     },
     {
@@ -490,6 +490,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-10-02T23:52:33.258Z",
-  "versionId": "0220b393-af5c-4c65-ae61-165fd9fa3f56"
+  "updatedAt": "2026-10-04T02:21:21.116Z",
+  "versionId": "0e791ece-1c6e-4247-82d1-fc3f26399d3d"
 }
