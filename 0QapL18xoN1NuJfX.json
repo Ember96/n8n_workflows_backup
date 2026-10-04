@@ -1,0 +1,121 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Sizes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sizes": {
+      "main": [
+        [
+          {
+            "node": "Counts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T04:09:01.544Z",
+  "id": "0QapL18xoN1NuJfX",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - sizes",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "37e89f6b-133b-4a75-933c-2f49ffd9d213",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "2280a2dc-5f97-49ec-84b5-3d42161e4dce",
+      "name": "Sizes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT schemaname||'.'||tablename AS t, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS s, (SELECT count(*) FROM pg_class c2 JOIN pg_namespace n2 ON n2.oid=c2.relnamespace WHERE n2.nspname=schemaname AND c2.relname=tablename) AS x FROM pg_tables WHERE schemaname IN ('nat130','reportes','saas') ORDER BY 1",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "id": "a978c097-0cf8-43dc-a49b-38a22abe161d",
+      "name": "Counts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT (SELECT count(*) FROM nat130.social_identity) AS identity, (SELECT count(*) FROM reportes.snapshots) AS snaps, (SELECT count(*) FROM reportes.sends) AS sends, (SELECT count(*) FROM reportes.client_tokens) AS toks",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "0QapL18xoN1NuJfX",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T04:09:01.548Z",
+      "updatedAt": "2026-10-04T04:09:01.548Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T04:09:47.000Z",
+  "versionId": "cf105bc3-b1d7-40b1-8b3e-cd296563dec6"
+}
