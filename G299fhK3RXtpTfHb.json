@@ -1,0 +1,298 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "From router": {
+      "main": [
+        [
+          {
+            "node": "IG 1. Parse + Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 1. Parse + Guard": {
+      "main": [
+        [
+          {
+            "node": "IG 2. Is actionable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 2. Is actionable?": {
+      "main": [
+        [
+          {
+            "node": "IG 3. Canonical (NAT-97)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 7. Reply (replies endpoint)": {
+      "main": [
+        [
+          {
+            "node": "IG 8. DM with link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 3. Canonical (NAT-97)": {
+      "main": [
+        [
+          {
+            "node": "IG 6. CRM adapter (NAT-130)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 6. CRM adapter (NAT-130)": {
+      "main": [
+        [
+          {
+            "node": "IG 7. Reply (replies endpoint)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IG 8. DM with link": {
+      "main": [
+        [
+          {
+            "node": "IG 9. Assert reply delivered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-03T22:58:32.496Z",
+  "id": "G299fhK3RXtpTfHb",
+  "isArchived": true,
+  "meta": null,
+  "name": "TEST-gb.social.instagram",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "c34dd7f4-b86e-4f55-b0a6-8b02abef9427",
+      "name": "From router",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "payload",
+              "type": "any"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2747970a-d3ed-4386-8c4a-1e9ae8c67256",
+      "name": "IG 1. Parse + Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "alwaysOutputData": true,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const IG_ID = '2222222222222222';\nlet out = { route:'skip', reason:'', commentId:'', psid:'', username:'', text:'', mediaId:'', source:'instagram' };\ntry {\n  const items = $input.all();\n  const p = (items && items[0] && items[0].json) ? items[0].json : {};\n  let data = p.payload || p.body || p;\n  if (typeof data === 'string') { data = JSON.parse(data); }\n  if (!data || typeof data !== 'object') { data = {}; }\n  const entries = Array.isArray(data.entry) ? data.entry : [];\n  for (const en of entries) {\n    const chs = Array.isArray(en.changes) ? en.changes : [];\n    for (const ch of chs) {\n      if (ch.field !== 'comments') { continue; }\n      const v = ch.value || {};\n      const from = v.from || {};\n      const psid = String(from.id || '');\n      const text = String(v.text !== undefined ? v.text : (v.message || '')).slice(0, 2000);\n      const low = text.toLowerCase();\n      if (psid === IG_ID) { out.route='skip'; out.reason='self-account'; continue; }\n      if (!text) { out.route='skip'; out.reason='empty-text'; continue; }\n      if (low.indexOf('aqui tienes el link') >= 0 || low.indexOf('gracias') >= 0) { out.route='skip'; out.reason='own-reply-text'; continue; }\n      if (low.indexOf('link') < 0 && low.indexOf('enlace') < 0) { out.route='skip'; out.reason='no-keyword'; continue; }\n      out.route='lead'; out.reason='match';\n      out.commentId = String(v.comment_id || v.id || '');\n      out.psid = psid;\n      out.username = from.username || 'instagram-lead';\n      out.text = text;\n      out.mediaId = String((v.media && v.media.id) || v.media_id || '');\n    }\n  }\n} catch (err) { out.route='skip'; out.reason='error'; }\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "3b99675e-ae77-417e-876e-d93e35c5967a",
+      "name": "IG 2. Is actionable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "route",
+              "leftValue": "={{ $json.route }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "lead"
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "323fd7cd-f8eb-4436-9242-44459b293aa9",
+      "name": "IG 3. Canonical (NAT-97)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst now = new Date().toISOString();\nconst uname = d.username || 'instagram-lead';\nreturn [{ json: { externalId:d.commentId, userId:d.psid, name:uname, handle:uname, message:d.text||'', mediaId:d.mediaId||'', source:'instagram', sourceCrm:'zoho', sourceClient:'testclient-main', consent:{ emailMarketing:false, smsMarketing:false, version:'v1', capturedAt:now }, capturedAt:now } }];"
+      }
+    },
+    {
+      "id": "a1581b6b-4d1d-4567-a2a7-2590ece200c1",
+      "name": "IG 7. Reply (replies endpoint)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "position": [
+        1568,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }}/replies",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "Gracias! Te enviamos el link por mensaje privado."
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f728d9c9-4b2e-4520-9771-79c02d0a61de",
+      "name": "IG 8. DM with link",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "position": [
+        1792,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/1111111111111111/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "recipient",
+              "value": "={{ JSON.stringify({ comment_id: $(\"IG 3. Canonical (NAT-97)\").first().json.externalId }) }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ JSON.stringify({ text: \"Aqui tienes el link: https://testclient.example\" }) }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b47a93fa-8103-4790-a3d0-ab3d56405292",
+      "name": "IG 6. CRM adapter (NAT-130)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "onError": "continueRegularOutput",
+      "position": [
+        1344,
+        0
+      ],
+      "parameters": {
+        "mode": "each",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "lfpT53pITDWDzm7D"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "payload": "={{ $json }}"
+          },
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        }
+      }
+    },
+    {
+      "id": "3992c8e6-e9c8-47f0-ab45-00a3c04c7a82",
+      "name": "IG 9. Assert reply delivered",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Loud, but never at the customer's expense.\n//\n// The reply node is set to continue-on-error so a failed public reply still\n// lets the DM through — the person still gets the link. This node runs last\n// and re-raises, so the failure is still loud in n8n instead of hiding behind\n// a green execution.\nconst items = $input.all();\nconst failed = items.filter((i) => i && i.json && i.json.error !== undefined && i.json.error !== null);\nif (failed.length) {\n  const detail = failed.map((i) => (typeof i.json.error === 'string' ? i.json.error : JSON.stringify(i.json.error))).join(' | ');\n  throw new Error('Public reply to the social comment failed; downstream delivery was still attempted: ' + detail);\n}\nreturn items;"
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "G299fhK3RXtpTfHb",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-03T22:58:32.498Z",
+      "updatedAt": "2026-10-03T22:58:32.498Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-03T22:58:42.000Z",
+  "versionId": "7d59d4ed-84dd-4320-a854-a5481e668a44"
+}
