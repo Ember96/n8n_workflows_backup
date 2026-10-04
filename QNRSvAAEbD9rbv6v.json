@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "DDL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T02:20:13.153Z",
+  "id": "QNRSvAAEbD9rbv6v",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - share ddl",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "1604f7ab-e068-40bf-9f47-10785cee017b",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "edd0b437-75bd-4597-9ad3-f29f33afe11e",
+      "name": "DDL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS reportes.share_links (\n    id         text PRIMARY KEY,\n    client     text NOT NULL,\n    created_at timestamptz NOT NULL DEFAULT now(),\n    revoked_at timestamptz\n);\nCREATE UNIQUE INDEX IF NOT EXISTS share_one_live_per_client\n    ON reportes.share_links (client) WHERE revoked_at IS NULL;",
+        "options": {
+          "queryBatching": "transaction"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "QNRSvAAEbD9rbv6v",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T02:20:13.156Z",
+      "updatedAt": "2026-10-04T02:20:13.156Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T02:20:16.000Z",
+  "versionId": "09f9529e-05d2-47df-989f-bc461b9c26e6"
+}
