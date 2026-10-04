@@ -23,7 +23,7 @@
     "aiBuilderAssisted": true,
     "builderVariant": "mcp"
   },
-  "name": "TEST - ZeptoMail Send (plantilla)",
+  "name": "gb.zeptomail.plantilla",
   "nodeGroups": [],
   "nodes": [
     {
@@ -93,6 +93,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 0,
-  "updatedAt": "2026-09-07T01:45:46.033Z",
+  "updatedAt": "2026-10-03T16:38:49.892Z",
   "versionId": "9578e343-d16a-43c6-ac11-95963d3aec2e"
 }
