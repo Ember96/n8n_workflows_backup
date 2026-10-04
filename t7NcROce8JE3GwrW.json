@@ -1,0 +1,145 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Mock fixtures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock fixtures": {
+      "main": [
+        [
+          {
+            "node": "Build email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build email": {
+      "main": [
+        [
+          {
+            "node": "ZeptoMail — enviar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T02:39:55.041Z",
+  "id": "t7NcROce8JE3GwrW",
+  "isArchived": true,
+  "meta": null,
+  "name": "temp - mock send test",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "f1053e90-e5d0-4685-bfa1-abb695a58718",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ebd9a99c-a53a-4f87-874a-d3dc844c8901",
+      "name": "Mock fixtures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        288
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'gnomeaddict96@gmail.com', toName: 'QA', share: '0a3c91e963961d1ab0408fe0',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
+      }
+    },
+    {
+      "id": "a35daa43-04fa-4fb8-ba75-ab5eab91dc6c",
+      "name": "Build email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        192
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://n8n.innerchildproject.us/webhook/gb.reporte.ver?share=' + d.share;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
+      }
+    },
+    {
+      "id": "4425f791-b4d0-45fe-adea-4a55c36bdc15",
+      "name": "ZeptoMail — enviar",
+      "type": "n8n-nodes-zohozeptomail.zohoZeptomail",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        192
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendmail",
+        "mailagent": "55d0f985753fd715",
+        "fromaddress": {
+          "address": "support@growbusy.net",
+          "name": "Growbusy"
+        },
+        "toaddress": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "htmlbody": "={{ $json.htmlbody }}",
+        "attachment": {
+          "content": "={{ $json.attachContent }}",
+          "name": "={{ $json.attachName }}",
+          "mime_type": "text/html"
+        }
+      },
+      "credentials": {
+        "zohoZeptomailOAuth2Api": {
+          "id": "pcrI4y0M3biUMEzw",
+          "name": "Zoho ZeptoMail account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "t7NcROce8JE3GwrW",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T02:39:55.045Z",
+      "updatedAt": "2026-10-04T02:39:55.045Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T02:40:09.000Z",
+  "versionId": "b4150707-0f83-40ba-a33f-3b392544229b"
+}
