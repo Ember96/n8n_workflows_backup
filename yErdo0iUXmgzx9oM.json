@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "072c5445-f45a-4130-99e6-0a5093e4a882",
+    "versionId": "4b76fd75-b930-4919-ac7a-ea548c00c88d",
     "workflowId": "yErdo0iUXmgzx9oM",
     "nodes": [
       {
@@ -32,7 +32,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "const q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+          "jsCode": "// Orden: header Authorization Bearer, luego ?token=, luego ?share= (magic link del correo).\nconst first = $input.first().json;\nconst q = first.query || {};\nconst h = first.headers || {};\nconst auth = String(h.authorization || h.Authorization || '');\nlet token = '', share = '';\nconst m = auth.match(/^Bearer\\s+(.+)$/i);\nif (m) token = m[1].trim();\nelse if (q.token) token = String(q.token);\nif (q.share) share = String(q.share);\nif (!token && !share) throw new Error('forbidden: sin credencial');\nreturn [{ json: { token: token, share: share } }];"
         }
       },
       {
@@ -46,10 +46,10 @@
         ],
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT client FROM reportes.client_tokens WHERE token_hash = encode(digest($1, 'sha256'), 'hex') AND active = true LIMIT 1",
+          "query": "WITH p AS (SELECT $1::jsonb AS j)\nSELECT client, 'token' AS via FROM reportes.client_tokens, p\nWHERE token_hash = encode(digest(COALESCE(p.j->>'token', ''), 'sha256'), 'hex')\n  AND COALESCE(p.j->>'token', '') <> '' AND active\nUNION ALL\nSELECT client, 'share' FROM reportes.share_links, p\nWHERE id = p.j->>'share' AND revoked_at IS NULL AND COALESCE(p.j->>'share', '') <> ''\nLIMIT 1",
           "options": {
             "queryBatching": "single",
-            "queryReplacement": "={{ $json.token }}"
+            "queryReplacement": "={{ JSON.stringify({ token: $json.token || '', share: $json.share || '' }) }}"
           }
         },
         "credentials": {
@@ -72,7 +72,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client } }];"
+          "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client, via: hit.via || 'token' } }];"
         }
       },
       {
@@ -111,7 +111,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "// El cliente nunca ve la clave: solo recibe el redirect tras validar el token.\nconst rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.r2_key; });\nif (!hit) throw new Error('not found: aun no hay snapshot para este cliente');\nreturn [{ json: { url: 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + hit.r2_key } }];"
+          "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.r2_key; });\nif (!hit) throw new Error('not found: aun no hay snapshot para este cliente');\nreturn [{ json: { key: hit.r2_key, expires: 300 } }];"
         }
       },
       {
@@ -126,6 +126,32 @@
         "parameters": {
           "respondWith": "redirect",
           "redirectURL": "={{ $json.url }}"
+        }
+      },
+      {
+        "id": "527baf03-85f2-4c65-94c0-d6bf7fa99f0f",
+        "name": "Firmar URL",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1424,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://gb-firmador.gnomeaddict96.workers.dev/",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ key: $json.key, expires: $json.expires }) }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "ZEOzpCl7BUrWfMB6",
+            "name": "Firmador R2"
+          }
         }
       }
     ],
@@ -189,6 +215,17 @@
         "main": [
           [
             {
+              "node": "Firmar URL",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Firmar URL": {
+        "main": [
+          [
+            {
               "node": "Responder — redirect",
               "type": "main",
               "index": 0
@@ -199,13 +236,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated Supabase — buscar token",
-    "description": "Updated nodes: Supabase — buscar token",
+    "name": "Updated Code — extraer token, Supabase — buscar token, Code — validar token",
+    "description": "Updated nodes: Code — extraer token, Supabase — buscar token, Code — validar token",
     "autosaved": false,
-    "createdAt": "2026-10-03T00:33:43.622Z",
-    "updatedAt": "2026-10-03T00:33:43.622Z"
+    "createdAt": "2026-10-04T02:20:55.684Z",
+    "updatedAt": "2026-10-04T02:20:55.684Z"
   },
-  "activeVersionId": "072c5445-f45a-4130-99e6-0a5093e4a882",
+  "activeVersionId": "4b76fd75-b930-4919-ac7a-ea548c00c88d",
   "connections": {
     "Webhook — ver reporte": {
       "main": [
@@ -266,6 +303,17 @@
       "main": [
         [
           {
+            "node": "Firmar URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firmar URL": {
+      "main": [
+        [
+          {
             "node": "Responder — redirect",
             "type": "main",
             "index": 0
@@ -312,7 +360,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const q = ($input.first().json.query || {});\nconst tok = String(q.token || '');\nif (!tok) throw new Error('forbidden: token invalido');\nreturn [{ json: { token: tok } }];"
+        "jsCode": "// Orden: header Authorization Bearer, luego ?token=, luego ?share= (magic link del correo).\nconst first = $input.first().json;\nconst q = first.query || {};\nconst h = first.headers || {};\nconst auth = String(h.authorization || h.Authorization || '');\nlet token = '', share = '';\nconst m = auth.match(/^Bearer\\s+(.+)$/i);\nif (m) token = m[1].trim();\nelse if (q.token) token = String(q.token);\nif (q.share) share = String(q.share);\nif (!token && !share) throw new Error('forbidden: sin credencial');\nreturn [{ json: { token: token, share: share } }];"
       }
     },
     {
@@ -326,10 +374,10 @@
       ],
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT client FROM reportes.client_tokens WHERE token_hash = encode(digest($1, 'sha256'), 'hex') AND active = true LIMIT 1",
+        "query": "WITH p AS (SELECT $1::jsonb AS j)\nSELECT client, 'token' AS via FROM reportes.client_tokens, p\nWHERE token_hash = encode(digest(COALESCE(p.j->>'token', ''), 'sha256'), 'hex')\n  AND COALESCE(p.j->>'token', '') <> '' AND active\nUNION ALL\nSELECT client, 'share' FROM reportes.share_links, p\nWHERE id = p.j->>'share' AND revoked_at IS NULL AND COALESCE(p.j->>'share', '') <> ''\nLIMIT 1",
         "options": {
           "queryBatching": "single",
-          "queryReplacement": "={{ $json.token }}"
+          "queryReplacement": "={{ JSON.stringify({ token: $json.token || '', share: $json.share || '' }) }}"
         }
       },
       "credentials": {
@@ -352,7 +400,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client } }];"
+        "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.client; });\nif (!hit) throw new Error('forbidden: token invalido');\nreturn [{ json: { client: hit.client, via: hit.via || 'token' } }];"
       }
     },
     {
@@ -391,7 +439,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// El cliente nunca ve la clave: solo recibe el redirect tras validar el token.\nconst rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.r2_key; });\nif (!hit) throw new Error('not found: aun no hay snapshot para este cliente');\nreturn [{ json: { url: 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + hit.r2_key } }];"
+        "jsCode": "const rows = $input.all().map(function(i){ return i.json; });\nconst hit = rows.find(function(r){ return r && r.r2_key; });\nif (!hit) throw new Error('not found: aun no hay snapshot para este cliente');\nreturn [{ json: { key: hit.r2_key, expires: 300 } }];"
       }
     },
     {
@@ -406,6 +454,32 @@
       "parameters": {
         "respondWith": "redirect",
         "redirectURL": "={{ $json.url }}"
+      }
+    },
+    {
+      "id": "527baf03-85f2-4c65-94c0-d6bf7fa99f0f",
+      "name": "Firmar URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1424,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://gb-firmador.gnomeaddict96.workers.dev/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ key: $json.key, expires: $json.expires }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZEOzpCl7BUrWfMB6",
+          "name": "Firmador R2"
+        }
       }
     }
   ],
@@ -432,6 +506,6 @@
   "staticData": null,
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-10-03T02:45:35.637Z",
-  "versionId": "072c5445-f45a-4130-99e6-0a5093e4a882"
+  "updatedAt": "2026-10-04T02:20:55.682Z",
+  "versionId": "4b76fd75-b930-4919-ac7a-ea548c00c88d"
 }
