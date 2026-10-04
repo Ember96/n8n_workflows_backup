@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "0463a32c-8166-4087-a108-7c9dc72965f1",
+    "versionId": "3aebe776-2ba2-4f76-8d04-52d73acaa7b1",
     "workflowId": "dcNSWHdEcT9lOzHH",
     "nodes": [
       {
@@ -26,7 +26,7 @@
         ],
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT r.client, r.email, r.name, s.week, s.r2_key\nFROM reportes.recipients r\nJOIN reportes.client_tokens t ON t.client = r.client AND t.active\nJOIN LATERAL (SELECT week, r2_key FROM reportes.snapshots WHERE client = r.client ORDER BY week DESC LIMIT 1) s ON true\nLEFT JOIN reportes.sends d ON d.client = r.client AND d.week = s.week\nWHERE r.active = true AND d.id IS NULL\nORDER BY r.client",
+          "query": "SELECT r.client, r.email, r.name, s.week, s.r2_key, l.id AS share\nFROM reportes.recipients r\nJOIN reportes.client_tokens t ON t.client = r.client AND t.active\nJOIN LATERAL (SELECT week, r2_key FROM reportes.snapshots WHERE client = r.client ORDER BY week DESC LIMIT 1) s ON true\nLEFT JOIN reportes.share_links l ON l.client = r.client AND l.revoked_at IS NULL\nLEFT JOIN reportes.sends d ON d.client = r.client AND d.week = s.week\nWHERE r.active = true AND d.id IS NULL\nORDER BY r.client",
           "options": {
             "queryBatching": "single"
           }
@@ -65,7 +65,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "// Junta destinatario + HTML: el Fetch reemplaza el item y el contexto se pierde.\nconst _inp = $input.first();\nconst _idx = (_inp.pairedItem && typeof _inp.pairedItem.item === 'number') ? _inp.pairedItem.item : 0;\nconst _due = $('Due sends').all();\nconst cfg = (((_due[_idx] || {}).json) || {});\nconst raw = _inp.json;\nconst html = (typeof raw === 'string') ? raw : (raw.data || raw.html || raw.body || '');\nreturn [{ json: { client: cfg.client || '', toEmail: cfg.email || '', toName: cfg.name || '', week: cfg.week || '', r2key: cfg.r2_key || '', html: html } }];"
+          "jsCode": "// Junta destinatario + HTML: el Fetch reemplaza el item y el contexto se pierde.\nconst _inp = $input.first();\nconst _idx = (_inp.pairedItem && typeof _inp.pairedItem.item === 'number') ? _inp.pairedItem.item : 0;\nconst _due = $('Due sends').all();\nconst cfg = (((_due[_idx] || {}).json) || {});\nconst raw = _inp.json;\nconst html = (typeof raw === 'string') ? raw : (raw.data || raw.html || raw.body || '');\nreturn [{ json: { client: cfg.client || '', toEmail: cfg.email || '', toName: cfg.name || '', week: cfg.week || '', r2key: cfg.r2_key || '', share: cfg.share || '', html: html } }];"
         }
       },
       {
@@ -80,7 +80,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + d.r2key;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
+          "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://n8n.innerchildproject.us/webhook/gb.reporte.ver?share=' + d.share;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
         }
       },
       {
@@ -221,7 +221,7 @@
         "parameters": {
           "mode": "runOnceForAllItems",
           "language": "javaScript",
-          "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
+          "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA', share: 'mockshare',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
         }
       }
     ],
@@ -339,13 +339,13 @@
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated Log send",
-    "description": "Updated nodes: Log send",
+    "name": "Updated Join send",
+    "description": "Updated nodes: Join send",
     "autosaved": false,
-    "createdAt": "2026-10-03T04:32:49.593Z",
-    "updatedAt": "2026-10-03T04:32:49.593Z"
+    "createdAt": "2026-10-04T02:22:06.988Z",
+    "updatedAt": "2026-10-04T02:22:06.988Z"
   },
-  "activeVersionId": "0463a32c-8166-4087-a108-7c9dc72965f1",
+  "activeVersionId": "3aebe776-2ba2-4f76-8d04-52d73acaa7b1",
   "connections": {
     "Start": {
       "main": [
@@ -490,7 +490,7 @@
       ],
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT r.client, r.email, r.name, s.week, s.r2_key\nFROM reportes.recipients r\nJOIN reportes.client_tokens t ON t.client = r.client AND t.active\nJOIN LATERAL (SELECT week, r2_key FROM reportes.snapshots WHERE client = r.client ORDER BY week DESC LIMIT 1) s ON true\nLEFT JOIN reportes.sends d ON d.client = r.client AND d.week = s.week\nWHERE r.active = true AND d.id IS NULL\nORDER BY r.client",
+        "query": "SELECT r.client, r.email, r.name, s.week, s.r2_key, l.id AS share\nFROM reportes.recipients r\nJOIN reportes.client_tokens t ON t.client = r.client AND t.active\nJOIN LATERAL (SELECT week, r2_key FROM reportes.snapshots WHERE client = r.client ORDER BY week DESC LIMIT 1) s ON true\nLEFT JOIN reportes.share_links l ON l.client = r.client AND l.revoked_at IS NULL\nLEFT JOIN reportes.sends d ON d.client = r.client AND d.week = s.week\nWHERE r.active = true AND d.id IS NULL\nORDER BY r.client",
         "options": {
           "queryBatching": "single"
         }
@@ -529,7 +529,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Junta destinatario + HTML: el Fetch reemplaza el item y el contexto se pierde.\nconst _inp = $input.first();\nconst _idx = (_inp.pairedItem && typeof _inp.pairedItem.item === 'number') ? _inp.pairedItem.item : 0;\nconst _due = $('Due sends').all();\nconst cfg = (((_due[_idx] || {}).json) || {});\nconst raw = _inp.json;\nconst html = (typeof raw === 'string') ? raw : (raw.data || raw.html || raw.body || '');\nreturn [{ json: { client: cfg.client || '', toEmail: cfg.email || '', toName: cfg.name || '', week: cfg.week || '', r2key: cfg.r2_key || '', html: html } }];"
+        "jsCode": "// Junta destinatario + HTML: el Fetch reemplaza el item y el contexto se pierde.\nconst _inp = $input.first();\nconst _idx = (_inp.pairedItem && typeof _inp.pairedItem.item === 'number') ? _inp.pairedItem.item : 0;\nconst _due = $('Due sends').all();\nconst cfg = (((_due[_idx] || {}).json) || {});\nconst raw = _inp.json;\nconst html = (typeof raw === 'string') ? raw : (raw.data || raw.html || raw.body || '');\nreturn [{ json: { client: cfg.client || '', toEmail: cfg.email || '', toName: cfg.name || '', week: cfg.week || '', r2key: cfg.r2_key || '', share: cfg.share || '', html: html } }];"
       }
     },
     {
@@ -544,7 +544,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/' + d.r2key;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
+        "jsCode": "// Arma el correo. Lee SOLO $input: producción llega vía 'Join send' y el\n// test vía 'Mock fixtures' (mismo shape).\nconst d = $input.first().json;\nconst link = 'https://n8n.innerchildproject.us/webhook/gb.reporte.ver?share=' + d.share;\nconst subject = 'Reporte semanal GrowBusy — ' + d.week;\nconst hello = d.toName ? ('Hola ' + d.toName + ',') : 'Hola,';\nconst htmlbody = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"UTF-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">',\n'<title>' + subject + '</title>', '</head>',\n'<body style=\"margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,Helvetica,sans-serif;\">',\n'<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#f4f6f9;\">',\n'<tr><td align=\"center\" style=\"padding:24px 12px;\">',\n'<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#ffffff;border-radius:8px;overflow:hidden;\">',\n'<tr><td style=\"background-color:#0a1a33;padding:20px 24px;text-align:center;color:#ffffff;font-size:20px;font-weight:bold;\">GrowBusy</td></tr>',\n'<tr><td style=\"padding:28px 28px 12px 28px;color:#1a1a1a;font-size:15px;line-height:1.6;\">',\n'<p>' + hello + '</p>',\n'<p>Tu reporte de resultados de la semana <strong>' + d.week + '</strong> ya está listo.</p>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;text-align:center;\">',\n'<a href=\"' + link + '\" style=\"display:inline-block;background-color:#2196f3;color:#ffffff;text-decoration:none;font-size:16px;padding:12px 28px;border-radius:6px;\">Ver reporte</a>',\n'</td></tr>',\n'<tr><td style=\"padding:0 28px 28px 28px;color:#666;font-size:12px;\">',\n'<p>Adjuntamos también el reporte en HTML. Este es un correo transaccional, no una campaña.</p>',\n'</td></tr>',\n'</table>', '</td></tr>', '</table>', '</body>', '</html>'].join('\\n');\nconst b64 = Buffer.from(d.html || '', 'utf8').toString('base64');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '',\n  to: d.toEmail || '', subject: subject, htmlbody: htmlbody,\n  attachContent: b64, attachName: 'reporte-' + (d.week || 'semana') + '.html',\n  mock: d.mock || '' } }];"
       }
     },
     {
@@ -685,7 +685,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
+        "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA', share: 'mockshare',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
       }
     }
   ],
@@ -721,6 +721,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-10-03T04:32:49.591Z",
-  "versionId": "0463a32c-8166-4087-a108-7c9dc72965f1"
+  "updatedAt": "2026-10-04T02:22:06.987Z",
+  "versionId": "3aebe776-2ba2-4f76-8d04-52d73acaa7b1"
 }
