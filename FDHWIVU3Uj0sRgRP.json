@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "6a797a92-a2ad-45e5-9aa3-282154f29f65",
+    "versionId": "e878acc5-1dc1-4f78-bb30-d3e238b515fa",
     "workflowId": "FDHWIVU3Uj0sRgRP",
     "nodes": [
       {
@@ -11,8 +11,8 @@
         "type": "n8n-nodes-base.manualTrigger",
         "typeVersion": 1,
         "position": [
-          0,
-          0
+          -208,
+          192
         ]
       },
       {
@@ -28,8 +28,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.5,
         "position": [
-          224,
-          0
+          16,
+          96
         ],
         "credentials": {
           "postgres": {
@@ -47,8 +47,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          448,
-          0
+          240,
+          96
         ]
       },
       {
@@ -63,8 +63,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          672,
-          0
+          464,
+          96
         ],
         "credentials": {
           "httpHeaderAuth": {
@@ -75,17 +75,15 @@
       },
       {
         "parameters": {
-          "jsCode": "// Render del snapshot — mantener sincronizado con src/reportes/builder.ts\n// (summarizeDeals + buildReportHtml). Lee SOLO $input: producción llega vía\n// 'Join data' y el test de integración vía 'Mock fixtures'.\nfunction esc(s) {\n  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\nconst d = $input.first().json;\nconst camps = Array.isArray(d.camps) ? d.camps : [];\nconst deals = Array.isArray(d.deals) ? d.deals : [];\nlet won = 0, revenue = 0;\nfor (const dl of deals) {\n  const st = String(dl.Stage == null ? '' : dl.Stage).toLowerCase();\n  if (/closed won|ganado/.test(st)) { won++; revenue += Number(dl.Amount || 0); }\n}\nconst rows = camps.map(function(c) { return '      <li>' + esc(c.name) + ' — ' + esc(c.status) + '</li>'; }).join('\\n');\nconst html = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"utf-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">',\n'<title>Reporte ' + esc(d.client) + ' — semana ' + esc(d.week) + '</title>',\n'<style>',\n'  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',\n'  .meta { color: #666; font-size: 0.85rem; }',\n'  .kpis { display: flex; gap: 1rem; margin: 1.5rem 0; }',\n'  .kpi { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1; }',\n'  .kpi strong { display: block; font-size: 1.5rem; }',\n'  #pdf-btn { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }',\n'  @media print {',\n'    #pdf-btn { display: none; }',\n'    body { margin: 0; max-width: none; }',\n'    .kpi { break-inside: avoid; }',\n'  }',\n'</style>', '</head>', '<body>',\n'<h1>Reporte ' + esc(d.client) + '</h1>',\n'<p class=\"meta\">Semana ' + esc(d.week) + ' · generado ' + esc(d.generatedAt) + '</p>',\n'<div class=\"kpis\">',\n'  <div class=\"kpi\"><strong>' + camps.length + '</strong>Campañas</div>',\n'  <div class=\"kpi\"><strong>' + won + '</strong>Deals ganados</div>',\n'  <div class=\"kpi\"><strong>$' + revenue + '</strong>Revenue atribuido (last-touch 30d)</div>',\n'</div>', '<h2>Campañas</h2>', '<ul>', rows, '</ul>',\n'<p><button id=\"pdf-btn\" onclick=\"window.print()\">Descargar PDF</button></p>',\n'</body>', '</html>'].join('\\n');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '', generatedAt: d.generatedAt || '', mock: d.mock || '', html: html, won: won, revenue: revenue, campaignCount: camps.length } }];",
-          "mode": "runOnceForAllItems",
-          "language": "javaScript"
+          "jsCode": "// Render del snapshot — mantener sincronizado con src/reportes/builder.ts\n// (summarizeDeals + buildReportHtml). Lee SOLO $input: producción llega vía\n// 'Join data' y el test de integración vía 'Mock fixtures'.\nfunction esc(s) {\n  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\nconst d = $input.first().json;\nconst camps = Array.isArray(d.camps) ? d.camps : [];\nconst deals = Array.isArray(d.deals) ? d.deals : [];\nlet won = 0, revenue = 0;\nfor (const dl of deals) {\n  const st = String(dl.Stage == null ? '' : dl.Stage).toLowerCase();\n  if (/closed won|ganado/.test(st)) { won++; revenue += Number(dl.Amount || 0); }\n}\nconst rows = camps.map(function(c) { return '      <li>' + esc(c.name) + ' — ' + esc(c.status) + '</li>'; }).join('\\n');\nconst html = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"utf-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">',\n'<title>Reporte ' + esc(d.client) + ' — semana ' + esc(d.week) + '</title>',\n'<style>',\n'  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',\n'  .meta { color: #666; font-size: 0.85rem; }',\n'  .kpis { display: flex; gap: 1rem; margin: 1.5rem 0; }',\n'  .kpi { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1; }',\n'  .kpi strong { display: block; font-size: 1.5rem; }',\n'  #pdf-btn { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }',\n'  @media print {',\n'    #pdf-btn { display: none; }',\n'    body { margin: 0; max-width: none; }',\n'    .kpi { break-inside: avoid; }',\n'  }',\n'</style>', '</head>', '<body>',\n'<h1>Reporte ' + esc(d.client) + '</h1>',\n'<p class=\"meta\">Semana ' + esc(d.week) + ' · generado ' + esc(d.generatedAt) + '</p>',\n'<div class=\"kpis\">',\n'  <div class=\"kpi\"><strong>' + camps.length + '</strong>Campañas</div>',\n'  <div class=\"kpi\"><strong>' + won + '</strong>Deals ganados</div>',\n'  <div class=\"kpi\"><strong>$' + revenue + '</strong>Revenue atribuido (last-touch 30d)</div>',\n'</div>', '<h2>Campañas</h2>', '<ul>', rows, '</ul>',\n'<p><button id=\"pdf-btn\" onclick=\"window.print()\">Descargar PDF</button></p>',\n'</body>', '</html>'].join('\\n');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '', generatedAt: d.generatedAt || '', mock: d.mock || '', html: html, won: won, revenue: revenue, campaignCount: camps.length } }];"
         },
         "id": "12af9fe5-86e2-4ee7-8a23-a702d3f59641",
         "name": "Build HTML",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1120,
-          0
+          1136,
+          192
         ]
       },
       {
@@ -102,8 +100,8 @@
         "type": "n8n-nodes-base.s3",
         "typeVersion": 1,
         "position": [
-          1344,
-          0
+          1360,
+          192
         ],
         "credentials": {
           "s3": {
@@ -126,8 +124,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.5,
         "position": [
-          1568,
-          0
+          1808,
+          192
         ],
         "credentials": {
           "postgres": {
@@ -137,84 +135,91 @@
         }
       },
       {
-        "id": "be5d18f5-5476-4fce-a502-220209f756b4",
-        "name": "Zoho — deals",
-        "type": "n8n-nodes-base.zohoCrm",
-        "typeVersion": 1,
-        "position": [
-          896,
-          0
-        ],
         "parameters": {
           "resource": "deal",
           "operation": "getAll",
           "options": {}
         },
+        "id": "be5d18f5-5476-4fce-a502-220209f756b4",
+        "name": "Zoho — deals",
+        "type": "n8n-nodes-base.zohoCrm",
+        "typeVersion": 1,
+        "position": [
+          688,
+          96
+        ],
+        "alwaysOutputData": true,
         "credentials": {
           "zohoOAuth2Api": {
             "id": "R5WqgTreF3p3gViM",
             "name": "Zoho account"
           }
-        },
-        "alwaysOutputData": true
+        }
       },
       {
+        "parameters": {
+          "jsCode": "// Reune Build + subida: el nodo S3 devuelve solo {success} y Record necesita el contexto.\nconst idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst all = $('Build HTML').all();\nconst b = ((all[idx] || {}).json) || {};\nreturn [{ json: { ...b, uploaded: $input.first().json } }];"
+        },
         "id": "41a618de-5355-4a39-a786-23c793176efd",
         "name": "Attach result",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1568,
-          0
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "// Reune Build + subida: el nodo S3 devuelve solo {success} y Record necesita el contexto.\nconst idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst all = $('Build HTML').all();\nconst b = ((all[idx] || {}).json) || {};\nreturn [{ json: { ...b, uploaded: $input.first().json } }];"
-        }
+          1584,
+          192
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "// Junta cfg + Brevo + Zoho en un solo item: Build lee solo $input.\n// (Brevo/Zoho reemplazan el item; sin esto el contexto se pierde.)\nconst _idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst _prep = $('Prep snapshot').all();\nconst cfg = (((_prep[_idx] || {}).json) || {});\nconst bitems = $('Brevo — campañas').all();\nconst zitems = $('Zoho — deals').all();\nconst camps = (((bitems[0] || {}).json || {}).campaigns) || [];\nlet deals = [];\nfor (const it of zitems) {\n  const j = (it || {}).json || {};\n  if (Array.isArray(j.data)) { deals = j.data; }\n  else if (j.id && j.Deal_Name) { deals.push(j); }\n}\nreturn [{ json: { client: cfg.client || '', week: cfg.week || '', r2key: cfg.r2key || '', generatedAt: cfg.generatedAt || new Date().toISOString(), mock: '', camps: camps, deals: deals } }];"
+        },
         "id": "399e6579-3e38-4e78-91eb-668bc5be1c17",
         "name": "Join data",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1088,
-          0
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "// Junta cfg + Brevo + Zoho en un solo item: Build lee solo $input.\n// (Brevo/Zoho reemplazan el item; sin esto el contexto se pierde.)\nconst _idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst _prep = $('Prep snapshot').all();\nconst cfg = (((_prep[_idx] || {}).json) || {});\nconst bitems = $('Brevo — campañas').all();\nconst zitems = $('Zoho — deals').all();\nconst camps = (((bitems[0] || {}).json || {}).campaigns) || [];\nlet deals = [];\nfor (const it of zitems) {\n  const j = (it || {}).json || {};\n  if (Array.isArray(j.data)) { deals = j.data; }\n  else if (j.id && j.Deal_Name) { deals.push(j); }\n}\nreturn [{ json: { client: cfg.client || '', week: cfg.week || '', r2key: cfg.r2key || '', generatedAt: cfg.generatedAt || new Date().toISOString(), mock: '', camps: camps, deals: deals } }];"
-        }
+          912,
+          96
+        ]
       },
       {
+        "parameters": {},
         "id": "59b005ac-b75f-4c8d-a4ae-39b8650b10b8",
         "name": "Mock test",
         "type": "n8n-nodes-base.manualTrigger",
         "typeVersion": 1,
         "position": [
-          1088,
-          320
-        ],
-        "parameters": {}
+          688,
+          288
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "// Fixtures del test de integración: números conocidos para afirmar el cálculo.\n// mock:'yes' desvía a 'Mock done' para no ensuciar reportes.snapshots.\n// El objeto SÍ sube a R2 bajo mock/ y se borra al final del test.\nreturn [{ json: {\n  client: 'growbusy',\n  week: '2999-W99',\n  r2key: 'mock/integration-' + Math.random().toString(36).slice(2, 10) + '.html',\n  generatedAt: new Date().toISOString(),\n  mock: 'yes',\n  camps: [\n    { name: 'Promo <Flash> & \"Sale\"', status: 'sent' },\n    { name: 'Winback', status: 'sent' },\n    { name: 'Dormida', status: 'draft' }\n  ],\n  deals: [\n    { Stage: 'Closed Won', Amount: 1000 },\n    { Stage: 'Ganado', Amount: 500 },\n    { Stage: 'Negotiation', Amount: 9999 },\n    { Stage: 'Closed Lost', Amount: 250 }\n  ]\n} }];"
+        },
         "id": "dfa57d13-0f42-4c9f-a1e6-32a00b6f92c7",
         "name": "Mock fixtures",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1280,
-          320
-        ],
-        "parameters": {
-          "mode": "runOnceForAllItems",
-          "language": "javaScript",
-          "jsCode": "// Fixtures del test de integración: números conocidos para afirmar el cálculo.\n// mock:'yes' desvía a 'Mock done' para no ensuciar reportes.snapshots.\n// El objeto SÍ sube a R2 bajo mock/ y se borra al final del test.\nreturn [{ json: {\n  client: 'growbusy',\n  week: '2999-W99',\n  r2key: 'mock/integration-' + Math.random().toString(36).slice(2, 10) + '.html',\n  generatedAt: new Date().toISOString(),\n  mock: 'yes',\n  camps: [\n    { name: 'Promo <Flash> & \"Sale\"', status: 'sent' },\n    { name: 'Winback', status: 'sent' },\n    { name: 'Dormida', status: 'draft' }\n  ],\n  deals: [\n    { Stage: 'Closed Won', Amount: 1000 },\n    { Stage: 'Ganado', Amount: 500 },\n    { Stage: 'Negotiation', Amount: 9999 },\n    { Stage: 'Closed Lost', Amount: 250 }\n  ]\n} }];"
-        }
+          912,
+          288
+        ]
       },
       {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 11
+              }
+            ]
+          }
+        },
         "id": "f06c7884-7b03-444c-bcd3-0c2a8f442fcb",
         "name": "Schedule — lunes 07:00 ET",
         "type": "n8n-nodes-base.scheduleTrigger",
@@ -222,22 +227,7 @@
         "position": [
           -208,
           0
-        ],
-        "parameters": {
-          "rule": {
-            "interval": [
-              {
-                "field": "weeks",
-                "weeksInterval": 1,
-                "triggerAtDay": [
-                  1
-                ],
-                "triggerAtHour": 11,
-                "triggerAtMinute": 0
-              }
-            ]
-          }
-        }
+        ]
       }
     ],
     "connections": {
@@ -375,14 +365,14 @@
       }
     },
     "nodeGroups": [],
-    "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated Schedule — lunes 07:00 ET",
-    "description": "Updated nodes: Schedule — lunes 07:00 ET",
-    "autosaved": false,
-    "createdAt": "2026-10-03T07:55:47.937Z",
-    "updatedAt": "2026-10-03T07:55:47.937Z"
+    "authors": "Jose Ricardo Cedeno Garcia",
+    "name": "Version e878acc5",
+    "description": "Reorganizing nodes position in the graph",
+    "autosaved": true,
+    "createdAt": "2026-10-03T16:33:05.044Z",
+    "updatedAt": "2026-10-03T16:33:29.000Z"
   },
-  "activeVersionId": "6a797a92-a2ad-45e5-9aa3-282154f29f65",
+  "activeVersionId": "e878acc5-1dc1-4f78-bb30-d3e238b515fa",
   "connections": {
     "Start": {
       "main": [
@@ -534,8 +524,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        -208,
+        192
       ]
     },
     {
@@ -551,8 +541,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [
-        224,
-        0
+        16,
+        96
       ],
       "credentials": {
         "postgres": {
@@ -570,8 +560,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        0
+        240,
+        96
       ]
     },
     {
@@ -586,8 +576,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        672,
-        0
+        464,
+        96
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -598,17 +588,15 @@
     },
     {
       "parameters": {
-        "jsCode": "// Render del snapshot — mantener sincronizado con src/reportes/builder.ts\n// (summarizeDeals + buildReportHtml). Lee SOLO $input: producción llega vía\n// 'Join data' y el test de integración vía 'Mock fixtures'.\nfunction esc(s) {\n  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\nconst d = $input.first().json;\nconst camps = Array.isArray(d.camps) ? d.camps : [];\nconst deals = Array.isArray(d.deals) ? d.deals : [];\nlet won = 0, revenue = 0;\nfor (const dl of deals) {\n  const st = String(dl.Stage == null ? '' : dl.Stage).toLowerCase();\n  if (/closed won|ganado/.test(st)) { won++; revenue += Number(dl.Amount || 0); }\n}\nconst rows = camps.map(function(c) { return '      <li>' + esc(c.name) + ' — ' + esc(c.status) + '</li>'; }).join('\\n');\nconst html = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"utf-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">',\n'<title>Reporte ' + esc(d.client) + ' — semana ' + esc(d.week) + '</title>',\n'<style>',\n'  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',\n'  .meta { color: #666; font-size: 0.85rem; }',\n'  .kpis { display: flex; gap: 1rem; margin: 1.5rem 0; }',\n'  .kpi { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1; }',\n'  .kpi strong { display: block; font-size: 1.5rem; }',\n'  #pdf-btn { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }',\n'  @media print {',\n'    #pdf-btn { display: none; }',\n'    body { margin: 0; max-width: none; }',\n'    .kpi { break-inside: avoid; }',\n'  }',\n'</style>', '</head>', '<body>',\n'<h1>Reporte ' + esc(d.client) + '</h1>',\n'<p class=\"meta\">Semana ' + esc(d.week) + ' · generado ' + esc(d.generatedAt) + '</p>',\n'<div class=\"kpis\">',\n'  <div class=\"kpi\"><strong>' + camps.length + '</strong>Campañas</div>',\n'  <div class=\"kpi\"><strong>' + won + '</strong>Deals ganados</div>',\n'  <div class=\"kpi\"><strong>$' + revenue + '</strong>Revenue atribuido (last-touch 30d)</div>',\n'</div>', '<h2>Campañas</h2>', '<ul>', rows, '</ul>',\n'<p><button id=\"pdf-btn\" onclick=\"window.print()\">Descargar PDF</button></p>',\n'</body>', '</html>'].join('\\n');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '', generatedAt: d.generatedAt || '', mock: d.mock || '', html: html, won: won, revenue: revenue, campaignCount: camps.length } }];",
-        "mode": "runOnceForAllItems",
-        "language": "javaScript"
+        "jsCode": "// Render del snapshot — mantener sincronizado con src/reportes/builder.ts\n// (summarizeDeals + buildReportHtml). Lee SOLO $input: producción llega vía\n// 'Join data' y el test de integración vía 'Mock fixtures'.\nfunction esc(s) {\n  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\n}\nconst d = $input.first().json;\nconst camps = Array.isArray(d.camps) ? d.camps : [];\nconst deals = Array.isArray(d.deals) ? d.deals : [];\nlet won = 0, revenue = 0;\nfor (const dl of deals) {\n  const st = String(dl.Stage == null ? '' : dl.Stage).toLowerCase();\n  if (/closed won|ganado/.test(st)) { won++; revenue += Number(dl.Amount || 0); }\n}\nconst rows = camps.map(function(c) { return '      <li>' + esc(c.name) + ' — ' + esc(c.status) + '</li>'; }).join('\\n');\nconst html = ['<!DOCTYPE html>', '<html lang=\"es\">', '<head>', '<meta charset=\"utf-8\">',\n'<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">',\n'<title>Reporte ' + esc(d.client) + ' — semana ' + esc(d.week) + '</title>',\n'<style>',\n'  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }',\n'  .meta { color: #666; font-size: 0.85rem; }',\n'  .kpis { display: flex; gap: 1rem; margin: 1.5rem 0; }',\n'  .kpi { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; flex: 1; }',\n'  .kpi strong { display: block; font-size: 1.5rem; }',\n'  #pdf-btn { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; }',\n'  @media print {',\n'    #pdf-btn { display: none; }',\n'    body { margin: 0; max-width: none; }',\n'    .kpi { break-inside: avoid; }',\n'  }',\n'</style>', '</head>', '<body>',\n'<h1>Reporte ' + esc(d.client) + '</h1>',\n'<p class=\"meta\">Semana ' + esc(d.week) + ' · generado ' + esc(d.generatedAt) + '</p>',\n'<div class=\"kpis\">',\n'  <div class=\"kpi\"><strong>' + camps.length + '</strong>Campañas</div>',\n'  <div class=\"kpi\"><strong>' + won + '</strong>Deals ganados</div>',\n'  <div class=\"kpi\"><strong>$' + revenue + '</strong>Revenue atribuido (last-touch 30d)</div>',\n'</div>', '<h2>Campañas</h2>', '<ul>', rows, '</ul>',\n'<p><button id=\"pdf-btn\" onclick=\"window.print()\">Descargar PDF</button></p>',\n'</body>', '</html>'].join('\\n');\nreturn [{ json: { client: d.client || '', week: d.week || '', r2key: d.r2key || '', generatedAt: d.generatedAt || '', mock: d.mock || '', html: html, won: won, revenue: revenue, campaignCount: camps.length } }];"
       },
       "id": "12af9fe5-86e2-4ee7-8a23-a702d3f59641",
       "name": "Build HTML",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
-        0
+        1136,
+        192
       ]
     },
     {
@@ -625,8 +613,8 @@
       "type": "n8n-nodes-base.s3",
       "typeVersion": 1,
       "position": [
-        1344,
-        0
+        1360,
+        192
       ],
       "credentials": {
         "s3": {
@@ -649,8 +637,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.5,
       "position": [
-        1568,
-        0
+        1808,
+        192
       ],
       "credentials": {
         "postgres": {
@@ -660,84 +648,91 @@
       }
     },
     {
-      "id": "be5d18f5-5476-4fce-a502-220209f756b4",
-      "name": "Zoho — deals",
-      "type": "n8n-nodes-base.zohoCrm",
-      "typeVersion": 1,
-      "position": [
-        896,
-        0
-      ],
       "parameters": {
         "resource": "deal",
         "operation": "getAll",
         "options": {}
       },
+      "id": "be5d18f5-5476-4fce-a502-220209f756b4",
+      "name": "Zoho — deals",
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        688,
+        96
+      ],
+      "alwaysOutputData": true,
       "credentials": {
         "zohoOAuth2Api": {
           "id": "R5WqgTreF3p3gViM",
           "name": "Zoho account"
         }
-      },
-      "alwaysOutputData": true
+      }
     },
     {
+      "parameters": {
+        "jsCode": "// Reune Build + subida: el nodo S3 devuelve solo {success} y Record necesita el contexto.\nconst idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst all = $('Build HTML').all();\nconst b = ((all[idx] || {}).json) || {};\nreturn [{ json: { ...b, uploaded: $input.first().json } }];"
+      },
       "id": "41a618de-5355-4a39-a786-23c793176efd",
       "name": "Attach result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1568,
-        0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "// Reune Build + subida: el nodo S3 devuelve solo {success} y Record necesita el contexto.\nconst idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst all = $('Build HTML').all();\nconst b = ((all[idx] || {}).json) || {};\nreturn [{ json: { ...b, uploaded: $input.first().json } }];"
-      }
+        1584,
+        192
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "// Junta cfg + Brevo + Zoho en un solo item: Build lee solo $input.\n// (Brevo/Zoho reemplazan el item; sin esto el contexto se pierde.)\nconst _idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst _prep = $('Prep snapshot').all();\nconst cfg = (((_prep[_idx] || {}).json) || {});\nconst bitems = $('Brevo — campañas').all();\nconst zitems = $('Zoho — deals').all();\nconst camps = (((bitems[0] || {}).json || {}).campaigns) || [];\nlet deals = [];\nfor (const it of zitems) {\n  const j = (it || {}).json || {};\n  if (Array.isArray(j.data)) { deals = j.data; }\n  else if (j.id && j.Deal_Name) { deals.push(j); }\n}\nreturn [{ json: { client: cfg.client || '', week: cfg.week || '', r2key: cfg.r2key || '', generatedAt: cfg.generatedAt || new Date().toISOString(), mock: '', camps: camps, deals: deals } }];"
+      },
       "id": "399e6579-3e38-4e78-91eb-668bc5be1c17",
       "name": "Join data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1088,
-        0
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "// Junta cfg + Brevo + Zoho en un solo item: Build lee solo $input.\n// (Brevo/Zoho reemplazan el item; sin esto el contexto se pierde.)\nconst _idx = ($input.first().pairedItem && typeof $input.first().pairedItem.item === 'number') ? $input.first().pairedItem.item : 0;\nconst _prep = $('Prep snapshot').all();\nconst cfg = (((_prep[_idx] || {}).json) || {});\nconst bitems = $('Brevo — campañas').all();\nconst zitems = $('Zoho — deals').all();\nconst camps = (((bitems[0] || {}).json || {}).campaigns) || [];\nlet deals = [];\nfor (const it of zitems) {\n  const j = (it || {}).json || {};\n  if (Array.isArray(j.data)) { deals = j.data; }\n  else if (j.id && j.Deal_Name) { deals.push(j); }\n}\nreturn [{ json: { client: cfg.client || '', week: cfg.week || '', r2key: cfg.r2key || '', generatedAt: cfg.generatedAt || new Date().toISOString(), mock: '', camps: camps, deals: deals } }];"
-      }
+        912,
+        96
+      ]
     },
     {
+      "parameters": {},
       "id": "59b005ac-b75f-4c8d-a4ae-39b8650b10b8",
       "name": "Mock test",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        1088,
-        320
-      ],
-      "parameters": {}
+        688,
+        288
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "// Fixtures del test de integración: números conocidos para afirmar el cálculo.\n// mock:'yes' desvía a 'Mock done' para no ensuciar reportes.snapshots.\n// El objeto SÍ sube a R2 bajo mock/ y se borra al final del test.\nreturn [{ json: {\n  client: 'growbusy',\n  week: '2999-W99',\n  r2key: 'mock/integration-' + Math.random().toString(36).slice(2, 10) + '.html',\n  generatedAt: new Date().toISOString(),\n  mock: 'yes',\n  camps: [\n    { name: 'Promo <Flash> & \"Sale\"', status: 'sent' },\n    { name: 'Winback', status: 'sent' },\n    { name: 'Dormida', status: 'draft' }\n  ],\n  deals: [\n    { Stage: 'Closed Won', Amount: 1000 },\n    { Stage: 'Ganado', Amount: 500 },\n    { Stage: 'Negotiation', Amount: 9999 },\n    { Stage: 'Closed Lost', Amount: 250 }\n  ]\n} }];"
+      },
       "id": "dfa57d13-0f42-4c9f-a1e6-32a00b6f92c7",
       "name": "Mock fixtures",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1280,
-        320
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "language": "javaScript",
-        "jsCode": "// Fixtures del test de integración: números conocidos para afirmar el cálculo.\n// mock:'yes' desvía a 'Mock done' para no ensuciar reportes.snapshots.\n// El objeto SÍ sube a R2 bajo mock/ y se borra al final del test.\nreturn [{ json: {\n  client: 'growbusy',\n  week: '2999-W99',\n  r2key: 'mock/integration-' + Math.random().toString(36).slice(2, 10) + '.html',\n  generatedAt: new Date().toISOString(),\n  mock: 'yes',\n  camps: [\n    { name: 'Promo <Flash> & \"Sale\"', status: 'sent' },\n    { name: 'Winback', status: 'sent' },\n    { name: 'Dormida', status: 'draft' }\n  ],\n  deals: [\n    { Stage: 'Closed Won', Amount: 1000 },\n    { Stage: 'Ganado', Amount: 500 },\n    { Stage: 'Negotiation', Amount: 9999 },\n    { Stage: 'Closed Lost', Amount: 250 }\n  ]\n} }];"
-      }
+        912,
+        288
+      ]
     },
     {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 11
+            }
+          ]
+        }
+      },
       "id": "f06c7884-7b03-444c-bcd3-0c2a8f442fcb",
       "name": "Schedule — lunes 07:00 ET",
       "type": "n8n-nodes-base.scheduleTrigger",
@@ -745,22 +740,7 @@
       "position": [
         -208,
         0
-      ],
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "weeks",
-              "weeksInterval": 1,
-              "triggerAtDay": [
-                1
-              ],
-              "triggerAtHour": 11,
-              "triggerAtMinute": 0
-            }
-          ]
-        }
-      }
+      ]
     }
   ],
   "origin": "n8n",
@@ -796,6 +776,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-10-03T07:55:47.936Z",
-  "versionId": "6a797a92-a2ad-45e5-9aa3-282154f29f65"
+  "updatedAt": "2026-10-03T16:35:02.567Z",
+  "versionId": "e878acc5-1dc1-4f78-bb30-d3e238b515fa"
 }
