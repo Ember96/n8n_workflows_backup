@@ -1,0 +1,87 @@
+{
+  "active": false,
+  "activeVersion": null,
+  "activeVersionId": null,
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2026-10-04T02:22:16.849Z",
+  "id": "iHIbwa52LnIxYIcC",
+  "isArchived": true,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "name": "temp - share get",
+  "nodeGroups": [],
+  "nodes": [
+    {
+      "id": "c97705ba-4dff-4f61-b60f-a6da27476c75",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "79d58c5b-3997-40a2-8860-7131e51eaa3d",
+      "name": "Get",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM reportes.share_links WHERE client = 'growbusy' AND revoked_at IS NULL LIMIT 1",
+        "options": {
+          "queryBatching": "single"
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "1gnIcgG4hDGKsy6f",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "origin": "n8n",
+  "pinData": null,
+  "repo": {
+    "owner": "Ember96",
+    "name": "n8n_workflows_backup"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "iHIbwa52LnIxYIcC",
+      "projectId": "qxeR1gIEc01jkoF9",
+      "createdAt": "2026-10-04T02:22:16.851Z",
+      "updatedAt": "2026-10-04T02:22:16.851Z"
+    }
+  ],
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-04T02:22:19.000Z",
+  "versionId": "b8d8dfea-7701-4577-b168-9ab69719392c"
+}
