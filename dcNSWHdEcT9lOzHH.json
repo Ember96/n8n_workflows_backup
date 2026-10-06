@@ -1,7 +1,7 @@
 {
   "active": true,
   "activeVersion": {
-    "versionId": "3aebe776-2ba2-4f76-8d04-52d73acaa7b1",
+    "versionId": "66d5a5cd-102e-4c4e-bdff-689145b47825",
     "workflowId": "dcNSWHdEcT9lOzHH",
     "nodes": [
       {
@@ -49,7 +49,7 @@
         ],
         "parameters": {
           "method": "GET",
-          "url": "={{ \"https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/\" + $json.r2_key }}",
+          "url": "={{ $json.url }}",
           "options": {}
         }
       },
@@ -223,6 +223,32 @@
           "language": "javaScript",
           "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA', share: 'mockshare',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
         }
+      },
+      {
+        "id": "87ca6962-00f3-492f-946d-03e98bc713ac",
+        "name": "Firmar URL",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://gb-firmador.gnomeaddict96.workers.dev/",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ key: $json.r2_key, expires: 600 }) }}",
+          "options": {}
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "ZEOzpCl7BUrWfMB6",
+            "name": "Firmador R2"
+          }
+        }
       }
     ],
     "connections": {
@@ -231,17 +257,6 @@
           [
             {
               "node": "Due sends",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Due sends": {
-        "main": [
-          [
-            {
-              "node": "Fetch HTML",
               "type": "main",
               "index": 0
             }
@@ -335,34 +350,45 @@
             }
           ]
         ]
+      },
+      "Due sends": {
+        "main": [
+          [
+            {
+              "node": "Firmar URL",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Firmar URL": {
+        "main": [
+          [
+            {
+              "node": "Fetch HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "nodeGroups": [],
     "authors": "Jose Ricardo Cedeno Garcia (via MCP)",
-    "name": "Updated Join send",
-    "description": "Updated nodes: Join send",
+    "name": "Updated Fetch HTML",
+    "description": "Updated nodes: Fetch HTML",
     "autosaved": false,
-    "createdAt": "2026-10-04T02:22:06.988Z",
-    "updatedAt": "2026-10-04T02:22:06.988Z"
+    "createdAt": "2026-10-05T17:13:00.537Z",
+    "updatedAt": "2026-10-05T17:13:00.537Z"
   },
-  "activeVersionId": "3aebe776-2ba2-4f76-8d04-52d73acaa7b1",
+  "activeVersionId": "66d5a5cd-102e-4c4e-bdff-689145b47825",
   "connections": {
     "Start": {
       "main": [
         [
           {
             "node": "Due sends",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Due sends": {
-      "main": [
-        [
-          {
-            "node": "Fetch HTML",
             "type": "main",
             "index": 0
           }
@@ -456,6 +482,28 @@
           }
         ]
       ]
+    },
+    "Due sends": {
+      "main": [
+        [
+          {
+            "node": "Firmar URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firmar URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "createdAt": "2026-10-03T03:10:48.690Z",
@@ -513,7 +561,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "={{ \"https://pub-d9d8edcf1e2c4e86912b48b121ff93fb.r2.dev/\" + $json.r2_key }}",
+        "url": "={{ $json.url }}",
         "options": {}
       }
     },
@@ -687,6 +735,32 @@
         "language": "javaScript",
         "jsCode": "// Fixtures del test: mismo shape que 'Join send'. mock:'yes' lo frena el filtro.\nreturn [{ json: {\n  client: 'growbusy', week: '2999-W99', r2key: 'mock/integration-qex0qv3j.html',\n  toEmail: 'qa@localhost', toName: 'QA', share: 'mockshare',\n  html: '<html><body><h1>Mock</h1></body></html>',\n  mock: 'yes'\n} }];"
       }
+    },
+    {
+      "id": "87ca6962-00f3-492f-946d-03e98bc713ac",
+      "name": "Firmar URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://gb-firmador.gnomeaddict96.workers.dev/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ key: $json.r2_key, expires: 600 }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZEOzpCl7BUrWfMB6",
+          "name": "Firmador R2"
+        }
+      }
     }
   ],
   "origin": "n8n",
@@ -721,6 +795,6 @@
   },
   "tags": [],
   "triggerCount": 1,
-  "updatedAt": "2026-10-04T02:22:06.987Z",
-  "versionId": "3aebe776-2ba2-4f76-8d04-52d73acaa7b1"
+  "updatedAt": "2026-10-05T17:13:00.535Z",
+  "versionId": "66d5a5cd-102e-4c4e-bdff-689145b47825"
 }
